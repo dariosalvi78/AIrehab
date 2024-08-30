@@ -1,0 +1,60 @@
+/**
+ * @typedef {Object} User
+ * @property {!string} id - unique identifier
+ * @property {!string} email - email address of the user
+ * @property {string} hashedpassword - password, hashed
+ * @property {!string} role - 'admin' or 'physiotherapist'
+ */
+
+/**
+ * @typedef {Object} Patient
+ * @property {!string} id - unique identifier
+ * @property {!string} physiotherapistId - unique identifier of the phyisiotherapist in charge
+ * @property {!string} names - first and second (ort third, fourth etc.) names
+ * @property {!string} dateOfBirth - date of birth, format "yyyy-MM-DD"
+ * @property {number} height - height in cm
+ * @property {number} weight - weight in KGs
+ * @property {string} injuries - general description of injuries
+ */
+
+/**
+ * @typedef {Object} POEEvaluation
+ * @property {!string} id - unique identifier
+ * @property {number} repetition - repetition number, null or 0 means that this is a summative evaluation
+ * @property {!number} score - can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt)
+ * @property {!string} posturalOrientation - 'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
+ * @property {number} confidence0 - confidence value for score 0
+ * @property {number} confidence1 - confidence value for score 1
+ * @property {number} confidence2 - confidence value for score 2
+ */
+
+/**
+ * @typedef {Object} PhysiotherapySession 
+ * @property {!string} id - unique identifier
+ * @property {!string} patientId - id of the patient
+ * @property {string} startTimestamp - ISO 8601 date and time
+ * @property {string} endTimestamp - ISO 8601 date and time
+ */
+
+
+/**
+ * @typedef {Object} Exercise
+ * @property {!string} id - unique identifier
+ * @property {!string} physiotherapySessionId - id of the physiotherapy session
+ * @property {string} startTimestamp - ISO 8601 date and time
+ * @property {string} endTimestamp - ISO 8601 date and time
+ * @property {!string} type - type of exercise, can be "singleLeggedSquat"
+ * @property {string} videoFile - filename of the video associated to the exercise
+ * @property {?POEEvaluation} POEEvaluation - object containing metrics about the quality of the exercise
+ * @property {?string} notes - some textual notes
+ */
+
+
+/**
+ * @typedef {Object} ExerciseSession
+ * @property {!string} id - unique identifier
+ * @property {!string} patientId - unique identifier of the patient
+ * @property {string} startTimestamp - ISO 8601 date and time
+ * @property {string} endTimestamp - ISO 8601 date and time
+ * @property {Array<Exercise>} exercises - array of exercises
+ */
