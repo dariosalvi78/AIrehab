@@ -1,6 +1,12 @@
+// DB schema
+// https://app.chartdb.io/diagrams/lxvpwqcifsbjimmnrcfgmnj4r
+
+
 /**
  * @typedef {Object} User
  * @property {!string} id - unique identifier
+ * @property {!string} createdTimestamp - ISO 8601 date and time of when the patient was created
+ * @property {!string} lastLoginTimestamp - ISO 8601 date and time of last login
  * @property {!string} email - email address of the user
  * @property {string} hashedpassword - password, hashed
  * @property {!string} role - 'admin' or 'physiotherapist'
@@ -9,6 +15,7 @@
 /**
  * @typedef {Object} Patient
  * @property {!string} id - unique identifier
+ * @property {!string} createdTimestamp - ISO 8601 date and time of when the patient was created
  * @property {!string} physiotherapistId - unique identifier of the phyisiotherapist in charge
  * @property {!string} names - first and second (ort third, fourth etc.) names
  * @property {!string} dateOfBirth - date of birth, format "yyyy-MM-DD"
@@ -43,18 +50,8 @@
  * @property {!string} physiotherapySessionId - id of the physiotherapy session
  * @property {string} startTimestamp - ISO 8601 date and time
  * @property {string} endTimestamp - ISO 8601 date and time
- * @property {!string} type - type of exercise, can be "singleLeggedSquat"
+ * @property {!string} type - type of exercise, can be "singleLeggedSquatLeft" or "singleLeggedSquatRight"
  * @property {string} videoFile - filename of the video associated to the exercise
  * @property {?POEEvaluation} POEEvaluation - object containing metrics about the quality of the exercise
  * @property {?string} notes - some textual notes
- */
-
-
-/**
- * @typedef {Object} ExerciseSession
- * @property {!string} id - unique identifier
- * @property {!string} patientId - unique identifier of the patient
- * @property {string} startTimestamp - ISO 8601 date and time
- * @property {string} endTimestamp - ISO 8601 date and time
- * @property {Array<Exercise>} exercises - array of exercises
  */
