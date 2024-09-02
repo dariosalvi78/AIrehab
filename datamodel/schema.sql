@@ -5,8 +5,8 @@ BEGIN
         start_timestamp datetime NOT NULL,
         end_timestamps datetime,
         physiotherapy_session_id uniqueidentifier NOT NULL,
-        type varchar(255),
-        video_file varchar(255),
+        type varchar,
+        video_file varchar,
         notes text
     );
 END
@@ -40,7 +40,7 @@ BEGIN
     CREATE TABLE poe_evaluation (
         id uniqueidentifier NOT NULL PRIMARY KEY,
         exercise_id uniqueidentifier NOT NULL,
-        postural_orientation varchar(255) NOT NULL,
+        postural_orientation varchar NOT NULL,
         score int NOT NULL,
         score_confidence_0 decimal,
         score_confidence_1 decimal,
@@ -53,9 +53,9 @@ IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[us
 BEGIN
     CREATE TABLE [user] (
         id uniqueidentifier NOT NULL PRIMARY KEY,
-        email varchar(255) NOT NULL,
-        hashedpassword varchar(255) NOT NULL,
-        role varchar(255) NOT NULL,
+        email varchar NOT NULL,
+        hashedpassword varchar NOT NULL,
+        role varchar NOT NULL,
         createdTimestamp datetime NOT NULL,
         lastLoginTimestamp datetime
     );
@@ -64,4 +64,4 @@ END
 ALTER TABLE exercise ADD CONSTRAINT exercise_physiotherapy_session_id_fk FOREIGN KEY (physiotherapy_session_id) REFERENCES physiotherapy_session (id);
 ALTER TABLE physiotherapy_session ADD CONSTRAINT physiotherapy_session_patient_id_fk FOREIGN KEY (patient_id) REFERENCES patient (id);
 ALTER TABLE poe_evaluation ADD CONSTRAINT poe_evaluation_exercise_id_fk FOREIGN KEY (exercise_id) REFERENCES exercise (id);
-ALTER TABLE [user] ADD CONSTRAINT user_id_fk FOREIGN KEY (id) REFERENCES patient (physiotherapist_id);
+ALTER TABLE patient ADD CONSTRAINT patient_physiotherapist_id_fk FOREIGN KEY (physiotherapist_id) REFERENCES [user] (id);
