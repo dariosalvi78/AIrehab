@@ -53,6 +53,35 @@ When setting up the database for production, we c
 
 ## Frontend
 
+This project is built using [Quasar framework](https://quasar.dev/)
+
+### Pre requisites
+
+- nodejs
+- (optional) [Quasar CLI](https://quasar.dev/quasar-cli/installation)
+
+Install the dependencies using
+```bash
+yarn
+# or
+npm install
+```
+
+### Start the app in development mode
+```bash
+quasar dev
+```
+
+
+### Build the app for production
+```bash
+quasar build
+```
+
+### Customize the configuration
+See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+
+
 ## Tests
 
 
