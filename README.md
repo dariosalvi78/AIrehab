@@ -4,7 +4,9 @@ AI based physiotherapy rehabilitation
 
 ## Backend
 
-### Setup of the database:
+The backend exposes the database and the AI algorithm through a REST API adding authentication and access control. It is programmed as a nodejs application, and can be run as a Docker container.
+
+### Setup of the database (for development):
 
 - Start a Microsoft SQL server:
 `docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=MyPassword_1234" -e "MSSQL_PID=Developer" -p 1433:1433  --name msql --hostname msql -d mcr.microsoft.com/mssql/server:2022-preview-ubuntu-22.04`. Notice that the administrator user for the database will be `sa` with password `MyPassword_1234`.
@@ -39,11 +41,15 @@ GO
 - Create the schema tables: copy paste the schema.sql found in the datamodel folder into the SQL interpreter and run it.
 
 
+When setting up the database for production, we c
+
 ### Setup of the nodejs server:
 
 - In the backend folder, install all dependencies: `npm i`.
-- Create a .env file in the same folder. Use `.env_example` as a template
+- Create a .env file in the same folder. Use `.env_example` as a template.
 
+
+### 
 
 ## Frontend
 
