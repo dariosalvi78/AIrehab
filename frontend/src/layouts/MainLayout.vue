@@ -1,8 +1,11 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="mainLayout">
-    <q-page-container>
+  <q-layout view="lHh Lpr lFf" class="m-width mainLayout">
+    <q-page-container class="q-main-container">
       <router-view />
     </q-page-container>
+    <q-footer elevated class="m-width bg-grey-8 text-white flex flex-center">
+      <div>App v. {{appVersion}}</div>
+    </q-footer>
   </q-layout>
 </template>
 
@@ -11,15 +14,22 @@ export default {
   name: 'MainLayout',
   data () {
     return {
+      appVersion: JSON.parse(process.env.APP_VERSION)
     }
   },
+  mounted () { }
 }
 </script>
 
 <style scoped>
-.mainLayout {
+.m-width {
   max-width: 800px;
-  background-color: #f2f2f2;
   margin: 0 auto;
+}
+.mainLayout {
+  background-color: #f4f4f4;
+}
+.q-main-container {
+  padding: 0px !important;
 }
 </style>
