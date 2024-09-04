@@ -26,6 +26,5 @@ import db from './db.js'
     app.listen(port, () => {
         console.log(`Server running on http://${hostname}:${port}`)
     })
-
-    db.tryConnect()
+    
 })()
