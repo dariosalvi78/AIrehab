@@ -1,0 +1,50 @@
+<template>
+  <q-layout>
+    <q-page-container>
+      <q-page class="flex flex-center">
+        <q-form ref="loginForm">
+          <q-card class="q-pa-sm">
+            <q-card-section>
+              <div class="text-h4">Physiotherapist Sign-in</div>
+            </q-card-section>
+            <q-card-section>
+              <form autocomplete="on">
+                <q-input v-model.trim="email" type="email" label="Email" placeholder="e.g. email@email.com"
+                  autocomplete="on" />
+                <q-input v-model.trim="password" type="password" label="Password" autocomplete="on"
+                  @keyup.enter="login()"/>
+              </form>
+            </q-card-section>
+            <q-card-actions class="flex flex-center">
+              <q-btn size="lg" label="login" color="primary" @click="login()" />
+            </q-card-actions>
+          </q-card>
+        </q-form>
+      </q-page>
+    </q-page-container>
+  </q-layout>
+</template>
+
+<script>
+export default {
+  name: 'LoginPage',
+  data () {
+    return {
+        // TODO: add email form validation
+        email: undefined,
+        password: undefined
+    }
+  },
+  methods: {
+    login () { },
+    // TODO: add user sign-up and reset pwd
+    newUser () { },
+    resetPassword () { }
+  }
+}
+</script>
+
+
+<style scoped>
+
+</style>
