@@ -52,7 +52,7 @@ module.exports = configure(function (/* ctx */) {
 
       env: {
         APP_VERSION: JSON.stringify(require('./package.json').version),
-        API_ENDPOINT: undefined
+        API_ENDPOINT: '/api'
       },
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
@@ -81,8 +81,17 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
-      // https: true
-      open: true // opens browser window automatically
+      // https: true,
+      open: true, // opens browser window automatically
+
+      // Proxy all requests from frontend to api
+      // should only be used in dev environment
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:8080',
+          changeOrigin: true
+        }
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
