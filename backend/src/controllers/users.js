@@ -16,7 +16,7 @@ export default {
         }
         try {
             const response = await db.query(`
-                    SELECT email, hashedPassword, role, createdTimestamp, lastLoginTimestamp FROM [user]
+                    SELECT id, email, hashedPassword, role, createdTimestamp, lastLoginTimestamp FROM [user]
                     WHERE email = '${req.body.email}';
                 `)
 
@@ -24,13 +24,21 @@ export default {
                 res.sendStatus(404)
                 return
             }
-
             let user = response.recordset[0]
+
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
-                delete user.hashedPassword
                 console.info('found user: ', user.email)
+                await db.query(`
+                    UPDATE [user] 
+                    SET [user].lastLoginTimestamp = CURRENT_TIMESTAMP
+                    WHERE [user].id = '${user.id}';
+                `)
+                delete user.hashedPassword
+                delete user.id
+
                 res.send(user)
+                return
             } else {
                 res.sendStatus(404)
                 return
