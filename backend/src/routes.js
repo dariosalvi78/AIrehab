@@ -1,12 +1,13 @@
 
 import healthcheck from "./controllers/healthCheck.js";
+import users from "./controllers/users.js";
 
 const API_PREFIX = '/api'
 
 /**
  * Setup for routes
  */
-export default async (app) => {
+export default async (app, auth) => {
     console.info('Setting up routes')
 
     app.get(`${API_PREFIX}/health-check`, healthcheck)
@@ -14,4 +15,9 @@ export default async (app) => {
     app.get('/', async function (req, res) {
         res.send('<p>OK</p>')
     })
+
+    app.get(`${API_PREFIX}/users`, users.getUsers)
+
+    app.post(`${API_PREFIX}/login`, users.login)
+
 }

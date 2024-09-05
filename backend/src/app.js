@@ -35,6 +35,10 @@ import db from './db.js'
                 .catch((err) => console.info('something went wrong when creating admin user: ', err))
         }
     }
+    
+    app.use(express.urlencoded({ limit: '20mb', extended: false }))
+    app.use(express.json({ limit: '20mb' }))
+    app.use(express.text({ limit: '20mb' }))
 
     await setRoutes(app)
 
