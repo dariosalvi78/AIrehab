@@ -26,6 +26,9 @@
 </template>
 
 <script>
+import API from '../API.js'
+import storage from '../utils/userStorage.js'
+
 export default {
   name: 'LoginPage',
   data () {
@@ -36,7 +39,23 @@ export default {
     }
   },
   methods: {
-    login () { },
+    async login () {
+      try {
+        let user = await API.login(this.email.toLowerCase(), this.password)
+        console.log('user:', user)
+        storage.login(user)
+
+        if (storage.info().role == 'admin') this.$router.push('/admin')
+
+      } catch (err) {
+        this.$q.notify({
+          color: 'negative',
+          message: 'Login failed: ' + err.message,
+          icon: 'report_problem'
+        })
+      }
+    },
+
     // TODO: add user sign-up and reset pwd
     newUser () { },
     resetPassword () { }
