@@ -8,6 +8,7 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '/login', component: () => import('components/LoginPage.vue') },
+      { path: '/home', component: () => import('components/PhysiotherapistHome.vue') },
       { path: '/admin', component: () => import('components/AdminHome.vue') }
     ]
   },
