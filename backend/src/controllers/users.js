@@ -46,5 +46,54 @@ export default {
         } catch (err) {
             console.error('error finding user: ', err)
         }
+    },
+
+    // logout: async (req, res) => {
+    //     console.info('user logged out', req.user)
+    // },
+
+    getUsers: async (req, res) => {
+        try {
+            const response = await db.query(`
+                SELECT id, email, role, createdTimestamp, lastLoginTimestamp FROM [user]
+                WHERE role != 'admin';
+                `)
+            res.send(response.recordset)
+        } catch (err) {
+            console.error('error getting users: ', err)
+        }
+    },
+
+    // TODO: let user complete registration using email
+    addNewUser: async (req, res) => {
+        let newUser, user = req.body
+
+        if (!user.role || !user.email || !user.password) {
+            res.sendStatus(400)
+            return
+        }
+
+        const response = await db.query(`SELECT COUNT(*) as c FROM [user] WHERE email = '${user.email}';`)
+        if (response.recordset[0].c !== 0) {
+            res.status(409).send(`${user.email} is already registered`)
+            return
+        }
+
+        try {
+            let hash = bcrypt.hashSync(user.password, 8)
+            const response = await db.query(`
+                INSERT INTO [user] 
+                (id, email, hashedpassword, role, createdTimestamp)
+                OUTPUT Inserted.email, Inserted.role, Inserted.createdTimestamp
+                VALUES(NEWID(), '${user.email}', '${hash}', '${user.role}', CURRENT_TIMESTAMP);
+            `)
+            newUser = response.recordset[0]
+            console.info('new user created: ', newUser)
+            res.send(newUser)
+        } catch (err) {
+            console.error('something went wrong when adding user: ', err)
+            res.sendStatus(500)
+            return
+        }
     }
 }

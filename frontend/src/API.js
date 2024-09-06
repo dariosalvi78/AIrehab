@@ -19,6 +19,20 @@ let API = {
         let response = await axios.post(URL_PRE + '/login', { email, password })
         return response.data
     },
+
+    async logout() {
+        await axios.get(URL_PRE + '/logout')
+    },
+
+    async getUsers() {
+        let response = await axios.get(URL_PRE + '/users')
+        return response.data
+    },
+
+    async addUser(role, email, password) {
+        let response = await axios.post(URL_PRE + '/users', { role, email, password })
+        return response.data
+    },
 }
 
 export default API

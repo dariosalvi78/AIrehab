@@ -16,8 +16,9 @@ export default async (app, auth) => {
         res.send('<p>OK</p>')
     })
 
-    app.get(`${API_PREFIX}/users`, users.getUsers)
-
     app.post(`${API_PREFIX}/login`, users.login)
 
+
+    app.get(`${API_PREFIX}/users`, users.getUsers)
+    app.post(`${API_PREFIX}/users`, users.addNewUser)
 }
