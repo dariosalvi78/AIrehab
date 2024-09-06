@@ -28,6 +28,7 @@
 <script>
 import API from '../API.js'
 import storage from '../utils/userStorage.js'
+import router from '../router/routeHandler.js'
 
 export default {
   name: 'LoginPage',
@@ -43,10 +44,11 @@ export default {
       try {
         let user = await API.login(this.email.toLowerCase(), this.password)
         console.log('user:', user)
-        storage.login(user)
-
-        if (storage.info().role == 'admin') this.$router.push('/admin')
-
+        if (user) {
+          storage.login(user)
+          this.$emit('handleStatus', true)
+          router.push(storage.info())
+        }
       } catch (err) {
         this.$q.notify({
           color: 'negative',

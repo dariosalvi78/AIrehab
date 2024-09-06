@@ -1,23 +1,45 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="m-width mainLayout">
+  <q-layout view="lHh Lpr lFf" class="mainLayout m-width">
+     <q-header v-show="isLoggedIn" elevated class="m-width">
+        <q-toolbar>
+          <q-btn flat round dense icon="menu" />
+          <q-toolbar-title>Dashboard</q-toolbar-title>
+          <q-btn flat dense icon="logout" label="Logout" @click="logout()"/>
+        </q-toolbar>
+      </q-header>
     <q-page-container class="q-main-container">
-      <router-view />
+      <router-view @handle-status="handleStatus" />
     </q-page-container>
-    <q-footer elevated class="m-width bg-grey-8 text-white flex flex-center">
+    <q-footer elevated class="m-width primary text-white flex flex-center">
       <div>App v. {{appVersion}}</div>
     </q-footer>
   </q-layout>
 </template>
 
 <script>
+import storage from '../utils/userStorage'
+import routes from '../router/routeHandler'
+
 export default {
   name: 'MainLayout',
   data () {
     return {
-      appVersion: JSON.parse(process.env.APP_VERSION)
+      appVersion: JSON.parse(process.env.APP_VERSION),
+      isLoggedIn: false
     }
   },
-  mounted () { }
+  mounted () { this.isLoggedIn = storage.info().loggedIn },
+  methods: {
+    logout () {
+      storage.logout()
+      this.isLoggedIn = false
+      routes.push(storage.info())
+    },
+    handleStatus(status) { 
+      console.log('status', status)
+      this.isLoggedIn = status 
+    }
+  }
 }
 </script>
 
@@ -27,9 +49,6 @@ export default {
   margin: 0 auto;
 }
 .mainLayout {
-  background-color: #f4f4f4;
-}
-.q-main-container {
-  padding: 0px !important;
+  background-color: #fff;
 }
 </style>
