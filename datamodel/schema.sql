@@ -5,8 +5,8 @@ BEGIN
         start_timestamp datetime NOT NULL,
         end_timestamps datetime,
         physiotherapy_session_id uniqueidentifier NOT NULL,
-        type varchar,
-        video_file varchar,
+        type varchar(50),
+        video_file varchar(100),
         notes text
     );
 END
@@ -40,7 +40,7 @@ BEGIN
     CREATE TABLE poe_evaluation (
         id uniqueidentifier NOT NULL PRIMARY KEY,
         exercise_id uniqueidentifier NOT NULL,
-        postural_orientation varchar NOT NULL,
+        postural_orientation varchar(100) NOT NULL,
         score int NOT NULL,
         score_confidence_0 decimal,
         score_confidence_1 decimal,
@@ -53,9 +53,9 @@ IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[us
 BEGIN
     CREATE TABLE [user] (
         id uniqueidentifier NOT NULL PRIMARY KEY,
-        email varchar NOT NULL,
-        hashedpassword varchar NOT NULL,
-        role varchar NOT NULL,
+        email varchar(100) NOT NULL,
+        hashedpassword varchar(100) NOT NULL,
+        role varchar(50) NOT NULL,
         createdTimestamp datetime NOT NULL,
         lastLoginTimestamp datetime
     );
