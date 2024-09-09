@@ -40,10 +40,11 @@ const storage = {
 
     login(newuser) {
         user.loggedIn = true
-        user.role = newuser.role
-        user.email = newuser.email
+        user.role = newuser.user.role
+        user.email = newuser.user.email
 
         window.localStorage.setItem('user', JSON.stringify(user))
+        document.cookie = `token=${newuser.token}`
     },
 
     logout() {
@@ -53,6 +54,7 @@ const storage = {
             email: undefined,
         }
         window.localStorage.removeItem('user')
+        document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     }
 }
 

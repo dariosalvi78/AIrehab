@@ -7,7 +7,7 @@ const API_PREFIX = '/api'
 /**
  * Setup for routes
  */
-export default async (app, auth) => {
+export default async (app, isAuth) => {
     console.info('Setting up routes')
 
     app.get(`${API_PREFIX}/health-check`, healthcheck)
@@ -17,8 +17,6 @@ export default async (app, auth) => {
     })
 
     app.post(`${API_PREFIX}/login`, users.login)
-
-
-    app.get(`${API_PREFIX}/users`, users.getUsers)
-    app.post(`${API_PREFIX}/users`, users.addNewUser)
+    app.get(`${API_PREFIX}/users`, isAuth, users.getUsers)
+    app.post(`${API_PREFIX}/users`, isAuth, users.addNewUser)
 }

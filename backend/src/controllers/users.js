@@ -1,6 +1,7 @@
 
 import db from "../db.js"
 import bcrypt from 'bcrypt'
+import { signAccessToken } from "../utils/tokenAuth.js"
 
 export default {
 
@@ -37,7 +38,8 @@ export default {
                 delete user.hashedPassword
                 delete user.id
 
-                res.send(user)
+                const token = await signAccessToken(user)
+                res.send({ user, token })
                 return
             } else {
                 res.sendStatus(404)
@@ -45,6 +47,8 @@ export default {
             }
         } catch (err) {
             console.error('error finding user: ', err)
+            res.sendStatus(500)
+            return
         }
     },
 
@@ -53,19 +57,34 @@ export default {
     // },
 
     getUsers: async (req, res) => {
+        let query
         try {
-            const response = await db.query(`
-                SELECT id, email, role, createdTimestamp, lastLoginTimestamp FROM [user]
-                WHERE role != 'admin';
-                `)
+            if (req.user.role == 'patient') {
+                return res.sendStatus(403)
+            } else if (req.user.role == 'admin') {
+                query = `SELECT id, email, role, createdTimestamp, lastLoginTimestamp FROM [user] WHERE role != 'admin';`
+            } else if (req.user.role == 'physiotherapist') {
+                query = `
+                    SELECT u.id, u.email, u.role, u.createdTimestamp, u.lastLoginTimestamp, p.* FROM [user] u
+                    INNER JOIN [patient] p ON u.id = p.physiotherapist_id
+                    WHERE role != 'physiotherapist' AND role != 'admin';`
+            }
+
+            const response = await db.query(query)
             res.send(response.recordset)
         } catch (err) {
             console.error('error getting users: ', err)
+            res.sendStatus(500)
+            return
         }
+    },
+
+    getUser: async (req, res) => {
     },
 
     // TODO: let user complete registration using email
     addNewUser: async (req, res) => {
+        if (req.user.role !== 'admin') return res.sendStatus(403)
         let newUser, user = req.body
 
         if (!user.role || !user.email || !user.password) {
@@ -84,13 +103,18 @@ export default {
             const response = await db.query(`
                 INSERT INTO [user] 
                 (id, email, hashedpassword, role, createdTimestamp)
-                OUTPUT Inserted.email, Inserted.role, Inserted.createdTimestamp
+                OUTPUT Inserted.id, Inserted.email, Inserted.role, Inserted.createdTimestamp
                 VALUES(NEWID(), '${user.email}', '${hash}', '${user.role}', CURRENT_TIMESTAMP);
             `)
             newUser = response.recordset[0]
             console.info('new user created: ', newUser)
-            res.send(newUser)
-        } catch (err) {
+
+            const token = await signAccessToken({ userID: newUser.id })
+            return res.status(201).json({
+                status: 'created', token, data: { newUser }
+            })
+        }
+        catch (err) {
             console.error('something went wrong when adding user: ', err)
             res.sendStatus(500)
             return

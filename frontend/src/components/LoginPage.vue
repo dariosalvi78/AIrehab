@@ -42,10 +42,10 @@ export default {
   methods: {
     async login () {
       try {
-        let user = await API.login(this.email.toLowerCase(), this.password)
-        console.log('user:', user)
-        if (user) {
-          storage.login(user)
+        const data = await API.login(this.email.toLowerCase(), this.password)
+        console.log('user:', data)
+        if (data.user) {
+          storage.login(data)
           this.$emit('handleStatus', true)
           router.push(storage.info())
         }
