@@ -8,8 +8,9 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '/login', component: () => import('components/LoginPage.vue') },
-      { path: '/home', component: () => import('components/PhysiotherapistHome.vue') },
-      { path: '/admin', component: () => import('components/AdminHome.vue') }
+      { path: '/admin', component: () => import('components/AdminHome.vue') },
+      { path: '/physiotherapist', component: () => import('components/PhysiotherapistHome.vue') },
+      { path: '/patient', component: () => import('components/PatientHome.vue') },
     ]
   },
 
