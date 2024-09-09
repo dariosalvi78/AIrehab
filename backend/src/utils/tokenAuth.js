@@ -14,19 +14,19 @@ const signAccessToken = async (user) => {
  * use for routes that require authorization
  */
 const authenticateToken = async (req, res, next) => {
-    const token = req.headers['cookie'].split('=')[1]
-    if (!token) return res.sendStatus(401)
+    try {
+        const token = req.headers['cookie'].split('=')[1]
+        if (!token) return res.sendStatus(401)
 
-    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, data) => {
-        try {
+        jwt.verify(token, process.env.JWT_SECRET_KEY, (err, data) => {
             if (err) return res.sendStatus(403)
             req.user = data.user
             next()
-        } catch (err) {
-            console.error('cant authenticate token: ', err)
-            return;
-        }
-    })
+        })
+    } catch (err) {
+        console.error('cant authenticate token: ', err)
+        return res.sendStatus(500)
+    }
 }
 
 /**

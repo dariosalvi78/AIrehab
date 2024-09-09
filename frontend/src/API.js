@@ -33,6 +33,21 @@ let API = {
         let response = await axios.post(URL_PRE + '/users', { role, email, password })
         return response.data
     },
+
+    async getPatients() {
+        let response = await axios.get(URL_PRE + '/patients')
+        return response.data
+    },
+
+    async getPatient(patientID) {
+        let response = await axios.get(URL_PRE + '/patients/' + patientID)
+        return response.data
+    },
+
+    async addPatient(fullName, dateOfBirth, height, weight, injuries) {
+        let response = await axios.post(URL_PRE + '/patients', { fullName, dateOfBirth, height, weight, injuries })
+        return response.data
+    },
 }
 
 export default API

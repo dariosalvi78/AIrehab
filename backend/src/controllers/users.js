@@ -57,20 +57,9 @@ export default {
     // },
 
     getUsers: async (req, res) => {
-        let query
+        if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
-            if (req.user.role == 'patient') {
-                return res.sendStatus(403)
-            } else if (req.user.role == 'admin') {
-                query = `SELECT id, email, role, createdTimestamp, lastLoginTimestamp FROM [user] WHERE role != 'admin';`
-            } else if (req.user.role == 'physiotherapist') {
-                query = `
-                    SELECT u.id, u.email, u.role, u.createdTimestamp, u.lastLoginTimestamp, p.* FROM [user] u
-                    INNER JOIN [patient] p ON u.id = p.physiotherapist_id
-                    WHERE role != 'physiotherapist' AND role != 'admin';`
-            }
-
-            const response = await db.query(query)
+            const response = await db.query(`SELECT id, email, role, createdTimestamp, lastLoginTimestamp FROM [user] WHERE role != 'admin';`)
             res.send(response.recordset)
         } catch (err) {
             console.error('error getting users: ', err)
@@ -84,8 +73,8 @@ export default {
 
     // TODO: let user complete registration using email
     addNewUser: async (req, res) => {
-        if (req.user.role !== 'admin') return res.sendStatus(403)
-        let newUser, user = req.body
+        if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
+        let query, newUser, user = req.body
 
         if (!user.role || !user.email || !user.password) {
             res.sendStatus(400)
