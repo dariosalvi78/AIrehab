@@ -1,7 +1,7 @@
 
 import healthcheck from "./controllers/healthCheck.js";
 import users from "./controllers/users.js";
-import patients from "./controllers/patient.js";
+import physiotherapists from "./controllers/physiotherapist.js";
 
 const API_PREFIX = '/api'
 
@@ -21,7 +21,7 @@ export default async (app, isAuth) => {
     app.get(`${API_PREFIX}/users`, isAuth, users.getUsers)
     app.post(`${API_PREFIX}/users`, isAuth, users.addNewUser)
 
-    app.get(`${API_PREFIX}/patients`, isAuth, patients.getPatients)
-    app.get(`${API_PREFIX}/patients/:patientID`, isAuth, patients.getPatient)
-    app.post(`${API_PREFIX}/patients`, isAuth, patients.addNewPatient)
+    app.get(`${API_PREFIX}/patients`, isAuth, physiotherapists.getPatients)
+    app.get(`${API_PREFIX}/patients/:patientID`, isAuth, physiotherapists.getPatient)
+    app.post(`${API_PREFIX}/patients`, isAuth, physiotherapists.addNewPatient)
 }
