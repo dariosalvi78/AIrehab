@@ -18,7 +18,7 @@
 
 <script>
 import storage from '../utils/userStorage'
-import routes from '../router/routeHandler'
+import API from '../API'
 
 export default {
   name: 'MainLayout',
@@ -30,10 +30,11 @@ export default {
   },
   mounted () { this.isLoggedIn = storage.info().loggedIn },
   methods: {
-    logout () {
+    async logout () {
       storage.logout()
       this.isLoggedIn = false
-      routes.push(storage.info())
+      await API.logout()
+      this.$router.push('login')
     },
     handleStatus(status) { 
       console.log('status', status)

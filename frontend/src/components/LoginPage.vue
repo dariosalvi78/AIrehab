@@ -47,7 +47,9 @@ export default {
         if (data.user) {
           storage.login(data)
           this.$emit('handleStatus', true)
-          router.push(storage.info())
+          if (data.user.role == 'admin') this.$router.push('admin')
+          else if (data.user.role == 'physiotherapist') this.$router.push('physiotherapist')
+          // else if (data.user.role == 'patient') this.$router.push('patient')
         }
       } catch (err) {
         this.$q.notify({
