@@ -15,6 +15,7 @@ The backend exposes the database and the AI algorithm through a REST API adding 
 send the following commands to the interpreter
 ```sql
 CREATE DATABASE AIREHAB COLLATE SQL_Latin1_General_CP1_CI_AS;
+GO
 USE AIREHAB
 GO
 ```
