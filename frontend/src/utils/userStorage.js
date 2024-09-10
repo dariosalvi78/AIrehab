@@ -44,8 +44,6 @@ const storage = {
     user.email = newuser.user.email
 
     window.localStorage.setItem('user', JSON.stringify(user))
-    // TODO: remove this, once is set on server
-    document.cookie = `token=${newuser.token}`
   },
 
   logout () {
@@ -55,7 +53,7 @@ const storage = {
       email: undefined,
     }
     window.localStorage.removeItem('user')
-    document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    document.cookie = "token=; Path=/; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
   }
 }
 
