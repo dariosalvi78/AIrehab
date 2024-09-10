@@ -47,10 +47,15 @@ When setting up the database for production, we c
 ### Setup of the nodejs server:
 
 - In the backend folder, install all dependencies: `npm i`.
-- Create a .env file in the same folder. Use `.env_example` as a template.
+- Create a .env file in config folder. Use `.env_template` as a template.
 
+### Start the server in development mode
 
-### 
+```bash
+npm run dev
+```
+
+_Make sure that database is running in the background_
 
 ## Frontend
 
