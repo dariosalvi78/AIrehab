@@ -2,6 +2,7 @@
 import db from "../db.js"
 import bcrypt from 'bcrypt'
 import { signAccessToken } from "../utils/tokenAuth.js"
+import DOM from "../DOM/usersMap.js"
 
 export default {
 
@@ -17,32 +18,20 @@ export default {
         }
         try {
             // TODO: use the db layer abstraction instead
-            const response = await db.query(`
-                    SELECT id, email, hashedPassword, role, createdTimestamp, lastLoginTimestamp FROM [user]
-                    WHERE email = '${req.body.email}';
-                `)
+            const user = await DOM.getUserByEmail(req.body.email)
 
-            if (response.recordset.length <= 0) {
-                res.sendStatus(404)
-                return
-            }
-            let user = response.recordset[0]
+            if (!user) return res.sendStatus(404)
 
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
                 console.info('found user: ', user.email)
-                await db.query(`
-                    UPDATE [user] 
-                    SET [user].lastLoginTimestamp = CURRENT_TIMESTAMP
-                    WHERE [user].id = '${user.id}';
-                `)
+                await DOM.updateUserLoginTimestamp(user.id)
                 delete user.hashedPassword
                 delete user.id
 
                 const token = await signAccessToken(user)
-                // TODO: set the cookie here, server side
-                res.send({ user, token })
-                return
+                res.cookie('token', token)
+                return res.send({ user })
             } else {
                 res.sendStatus(404)
                 return
@@ -54,15 +43,23 @@ export default {
         }
     },
 
-    // logout: async (req, res) => {
-    //     console.info('user logged out', req.user)
-    // },
+    logout: async (req, res) => {
+        try {
+            if (req.user) {
+                console.info('user logged out: ', req.user)
+            }
+            req.cookies = null
+            return res.sendStatus(204)
+        } catch (err) {
+            return res.status(500).send('Cannot log out ' + req.user.email)
+        }
+    },
 
     getUsers: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
-            const response = await db.query(`SELECT id, email, role, createdTimestamp, lastLoginTimestamp FROM [user] WHERE role != 'admin';`)
-            res.send(response.recordset)
+            const users = await DOM.getUsers()
+            res.send(users)
         } catch (err) {
             console.error('error getting users: ', err)
             res.sendStatus(500)
@@ -71,38 +68,41 @@ export default {
     },
 
     getUser: async (req, res) => {
+        if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
+        try {
+            const user = await DOM.getOneUser(req.params.userID)
+            return res.send(user)
+        } catch (err) {
+            console.error('error getting user: ', err)
+            res.sendStatus(500)
+            return
+        }
     },
 
     // TODO: let user complete registration using email
     addNewUser: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
-        let query, newUser, user = req.body
+        let body = req.body
 
-        if (!user.role || !user.email || !user.password) {
+        if (!body.role || !body.email || !body.password) {
             res.sendStatus(400)
             return
         }
 
-        const response = await db.query(`SELECT COUNT(*) as c FROM [user] WHERE email = '${user.email}';`)
-        if (response.recordset[0].c !== 0) {
-            res.status(409).send(`${user.email} is already registered`)
+        const isUser = await DOM.getUserByEmail(body.email)
+        if (isUser) {
+            res.status(409).send(`${body.email} is already registered`)
             return
         }
 
         try {
-            let hash = bcrypt.hashSync(user.password, 8)
-            const response = await db.query(`
-                INSERT INTO [user] 
-                (id, email, hashedpassword, role, createdTimestamp)
-                OUTPUT Inserted.id, Inserted.email, Inserted.role, Inserted.createdTimestamp
-                VALUES(NEWID(), '${user.email}', '${hash}', '${user.role}', CURRENT_TIMESTAMP);
-            `)
-            newUser = response.recordset[0]
-            console.info('new user created: ', newUser)
+            let hash = bcrypt.hashSync(body.password, 8)
+            const user = await DOM.createUser(body.email, hash, body.role)
+            console.info('new user created: ', user)
 
-            const token = await signAccessToken({ userID: newUser.id })
+            const token = await signAccessToken({ userID: user.id })
             return res.status(201).json({
-                status: 'created', token, data: { newUser }
+                status: 'created', token, data: { newUser: user }
             })
         }
         catch (err) {
