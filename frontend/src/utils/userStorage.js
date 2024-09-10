@@ -8,54 +8,55 @@
  * @property email
  */
 var user = {
-    loggedIn: false,
-    role: undefined,
-    email: undefined
+  loggedIn: false,
+  role: undefined,
+  email: undefined
 }
 
 let userStorage = window.localStorage.getItem('user')
 if (userStorage) {
-    user = JSON.parse(userStorage)
+  user = JSON.parse(userStorage)
 }
 
 const storage = {
-    /**
-     * @returns {User} User object
-     */
-    info() {
-        let userstr = window.localStorage.getItem('user')
-        if (userstr) {
-            try {
-                return JSON.parse(userstr)
-            } catch (err) {
-                this.logout()
-                return user
-            }
-        } else {
-            this.logout()
-            return user
-        }
-    },
-
-
-    login(newuser) {
-        user.loggedIn = true
-        user.role = newuser.user.role
-        user.email = newuser.user.email
-
-        window.localStorage.setItem('user', JSON.stringify(user))
-        document.cookie = `token=${newuser.token}`
-    },
-
-    logout() {
-        user = {
-            loggedIn: false,
-            role: undefined,
-            email: undefined,
-        }
-        window.localStorage.removeItem('user')
-        document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+  /**
+   * @returns {User} User object
+   */
+  info () {
+    let userstr = window.localStorage.getItem('user')
+    if (userstr) {
+      try {
+        return JSON.parse(userstr)
+      } catch (err) {
+        this.logout()
+        return user
+      }
+    } else {
+      this.logout()
+      return user
     }
+  },
+
+
+  login (newuser) {
+    user.loggedIn = true
+    user.role = newuser.user.role
+    user.email = newuser.user.email
+
+    window.localStorage.setItem('user', JSON.stringify(user))
+    // TODO: remove this, once is set on server
+    document.cookie = `token=${newuser.token}`
+  },
+
+  logout () {
+    user = {
+      loggedIn: false,
+      role: undefined,
+      email: undefined,
+    }
+    window.localStorage.removeItem('user')
+    document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+  }
 }
 
 export default storage
