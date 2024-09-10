@@ -1,4 +1,4 @@
-
+// TODO: export just the object
 export const loadConfig = () => {
     return {
         db: {

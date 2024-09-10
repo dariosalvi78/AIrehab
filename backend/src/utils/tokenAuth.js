@@ -6,6 +6,7 @@ import db from '../db.js'
  * Sign new access token for user
  */
 const signAccessToken = async (user) => {
+    // TODO: use config instead of process.env
     return jwt.sign({ user }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE })
 }
 
@@ -15,9 +16,11 @@ const signAccessToken = async (user) => {
  */
 const authenticateToken = async (req, res, next) => {
     try {
+        // TODO: use a cookie parser, https://expressjs.com/en/resources/middleware/cookie-parser.html
         const token = req.headers['cookie'].split('=')[1]
         if (!token) return res.sendStatus(401)
 
+        // TODO: use config instead of process.env
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, data) => {
             if (err) return res.sendStatus(403)
             req.user = data.user
@@ -33,6 +36,7 @@ const authenticateToken = async (req, res, next) => {
  * Creates admin user if not in DB
  * @param {*} config config -> .env
  */
+// TODO: remove config as a param, just import the object
 const createAdmin = async (config) => {
     const checkIfExists = await db.query("SELECT COUNT(*) as u FROM [user] WHERE role = 'admin';")
     if (!checkIfExists.recordset[0].u) {

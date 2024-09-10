@@ -16,6 +16,7 @@ export default {
             return
         }
         try {
+            // TODO: use the db layer abstraction instead
             const response = await db.query(`
                     SELECT id, email, hashedPassword, role, createdTimestamp, lastLoginTimestamp FROM [user]
                     WHERE email = '${req.body.email}';
@@ -39,6 +40,7 @@ export default {
                 delete user.id
 
                 const token = await signAccessToken(user)
+                // TODO: set the cookie here, server side
                 res.send({ user, token })
                 return
             } else {
