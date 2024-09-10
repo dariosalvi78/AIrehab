@@ -1,6 +1,5 @@
 
 import db from "../db.js"
-import { signAccessToken } from "../utils/tokenAuth.js"
 
 export default {
 
@@ -8,7 +7,7 @@ export default {
      * Get all patients for a specific physiotherapist
      */
     getPatients: async (req, res) => {
-        if (req.user.role == 'patient') return res.sendStatus(403)
+        // if (req.user.role == 'patient') return res.sendStatus(403)
         try {
             const response = await db.query(`
                 SELECT p.names, p.id as patientID FROM [user] u
@@ -27,7 +26,6 @@ export default {
      * Get one patient for a specific physiotherapist
      */
     getPatient: async (req, res) => {
-        if (!req.params || req.user.role == 'patient') return res.sendStatus(403)
         let user = req.body, patientID = req.params.patientID
 
         try {
@@ -49,7 +47,6 @@ export default {
     // TODO: let user complete registration using email
     // allow physiotherapist to add user for now
     addNewPatient: async (req, res) => {
-        if (!req.user || req.user.role == 'patient') return res.sendStatus(403)
         let user = req.body
 
         const response = await db.query(`SELECT COUNT(*) as c FROM [user] WHERE email = '${user.email}';`)
