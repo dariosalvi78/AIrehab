@@ -8,7 +8,7 @@
  * @property {!string} createdTimestamp - ISO 8601 date and time of when the patient was created
  * @property {!string} lastLoginTimestamp - ISO 8601 date and time of last login
  * @property {!string} email - email address of the user
- * @property {string} hashedpassword - password, hashed
+ * @property {string} hashedPassword - password, hashed
  * @property {!string} role - 'admin' or 'physiotherapist'
  */
 
@@ -55,3 +55,5 @@
  * @property {?POEEvaluation} POEEvaluation - object containing metrics about the quality of the exercise
  * @property {?string} notes - some textual notes
  */
+
+export const Types = {}

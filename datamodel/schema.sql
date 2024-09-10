@@ -2,11 +2,11 @@ IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ex
 BEGIN
     CREATE TABLE exercise (
         id uniqueidentifier NOT NULL PRIMARY KEY,
-        start_timestamp datetime NOT NULL,
-        end_timestamps datetime,
-        physiotherapy_session_id uniqueidentifier NOT NULL,
+        startTimestamp datetime NOT NULL,
+        endTimestamp datetime,
+        physiotherapySessionId uniqueidentifier NOT NULL,
         type varchar(50),
-        video_file varchar(100),
+        videoFile varchar(100),
         notes text
     );
 END
@@ -17,7 +17,7 @@ BEGIN
         id uniqueidentifier NOT NULL PRIMARY KEY,
         names text NOT NULL,
         dateofbirth date NOT NULL,
-        physiotherapist_id uniqueidentifier NOT NULL,
+        physiotherapistId uniqueidentifier NOT NULL,
         height decimal,
         weight decimal,
         injuries text,
@@ -29,9 +29,9 @@ IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ph
 BEGIN
     CREATE TABLE physiotherapy_session (
         id uniqueidentifier NOT NULL PRIMARY KEY,
-        patient_id uniqueidentifier NOT NULL,
-        start_timestamp datetime NOT NULL,
-        end_timestamp datetime
+        patientId uniqueidentifier NOT NULL,
+        startTimestamp datetime NOT NULL,
+        endTimestamp datetime
     );
 END
 
@@ -39,12 +39,12 @@ IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[po
 BEGIN
     CREATE TABLE poe_evaluation (
         id uniqueidentifier NOT NULL PRIMARY KEY,
-        exercise_id uniqueidentifier NOT NULL,
-        postural_orientation varchar(100) NOT NULL,
+        exerciseId uniqueidentifier NOT NULL,
+        posturalOrientation varchar(100) NOT NULL,
         score int NOT NULL,
-        score_confidence_0 decimal,
-        score_confidence_1 decimal,
-        score_confidence_2 decimal,
+        scoreConfidence_0 decimal,
+        scoreConfidence_1 decimal,
+        scoreConfidence_2 decimal,
         repetition int
     );
 END
