@@ -5,28 +5,34 @@
 
 import express from 'express'
 import helmet from 'helmet'
-import bcrypt from 'bcrypt'
 import setRoutes from './routes.js'
-import { loadConfig } from './utils/config.js'
-import db from './db.js'
+import config from './utils/config.js'
 import { authenticateToken, createAdmin } from './utils/tokenAuth.js'
+import cookieParser from 'cookie-parser'
 
 (async () => {
 
     console.log('Starting express app')
 
-    const config = loadConfig()
-
     const port = config.db.port
     const hostname = config.db.host
     const app = express()
     app.use(helmet())
+    app.use(cookieParser())
 
-    if (config.admin) await createAdmin(config)
+    if (config.admin) await createAdmin()
 
     app.use(express.urlencoded({ limit: '20mb', extended: false }))
     app.use(express.json({ limit: '20mb' }))
     app.use(express.text({ limit: '20mb' }))
+
+    // // Allow CORS policy
+    // app.use(function (req, res, next) {
+    //     res.header('Access-Control-Allow-Origin', '*') // allows cross origin requests
+    //     res.header('Vary', 'Cookie') // tells caches that cookies matters when caching
+    //     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    //     next()
+    // })
 
     await setRoutes(app, authenticateToken)
 

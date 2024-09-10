@@ -1,8 +1,6 @@
 
 import mssql from 'mssql'
-import { loadConfig } from './utils/config.js'
-
-const config = loadConfig()
+import config from './utils/config.js'
 
 const mssql_port = 1433
 

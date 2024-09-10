@@ -1,14 +1,16 @@
 
+import * as Types from '../../../datamodel/modeljdocs.mjs'
 import jwt from 'jsonwebtoken'
-import db from '../db.js'
 import bcrypt from 'bcrypt'
+import config from './config.js'
+import DOM from '../DOM/usersMap.js'
 
 /**
  * Sign new access token for user
+ * @param {Types.User} user
  */
 const signAccessToken = async (user) => {
-    // TODO: use config instead of process.env
-    return jwt.sign({ user }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE })
+    return jwt.sign({ user }, config.JWT.SECRET_KEY, { expiresIn: config.JWT.EXPIRE })
 }
 
 /**
@@ -17,15 +19,14 @@ const signAccessToken = async (user) => {
  */
 const authenticateToken = async (req, res, next) => {
     try {
-        // TODO: use a cookie parser, https://expressjs.com/en/resources/middleware/cookie-parser.html
-        const token = req.headers['cookie'].split('=')[1]
+        const token = req.cookies.token // req.headers['cookie'].split('=')[1]
         if (!token) return res.sendStatus(401)
 
-        // TODO: use config instead of process.env
-        jwt.verify(token, process.env.JWT_SECRET_KEY, (err, data) => {
+        jwt.verify(token, config.JWT.SECRET_KEY, (err, data) => {
             if (err) {
                 // TODO: remove the JWT cookie
-                return res.sendStatus(401)
+                req.cookies = null
+                res.status(401).send('Session has expired, please log in again')
             }
             req.user = data.user
             next()
@@ -38,24 +39,15 @@ const authenticateToken = async (req, res, next) => {
 
 /**
  * Creates admin user if not in DB
- * @param {*} config config -> .env
  */
-// TODO: remove config as a param, just import the object
-const createAdmin = async (config) => {
-    const checkIfExists = await db.query("SELECT COUNT(*) as u FROM [user] WHERE role = 'admin';")
-    if (!checkIfExists.recordset[0].u) {
+const createAdmin = async () => {
+    const users = await DOM.getUsersByRole('admin') // await db.query("SELECT COUNT(*) as u FROM [user] WHERE role = 'admin';")
+    if (users.length <= 0) {
         let hash = bcrypt.hashSync(config.admin.password, 8)
         try {
-            let res = await db.query(`
-                    INSERT INTO [user]
-                    (id, email, hashedpassword, role, createdTimestamp)
-                    OUTPUT Inserted.id, Inserted.email, Inserted.role, Inserted.createdTimestamp
-                    VALUES(NEWID(), '${config.admin.username}', '${hash}', 'admin', CURRENT_TIMESTAMP)
-                `)
-            if (res) {
-                console.info('no admin in db, new user created')
-                await signAccessToken(res.recordset[0])
-            }
+            const newUser = await DOM.createUser(config.admin.username, hash, 'admin')
+            console.info('no admin in db, new user created')
+            await signAccessToken(newUser)
         } catch (err) {
             // TODO: use a logging library
             console.error('something went wrong when creating admin user: ', err)
