@@ -1,6 +1,7 @@
 
 import jwt from 'jsonwebtoken'
 import db from '../db.js'
+import bcrypt from 'bcrypt'
 
 /**
  * Sign new access token for user
@@ -22,7 +23,10 @@ const authenticateToken = async (req, res, next) => {
 
         // TODO: use config instead of process.env
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, data) => {
-            if (err) return res.sendStatus(403)
+            if (err) {
+                // TODO: remove the JWT cookie
+                return res.sendStatus(401)
+            }
             req.user = data.user
             next()
         })
@@ -41,19 +45,21 @@ const createAdmin = async (config) => {
     const checkIfExists = await db.query("SELECT COUNT(*) as u FROM [user] WHERE role = 'admin';")
     if (!checkIfExists.recordset[0].u) {
         let hash = bcrypt.hashSync(config.admin.password, 8)
-        await db.query(`
+        try {
+            let res = await db.query(`
                     INSERT INTO [user]
                     (id, email, hashedpassword, role, createdTimestamp)
                     OUTPUT Inserted.id, Inserted.email, Inserted.role, Inserted.createdTimestamp
                     VALUES(NEWID(), '${config.admin.username}', '${hash}', 'admin', CURRENT_TIMESTAMP)
                 `)
-            .then(async (res) => {
-                if (res) {
-                    console.info('no admin in db, new user created')
-                    await signAccessToken(res.recordset[0])
-                }
-            })
-            .catch((err) => console.info('something went wrong when creating admin user: ', err))
+            if (res) {
+                console.info('no admin in db, new user created')
+                await signAccessToken(res.recordset[0])
+            }
+        } catch (err) {
+            // TODO: use a logging library
+            console.error('something went wrong when creating admin user: ', err)
+        }
     }
 }
 
