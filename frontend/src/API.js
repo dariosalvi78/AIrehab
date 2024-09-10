@@ -21,7 +21,7 @@ let API = {
     },
 
     async logout() {
-        await axios.get(URL_PRE + '/logout')
+        await axios.post(URL_PRE + '/logout')
     },
 
     async getUsers() {

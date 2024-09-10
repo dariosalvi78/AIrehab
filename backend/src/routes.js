@@ -18,7 +18,10 @@ export default async (app, isAuth) => {
     })
 
     app.post(`${API_PREFIX}/login`, users.login)
+    app.post(`${API_PREFIX}/logout`, users.logout)
+
     app.get(`${API_PREFIX}/users`, isAuth, users.getUsers)
+    app.get(`${API_PREFIX}/users/:userID`, isAuth, users.getUser)
     app.post(`${API_PREFIX}/users`, isAuth, users.addNewUser)
 
     app.get(`${API_PREFIX}/patients`, isAuth, physiotherapists.getPatients)

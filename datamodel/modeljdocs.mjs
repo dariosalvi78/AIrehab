@@ -5,7 +5,7 @@
 /**
  * @typedef {Object} User
  * @property {!string} id - unique identifier
- * @property {!string} createdTimestamp - ISO 8601 date and time of when the patient was created
+ * @property {!string} createdTimestamp - ISO 8601 date and time of when the user was created
  * @property {!string} lastLoginTimestamp - ISO 8601 date and time of last login
  * @property {!string} email - email address of the user
  * @property {string} hashedPassword - password, hashed
