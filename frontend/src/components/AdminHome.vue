@@ -1,26 +1,46 @@
 <template>
   <q-layout>
     <q-card-actions class="flex flex-center">
-      <q-btn size="md" label="Add new User" color="primary" @click="() => { this.newUserPrompt = !this.newUserPrompt }" />
+      <q-btn padding="md" color="secondary" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+        <q-icon left name="group_add"/>
+        <div>Add new Physiotherapist</div>
+      </q-btn>
     </q-card-actions>
 
     <q-dialog v-model="newUserPrompt" persistent>
       <q-card class="q-pl-mx" style="min-width: 350px">
         <q-card-section>
-          <div class="text-h6">New User</div>
+          <div class="text-h6">New Physiotherapist</div>
         </q-card-section>
-        <q-form class="q-pt-lg">
+        <q-form class="q-px-lg">
           <q-input
+            class="q-my-lg"            
             filled
             v-model="this.new.email"
             label="Email"
             hint="e.g. user@email.com"
           />
-          <q-option-group
+          <q-input
+            class="q-my-lg"            
+            filled
+            v-model="this.new.password"
+            label="Password"
+            type="password"
+            hint="Password for physiotherapist"
+          />
+           <q-input
+            class="q-my-lg"            
+            filled
+            v-model="this.new.passwordConfirm"
+            label="Confirm password"
+            type="password"
+            hint="Must be the same password"
+          />
+          <!-- <q-option-group
             :options="optionsRadio"
             type="radio"
             v-model="this.new.role"
-          />
+          /> -->
         </q-form>
         <q-card-actions align="right" class="text-primary">
           <q-btn flat label="Cancel" v-close-popup />
@@ -46,13 +66,12 @@ export default {
       users: [],
       newUserPrompt: false,
       new: {
-        role: undefined,
+        role: 'physiotherapist',
         email: undefined,
-        password: 'password' // change this once we have sign-up with email
+        password: undefined
       },
       optionsRadio: [
         { label: 'Physiotherapist', value: 'physiotherapist' },
-        { label: 'Patient', value: 'patient' },
       ]
     }
   },
