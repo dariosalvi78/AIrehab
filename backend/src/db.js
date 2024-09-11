@@ -1,6 +1,7 @@
 
 import mssql from 'mssql'
 import config from './utils/config.js'
+import logger from './utils/logger.js'
 
 const mssql_port = 1433
 
@@ -30,7 +31,7 @@ export default {
      */
     query: async function (text) {
         let res = await mssql.query(text)
-        console.info({
+        logger.info({
             query: text,
             rows: res.output
         }, 'query executed')
@@ -44,11 +45,11 @@ export default {
         try {
             const result = await this.query(`SELECT GetDate() as currDate`)
             if (result) {
-                console.info('db is running:', result.recordset[0].currDate)
+                logger.info('db is running:', result.recordset[0].currDate)
                 return result
             }
         } catch (err) {
-            console.log('db connection failed: ', err)
+            logger.info('db connection failed: ', err)
         }
     },
 

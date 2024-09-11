@@ -1,5 +1,6 @@
 
 import collection from "../DOM/physiotherapistCollection.js"
+import logger from "../utils/logger.js"
 
 export default {
 
@@ -13,7 +14,7 @@ export default {
             res.send(patients)
             return
         } catch (err) {
-            console.error('error getting patients: ', err)
+            logger.error({ error: err }, 'error getting patients: ')
             res.sendStatus(500)
             return
         }
@@ -28,7 +29,7 @@ export default {
             const patient = await collection.getOnePatientByEmail(req.user.email, req.params.patientID)
             res.send(patient)
         } catch (err) {
-            console.error('error getting patient: ', err)
+            logger.error({ error: err }, 'error getting patient: ')
             res.sendStatus(500)
             return
         }
@@ -53,13 +54,13 @@ export default {
             const physiotherapist = await collection.getOneTherapistByEmail(req.user.email)
             const addedPatient = await collection.createPatient(patient, physiotherapist.id)
 
-            console.info(`assigned ${addedPatient.id} to physiotherapist ${physiotherapist.email}`)
+            logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to physiotherapist ${physiotherapist.email}`)
             return res.status(201).json({
                 status: 'created', data: { patient: addedPatient }
             })
         }
         catch (err) {
-            console.error('something went wrong when adding patient: ', err)
+            logger.error({ error: err }, 'something went wrong when adding patient: ')
             res.sendStatus(500)
             return
         }

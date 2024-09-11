@@ -3,6 +3,7 @@ import db from "../db.js"
 import bcrypt from 'bcrypt'
 import { signAccessToken } from "../utils/tokenAuth.js"
 import collection from "../DOM/usersCollection.js"
+import logger from "../utils/logger.js"
 
 export default {
 
@@ -23,11 +24,11 @@ export default {
 
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
-                console.info('found user: ', user.email)
                 await collection.updateUserLoginTimestamp(user.id)
                 delete user.hashedPassword
                 delete user.id
 
+                logger.debug({ data: user }, 'user logged in')
                 const token = await signAccessToken(user)
                 res.cookie('token', token)
                 return res.send({ user })
@@ -36,7 +37,7 @@ export default {
                 return
             }
         } catch (err) {
-            console.error('error finding user: ', err)
+            logger.error({ error: err }, 'error logging out user: ')
             res.sendStatus(500)
             return
         }
@@ -60,7 +61,7 @@ export default {
             const users = await collection.getUsers()
             res.send(users)
         } catch (err) {
-            console.error('error getting users: ', err)
+            logger.error({ error: err }, 'error getting users')
             res.sendStatus(500)
             return
         }
@@ -72,7 +73,7 @@ export default {
             const user = await collection.getOneUser(req.params.userID)
             return res.send(user)
         } catch (err) {
-            console.error('error getting user: ', err)
+            logger.error({ error: err }, 'error getting user')
             res.sendStatus(500)
             return
         }
@@ -97,7 +98,7 @@ export default {
         try {
             let hash = bcrypt.hashSync(body.password, 8)
             const user = await collection.createUser(body.email, hash, body.role)
-            console.info('new user created: ', user)
+            logger.info({ data: user }, 'new user created: ')
 
             const token = await signAccessToken({ userID: user.id })
             return res.status(201).json({
@@ -105,7 +106,7 @@ export default {
             })
         }
         catch (err) {
-            console.error('something went wrong when adding user: ', err)
+            logger.error({ error: err }, 'something went wrong when adding user')
             res.sendStatus(500)
             return
         }
