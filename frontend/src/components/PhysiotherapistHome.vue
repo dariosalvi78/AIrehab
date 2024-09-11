@@ -1,8 +1,8 @@
 <template>
    <q-layout>
       <q-page-container>
-          <q-card-actions class="q-ma-lg flex flex-direction-row">      
-            <q-btn padding="md" color="accent" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+          <q-card-actions class="q-ma-md flex flex-center">      
+            <q-btn class="action-button" padding="md" color="accent" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
               <q-icon left name="group_add"/>
               <div>Add new Patient</div>
             </q-btn>
@@ -11,50 +11,55 @@
               <q-card class="q-pl-mx" style="min-width: 350px">
                 <q-card-section>
                   <div class="text-h6">Add new patient</div>
-                  <div class="text-subtitle2">Send invitation to patient</div>
+                  <!-- <div class="text-subtitle2">Send invitation to patient</div> -->
                 </q-card-section>
-                <q-form class="q-pt-lg">
-                  <q-input
+                  <q-form class="q-px-sm">
+                  <!-- <q-input
                     filled
                     v-model="this.new.email"
                     label="Email"
                     type="email"
                     hint="e.g. user@email.com"
-                  />
+                  /> -->
                   <q-input
+                    class="q-my-md"            
                     filled
                     v-model="this.new.fullName"
-                    label="full name"
+                    label="Full name"
                     type="text"
-                    hint="e.g. user@email.com"
+                    hint="Patient full name"
                   />
                   <q-input
+                    class="q-my-md"            
                     filled
                     v-model="this.new.dateOfBirth"
                     label="date"
                     type="date"
-                    hint="e.g. user@email.com"
+                    hint="Date of birth - in yyyy-mm-dd"
                   />
                     <q-input
+                    class="q-my-md"            
                     filled
                     v-model="this.new.height"
-                    label="number"
+                    label="Height (cm)"
                     type="number"
-                    hint="e.g. user@email.com"
+                    hint="Optional. Patient height"
                   />
                     <q-input
+                    class="q-my-md"            
                     filled
                     v-model="this.new.weight"
-                    label="number"
+                    label="Weight (kg)"
                     type="number"
-                    hint="e.g. user@email.com"
+                    hint="Optional. Patient weight"
                   />
                     <q-input
+                    class="q-my-md"            
                     filled
                     v-model="this.new.injuries"
-                    label="text"
-                    type="text"
-                    hint="e.g. user@email.com"
+                    label="Notes"
+                    type="textarea"
+                    hint="Optional. List of injuries"
                   />
                 </q-form>
                 <q-card-actions align="right" class="text-primary">
@@ -64,7 +69,7 @@
               </q-card>
             </q-dialog>
             
-            <q-btn padding="md" color="teal" @click="() => openExercisePrompt()">
+            <q-btn class="action-button" padding="md" color="teal" @click="() => openExercisePrompt()">
               <q-icon left name="accessibility" />
               <div>Exercises</div>
             </q-btn>
@@ -93,7 +98,7 @@
             <div class="text-h6">Patients list</div>
           </div>
           <q-separator inset />
-          <q-tab-panels v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
+          <q-tab-panels v-show="this.users.length >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
             <q-tab-panel id="panel" name="main">
             <div class="q-pa-md flex justify-center">
               <div style="max-width: 90%; width: 300px;">
@@ -123,42 +128,50 @@
             </q-tab-panel>
             <q-tab-panel name="view">
               <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$refs.panelForm.goTo('main')" />        
-                <q-card class="q-px-md patient-view-card" flat>
+              <q-card flat class="q-px-md patient-view-card">
+                <q-card-section>
+                  <div class="text-h6">{{selectedPatient.names}}</div>
+                  <div class="text-body2">
+                    <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
+                    {{ formatDate(selectedPatient.createdTimestamp) }}
+                    </div>
+                </q-card-section>
+                <q-separator inset />
+                <q-card-section>
+                  <div class="text-subtitle1">Height and weight</div>
+                  <div class="text-body2">
+                    {{ selectedPatient.height }} kg
+                  </div>
+                  <div class="text-body2">
+                    {{ selectedPatient.weight }} cm
+                  </div>
+                </q-card-section>
+                <q-separator inset />
+                 <q-card-section>
+                  <div class="text-subtitle1">Date of birth</div>
+                  <div class="text-body2">{{ formatDate(selectedPatient.dateofbirth) }}</div>
+                </q-card-section>                
+                <q-separator inset />
                   <q-card-section>
-                    <q-avatar icon="person"/>
-                    <div class="text-h6">{{selectedPatient.names}}</div>
-                  </q-card-section>
-                  <q-card-section class="q-pt-none">
-                    <span>Date of birth:</span>
-                    {{ selectedPatient.dateofbirth }}
-                  </q-card-section>
-                  <q-separator inset />
-                  <q-card-section>
-                    <span>List of injuries:</span>
-                    {{ selectedPatient.injuries }}
-                  </q-card-section>
-                  <q-separator inset />
-                  <q-card-section>
-                    <span>Height:</span>
-                    {{ selectedPatient.height }}
-                    <span>Weight:</span>
-                    {{ selectedPatient.weight }}
-                  </q-card-section>
-                  <q-separator inset />
-                  <q-card-section>
-                    <span>Created:</span>
-                    {{ selectedPatient.createdTimestamp }}
-                  </q-card-section>
-                </q-card>
+                  <div class="text-subtitle1">Description</div>
+                  <div style="whiteSpace: break-spaces" class="text-body2">{{ selectedPatient.injuries }}</div>
+                </q-card-section>
+              </q-card>
             </q-tab-panel>
         </q-tab-panels>
+        <div v-if="this.users.length == 0" class="q-ma-md flex flex-center">
+          <q-spinner-dots
+              color="primary"
+              size="3em"
+            />
+        </div>
       </q-page-container>
   </q-layout>
 </template>
 
 <script>
 import API from '../API'
-import storage from '../utils/userStorage'
+import nicers from '../utils/nicers'
 
 export default {
   name: 'PhysiotherapistHome',
@@ -166,10 +179,7 @@ export default {
     return {
       newUserPrompt: false,
       exercisePrompt: false, 
-       new: {
-        role: 'patient',
-        email: undefined,
-        password: 'password', // change this once we have sign-up with email
+      new: {
         fullName: undefined,
         dateOfBirth: undefined,
         height: undefined,
@@ -190,35 +200,26 @@ export default {
      async addNewUser () {
       try {
         let user = this.new
-        let resp = await API.addPatient(user.fullName, user.dateOfBirth, user.height, user.weight, user.injuries)
-        console.log('added: ', resp)
+        await API.addPatient(user.fullName, user.dateOfBirth, user.height, user.weight, user.injuries)
       } catch (e) {
-        if (e.status === 409) {
-          return this.$q.notify({
-            color: 'negative',
-            position: 'top',
-            message: 'User registration failed: ' + e.response.data,
-            icon: 'report_problem'
-          })
-        }
+        let errorMsg = e
+        if (e.status === 409 || e.status === 400) errorMsg = e.response.data
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'User registration failed' + e,
+          message: 'Patient registration failed: ' + errorMsg,
           icon: 'report_problem'
         })
       }
       await this.getUsers()
+      this.resetForm()
     },
     async getUsers () {
       let res = await API.getPatients()
       this.users = res
-      console.log(this.users)
     },
     async openExercisePrompt () {
-      console.log(this.users)
-      if (this.users <= 0) {
-        console.log(this.users)
+      if (!this.users || this.users.length <= 0) {
         this.$q.notify({
           color: 'warning',
           position: 'top',
@@ -232,15 +233,16 @@ export default {
     async openPatientView (selectedUser) {
       let resp = await API.getPatient(selectedUser.patientID)
       this.selectedPatient = resp
-      console.log(this.selectedPatient)
       this.$refs.panelForm.goTo('view')
       // this.$router.push('view/' + e.patientID)
     },
     resetForm () {
       this.newUserPrompt = false
       this.exercisePrompt = false
-      this.users = undefined
-      this.selectedPatient = undefined
+      this.new = { }
+    },
+    formatDate(date) {
+      return nicers.formattedDate(date)
     }
   }
 }
@@ -258,4 +260,11 @@ export default {
   margin: 0 auto;
   max-width: 300px;
 }
+
+@media only screen and (max-width: 450px) {
+  .action-button {
+    padding: 5px !important;
+  }
+}
+
 </style>
