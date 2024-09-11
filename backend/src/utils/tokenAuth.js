@@ -3,7 +3,7 @@ import * as Types from '../../../datamodel/modeljdocs.mjs'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import config from './config.js'
-import DOM from '../DOM/usersMap.js'
+import DOM from '../DOM/usersCollection.js'
 
 /**
  * Sign new access token for user

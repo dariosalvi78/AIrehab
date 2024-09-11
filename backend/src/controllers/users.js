@@ -2,7 +2,7 @@
 import db from "../db.js"
 import bcrypt from 'bcrypt'
 import { signAccessToken } from "../utils/tokenAuth.js"
-import DOM from "../DOM/usersMap.js"
+import collection from "../DOM/usersCollection.js"
 
 export default {
 
@@ -17,15 +17,14 @@ export default {
             return
         }
         try {
-            // TODO: use the db layer abstraction instead
-            const user = await DOM.getUserByEmail(req.body.email)
+            const user = await collection.getUserByEmail(req.body.email)
 
             if (!user) return res.sendStatus(404)
 
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
                 console.info('found user: ', user.email)
-                await DOM.updateUserLoginTimestamp(user.id)
+                await collection.updateUserLoginTimestamp(user.id)
                 delete user.hashedPassword
                 delete user.id
 
@@ -58,7 +57,7 @@ export default {
     getUsers: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
-            const users = await DOM.getUsers()
+            const users = await collection.getUsers()
             res.send(users)
         } catch (err) {
             console.error('error getting users: ', err)
@@ -70,7 +69,7 @@ export default {
     getUser: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
-            const user = await DOM.getOneUser(req.params.userID)
+            const user = await collection.getOneUser(req.params.userID)
             return res.send(user)
         } catch (err) {
             console.error('error getting user: ', err)
@@ -89,7 +88,7 @@ export default {
             return
         }
 
-        const isUser = await DOM.getUserByEmail(body.email)
+        const isUser = await collection.getUserByEmail(body.email)
         if (isUser) {
             res.status(409).send(`${body.email} is already registered`)
             return
@@ -97,7 +96,7 @@ export default {
 
         try {
             let hash = bcrypt.hashSync(body.password, 8)
-            const user = await DOM.createUser(body.email, hash, body.role)
+            const user = await collection.createUser(body.email, hash, body.role)
             console.info('new user created: ', user)
 
             const token = await signAccessToken({ userID: user.id })

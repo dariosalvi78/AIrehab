@@ -1,5 +1,5 @@
 
-import db from "../db.js"
+import collection from "../DOM/physiotherapistCollection.js"
 
 export default {
 
@@ -7,16 +7,13 @@ export default {
      * Get all patients for a specific physiotherapist
      */
     getPatients: async (req, res) => {
-        // if (req.user.role == 'patient') return res.sendStatus(403)
+        if (!req.user) return res.sendStatus(403)
         try {
-            const response = await db.query(`
-                SELECT p.names, p.id as patientID FROM [user] u
-                INNER JOIN [patient] p ON u.id = p.physiotherapist_id
-                WHERE u.email = '${req.user.email}';
-            `)
-            res.send(response.recordset)
+            const patients = await collection.getPatientsByEmail(req.user.email)
+            res.send(patients)
+            return
         } catch (err) {
-            console.error('error getting users: ', err)
+            console.error('error getting patients: ', err)
             res.sendStatus(500)
             return
         }
@@ -26,19 +23,12 @@ export default {
      * Get one patient for a specific physiotherapist
      */
     getPatient: async (req, res) => {
-        let user = req.body, patientID = req.params.patientID
-
+        if (!req.user || !req.params.patientID) return res.sendStatus(403)
         try {
-            const physiotherapist = await (await db.query(`SELECT id, email from [user] WHERE email = '${req.user.email}'`)).recordset[0]
-
-            const response = await db.query(`
-                SELECT p.* FROM [patient] p
-                WHERE p.id = '${patientID}'
-                AND p.physiotherapist_id = '${physiotherapist.id}';
-            `)
-            res.send(response.recordset[0])
+            const patient = await collection.getOnePatientByEmail(req.user.email, req.params.patientID)
+            res.send(patient)
         } catch (err) {
-            console.error('error getting user: ', err)
+            console.error('error getting patient: ', err)
             res.sendStatus(500)
             return
         }
@@ -47,31 +37,29 @@ export default {
     // TODO: let user complete registration using email
     // allow physiotherapist to add user for now
     addNewPatient: async (req, res) => {
-        let user = req.body
+        if (!req.user) return res.sendStatus(403)
+        let patient = req.body
 
-        const response = await db.query(`SELECT COUNT(*) as c FROM [user] WHERE email = '${user.email}';`)
-        if (response.recordset[0].c !== 0) {
-            res.status(409).send(`${user.email} is already registered`)
-            return
+        if (!patient || !patient.fullName || !patient.dateOfBirth) {
+            return res.status(400).send('Please enter required fields')
+        }
+
+        const checkIfPatient = await collection.getOnePatientByName(patient.fullName)
+        if (checkIfPatient) {
+            return res.status(409).send(`${patient.fullName} is already a patient`)
         }
 
         try {
-            const physiotherapist = await (await db.query(`SELECT id, email from [user] WHERE email = '${req.user.email}'`)).recordset[0]
+            const physiotherapist = await collection.getOneTherapistByEmail(req.user.email)
+            const addedPatient = await collection.createPatient(patient, physiotherapist.id)
 
-            const patient = await db.query(`
-                    INSERT INTO [patient] 
-                    (id, names, dateofbirth, physiotherapist_id, height, weight, injuries, createdTimestamp)
-                    OUTPUT Inserted.id, Inserted.physiotherapist_id, Inserted.createdTimestamp
-                    VALUES(NEWID(), '${user.fullName}', '${user.dateOfBirth}', '${physiotherapist.id}', '${user.height}', '${user.weight}', '${user.injuries}', CURRENT_TIMESTAMP);
-                `)
-            console.info(`assigned ${patient.recordset[0].id} to physiotherapist ${physiotherapist.email}`)
-
+            console.info(`assigned ${addedPatient.id} to physiotherapist ${physiotherapist.email}`)
             return res.status(201).json({
-                status: 'created', data: { patient: patient.recordset[0] }
+                status: 'created', data: { patient: addedPatient }
             })
         }
         catch (err) {
-            console.error('something went wrong when adding user: ', err)
+            console.error('something went wrong when adding patient: ', err)
             res.sendStatus(500)
             return
         }
