@@ -9,8 +9,13 @@ export default {
      */
     getPatients: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
+        let patients
         try {
-            const patients = await collections.physiotherapist.getPatientsByEmail(req.user.email)
+            if (req.user.role == 'admin') {
+                patients = await collections.physiotherapist.getPatients()
+            } else {
+                patients = await collections.physiotherapist.getPatientsByEmail(req.user.email)
+            }
             res.send(patients)
             return
         } catch (err) {

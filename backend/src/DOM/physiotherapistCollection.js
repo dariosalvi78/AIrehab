@@ -10,6 +10,17 @@ export const physiotherapist = {
         }
     },
     /**
+     * Get all patients, only used by admin
+     * @returns {Promise<Array.<Types.Patient>>}
+     */
+    getPatients: async function () {
+        const response = await db.query(`
+            SELECT p.* FROM [patient] p
+            ORDER BY p.id DESC;
+        `)
+        return response.recordset
+    },
+    /**
      * Get all patients for a specific physiotherapist
      * @param {Types.User["email"]} therapistEmail 
      * @returns {Promise<Array.<Types.Patient>>}
