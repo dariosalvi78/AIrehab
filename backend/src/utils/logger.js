@@ -1,8 +1,9 @@
 
 import pino from 'pino'
 import fs from 'node:fs'
+import config from './config.js'
 
-const basePath = 'logs/'
+const basePath = config.log.path
 let logger
 
 (async () => {
@@ -15,7 +16,7 @@ let logger
             transport: {
                 target: 'pino/file',
                 options: {
-                    destination: basePath + '/app.log'
+                    destination: basePath + 'app.log'
                 }
             }
         })
