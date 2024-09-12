@@ -1,14 +1,32 @@
 
-import pino, { destination } from 'pino'
+import pino from 'pino'
+import fs from 'node:fs'
 
-const logger = pino({
-    transport: {
-        target: 'pino/file',
-        options: {
-            destination: './logs/app.log'
+const basePath = 'logs/'
+let logger
+
+(async () => {
+    try {
+        if (!fs.existsSync(basePath)) {
+            fs.mkdirSync(basePath)
         }
+
+        logger = pino({
+            transport: {
+                target: 'pino/file',
+                options: {
+                    destination: basePath + '/app.log'
+                }
+            }
+        })
+
+        console.info('Starting logger')
+
+    } catch (err) {
+        console.error(err)
+        return;
     }
-})
+})()
 
 export default {
     info (data, msg) {
