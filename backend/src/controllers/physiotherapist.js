@@ -1,5 +1,5 @@
 
-import collection from "../DOM/physiotherapistCollection.js"
+import collections from "../DOM/collections.js"
 import logger from "../utils/logger.js"
 
 export default {
@@ -10,7 +10,7 @@ export default {
     getPatients: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         try {
-            const patients = await collection.getPatientsByEmail(req.user.email)
+            const patients = await collections.physiotherapist.getPatientsByEmail(req.user.email)
             res.send(patients)
             return
         } catch (err) {
@@ -26,7 +26,7 @@ export default {
     getPatient: async (req, res) => {
         if (!req.user || !req.params.patientID) return res.sendStatus(403)
         try {
-            const patient = await collection.getOnePatientByEmail(req.user.email, req.params.patientID)
+            const patient = await collections.physiotherapist.getOnePatientByEmail(req.user.email, req.params.patientID)
             res.send(patient)
         } catch (err) {
             logger.error({ error: err }, 'error getting patient: ')
@@ -45,14 +45,14 @@ export default {
             return res.status(400).send('Please enter required fields')
         }
 
-        const checkIfPatient = await collection.getOnePatientByName(patient.fullName)
+        const checkIfPatient = await collections.physiotherapist.getOnePatientByName(patient.fullName)
         if (checkIfPatient) {
             return res.status(409).send(`${patient.fullName} is already a patient`)
         }
 
         try {
-            const physiotherapist = await collection.getOneTherapistByEmail(req.user.email)
-            const addedPatient = await collection.createPatient(patient, physiotherapist.id)
+            const physiotherapist = await collections.physiotherapist.getOneTherapistByEmail(req.user.email)
+            const addedPatient = await collections.physiotherapist.createPatient(patient, physiotherapist.id)
 
             logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to physiotherapist ${physiotherapist.email}`)
             return res.status(201).json({

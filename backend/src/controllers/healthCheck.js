@@ -1,4 +1,4 @@
-import db from '../db.js'
+import db from '../db/dbDriver.js'
 
 export default async function (req, res) {
   try {

@@ -15,6 +15,9 @@ const config = {
     JWT: {
         SECRET_KEY: process.env.JWT_SECRET_KEY,
         EXPIRE: process.env.JWT_EXPIRE
+    },
+    log: {
+        path: process.env.LOG_PATH
     }
 }
 

@@ -1,12 +1,10 @@
 
-import db from "../db.js"
 import bcrypt from 'bcrypt'
 import { signAccessToken } from "../utils/tokenAuth.js"
-import collection from "../DOM/usersCollection.js"
+import collections from "../DOM/collections.js"
 import logger from "../utils/logger.js"
 
 export default {
-
     /**
      * login user, checks if user
      * has valid credentials
@@ -18,13 +16,13 @@ export default {
             return
         }
         try {
-            const user = await collection.getUserByEmail(req.body.email)
+            const user = await collections.users.getUserByEmail(req.body.email)
 
             if (!user) return res.sendStatus(404)
 
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
-                await collection.updateUserLoginTimestamp(user.id)
+                await collections.users.updateUserLoginTimestamp(user.id)
                 delete user.hashedPassword
                 delete user.id
 
@@ -58,7 +56,7 @@ export default {
     getUsers: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
-            const users = await collection.getUsers()
+            const users = await collections.users.getUsers()
             res.send(users)
         } catch (err) {
             logger.error({ error: err }, 'error getting users')
@@ -70,7 +68,7 @@ export default {
     getUser: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
-            const user = await collection.getOneUser(req.params.userID)
+            const user = await collections.users.getOneUser(req.params.userID)
             return res.send(user)
         } catch (err) {
             logger.error({ error: err }, 'error getting user')
@@ -89,7 +87,7 @@ export default {
             return
         }
 
-        const isUser = await collection.getUserByEmail(body.email)
+        const isUser = await collections.users.getUserByEmail(body.email)
         if (isUser) {
             res.status(409).send(`${body.email} is already registered`)
             return
@@ -97,7 +95,7 @@ export default {
 
         try {
             let hash = bcrypt.hashSync(body.password, 8)
-            const user = await collection.createUser(body.email, hash, body.role)
+            const user = await collections.users.createUser(body.email, hash, body.role)
             logger.info({ data: user }, 'new user created: ')
 
             const token = await signAccessToken({ userID: user.id })

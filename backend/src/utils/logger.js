@@ -34,18 +34,24 @@ export default {
         if (msg) {
             logger.info(data, msg)
             console.info(msg, data)    
+        } else {
+            console.info(data)
         }
     },
     error (data, msg) {
         if (msg) {
             logger.error(data, msg)
             console.error(msg, data)
+        } else {
+            console.error(data)
         }
     },
     debug (data, msg) {
         if (msg) {
             logger.debug(data, msg)
             console.debug(msg, data)
+        } else {
+            console.debug(data)
         }
     }
 }

@@ -9,6 +9,7 @@ import setRoutes from './routes.js'
 import config from './utils/config.js'
 import { authenticateToken, createAdmin } from './utils/tokenAuth.js'
 import cookieParser from 'cookie-parser'
+import collections from './DOM/collections.js'
 
 (async () => {
 
@@ -19,6 +20,8 @@ import cookieParser from 'cookie-parser'
     const app = express()
     app.use(helmet())
     app.use(cookieParser())
+
+    await collections.init()
 
     if (config.admin) await createAdmin()
 
