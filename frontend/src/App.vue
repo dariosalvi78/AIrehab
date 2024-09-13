@@ -1,31 +1,52 @@
 <template>
-  <router-view />
+  <router-view v-slot="{ MainLayout }">
+    <main-layout :is="MainLayout" :loggedInStatus="isloggedIn" @handle-status="handleStatus" />
+  </router-view>
 </template>
 
 <script>
 import storage from './utils/userStorage.js';
 import axios from 'axios';
+import API from './API.js';
+import MainLayout from './layouts/MainLayout.vue';
 
 export default {
+  components: { MainLayout },
   name: 'App',
-  created () {
+  data () {
+    return {
+      isloggedIn: false
+    }
+  },
+  beforeMount () {
     console.debug(`[Quasar app: ${this.$q.version}]`)
+
+    this.isloggedIn = storage.info().loggedIn
     if (!storage.info().loggedIn) {
       return this.$router.push('login')
     }
 
-    // Add a 401 response interceptor
     axios.interceptors.response.use((response) => {
       return response
     }, (err) => {
-      console.log(this.$router.currentRoute)
-      if (err.response.status === 401 && this.$router.currentRoute.value.href !== '/login') {
+      if (err.response.status === 401) {
         storage.logout()
-        console.log('test')
+        this.isloggedIn = storage.info().loggedIn
         this.$router.push('login')
+        this.$q.notify({
+          color: 'secondary',
+          position: 'top',
+          message: 'Session expired, please log in again',
+          icon: 'info'
+        })
       }
       return Promise.reject(err)
     })
+  },
+  methods: {
+    handleStatus (status) {
+      this.isloggedIn = status
+    }
   }
 }
 </script>

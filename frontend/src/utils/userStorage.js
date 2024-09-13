@@ -13,11 +13,6 @@ var user = {
   email: undefined
 }
 
-let userStorage = window.localStorage.getItem('user')
-if (userStorage) {
-  user = JSON.parse(userStorage)
-}
-
 const storage = {
   /**
    * @returns {User} User object
@@ -39,7 +34,7 @@ const storage = {
 
 
   login (newuser) {
-    user.loggedIn = true
+    user.loggedIn = newuser.user.loggedIn
     user.role = newuser.user.role
     user.email = newuser.user.email
 

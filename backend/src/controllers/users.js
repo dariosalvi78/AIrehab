@@ -23,9 +23,12 @@ export default {
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
                 await collections.users.updateUserLoginTimestamp(user.id)
-                delete user.hashedPassword
                 delete user.id
+                delete user.hashedPassword
+                delete user.createdTimestamp
+                delete user.lastLoginTimestamp
 
+                user.loggedIn = true
                 logger.debug({ data: user }, 'user logged in')
                 const token = await signAccessToken(user)
                 res.cookie('token', token)
@@ -44,9 +47,9 @@ export default {
     logout: async (req, res) => {
         try {
             if (req.user) {
-                console.info('user logged out: ', req.user)
+                logger.info('user logged out: ', req.user)
             }
-            req.cookies = null
+            res.clearCookie('token')
             return res.sendStatus(204)
         } catch (err) {
             return res.status(500).send('Cannot log out ' + req.user.email)

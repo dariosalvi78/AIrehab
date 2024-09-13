@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="mainLayout m-width">
-     <q-header v-show="isLoggedIn" elevated class="header m-width shadow-2 rounded-borders">
+     <q-header v-show="loggedInStatus" elevated class="header m-width shadow-2 rounded-borders">
         <q-toolbar>
           <q-btn flat round dense icon="menu" />
           <q-toolbar-title>Dashboard</q-toolbar-title>
@@ -20,23 +20,21 @@ import API from '../API'
 
 export default {
   name: 'MainLayout',
+  props: ['loggedInStatus'],
   data () {
     return {
-      appVersion: JSON.parse(process.env.APP_VERSION),
-      isLoggedIn: false
+      appVersion: JSON.parse(process.env.APP_VERSION)
     }
   },
-  mounted () { this.isLoggedIn = storage.info().loggedIn },
   methods: {
     async logout () {
       storage.logout()
-      this.isLoggedIn = false
+      this.handleStatus(false)
       await API.logout()
       this.$router.push('login')
     },
     handleStatus(status) { 
-      console.log('status', status)
-      this.isLoggedIn = status 
+      this.$emit('handleStatus', status)
     }
   }
 }
