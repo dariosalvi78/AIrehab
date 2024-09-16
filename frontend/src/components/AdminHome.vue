@@ -48,7 +48,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <admin-user-table :users="this.users"/>
+    <admin-user-table :users="this.users" @getUsers="getUsers()"/>
   </q-layout>
 </template>
 
@@ -104,8 +104,9 @@ export default {
       await this.getUsers()
     },
     async getUsers () {
-      let res = await API.getUsers()
-      this.users = res
+      let users = await API.getUsers()
+      let patients = await API.getPatients()
+      this.users = { therapists: users, patients: patients }
     }
   }
 }
