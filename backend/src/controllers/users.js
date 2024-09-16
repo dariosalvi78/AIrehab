@@ -28,7 +28,6 @@ export default {
                 delete user.createdTimestamp
                 delete user.lastLoginTimestamp
 
-                user.loggedIn = true
                 logger.debug({ data: user }, 'user logged in')
                 const token = await signAccessToken(user)
                 res.cookie('token', token)
@@ -108,6 +107,21 @@ export default {
         }
         catch (err) {
             logger.error({ error: err }, 'something went wrong when adding user')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    deleteUser: async (req, res) => {
+        console.log(req.user)
+        if (req.user.role !== 'admin') return res.sendStatus(403)
+        let userID = req.params.userID
+        try {
+            await collections.users.deleteOneUser(userID)
+            logger.info(`Deleted ${userID} permanently`)
+            return res.sendStatus(204)
+        } catch (err) {
+            logger.error({ error: err }, 'error deleting user: ')
             res.sendStatus(500)
             return
         }

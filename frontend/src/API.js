@@ -34,6 +34,11 @@ let API = {
         return response.data
     },
 
+    async deleteUser(userID) {
+        let response = await axios.delete(URL_PRE + '/users/' + userID, {})
+        return response.data
+    },
+
     async getPatients() {
         let response = await axios.get(URL_PRE + '/patients')
         return response.data

@@ -82,5 +82,17 @@ export const users = {
             WHERE email = '${email}';
         `)
         return response.recordset[0]
+    },
+
+    /**
+     * Delete one user
+     * @param {Types.User["id"]} userID 
+     */
+    deleteOneUser: async function (userID) {
+        const response = await db.query(`
+            DELETE u FROM [user] AS u
+            WHERE u.id = '${userID}';
+        `)
+        return response
     }
 }
