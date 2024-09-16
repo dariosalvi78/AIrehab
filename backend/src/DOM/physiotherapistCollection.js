@@ -41,10 +41,24 @@ export const physiotherapist = {
      */
     getOnePatientByEmail: async function (therapistEmail, patientID) {
         const response = await db.query(`
-            SELECT TOP 1 p.* FROM [patient] p
+            SELECT TOP 1 p.*, u.email AS therapistEmail FROM [patient] p
             INNER JOIN [user] u ON p.physiotherapistId = u.id
             WHERE p.id = '${patientID}'
             AND u.email = '${therapistEmail}';
+        `)
+        return response.recordset[0]
+    },
+
+     /**
+     * Get one patient by ID for a specific physiotherapist
+     * @param {Types.Patient["id"]} patientID 
+     * @returns {Promise<Types.Patient>}
+     */
+     getOnePatientByID: async function (patientID) {
+        const response = await db.query(`
+            SELECT TOP 1 p.*, u.email AS physiotherapistEmail FROM [patient] p
+            RIGHT JOIN [user] u ON p.physiotherapistId = u.id
+            WHERE p.id = '${patientID}'
         `)
         return response.recordset[0]
     },
@@ -105,5 +119,24 @@ export const physiotherapist = {
             AND u.id = '${therapistId}';
         `)
         return response
-    }
+    },
+
+    /**
+     * Updates one patient with new data
+     * @param {Types.Patient} patient
+     * @param {Types.User["id"]} patientID 
+     */
+    updateOnePatient: async function (patient, patientID) {
+        const response = await db.query(`
+            UPDATE p SET 
+            names = '${patient.fullName}', 
+            dateofbirth = '${patient.dateOfBirth}', 
+            height = '${patient.height}',
+            weight = '${patient.weight}',
+            injuries = '${patient.injuries}'
+            FROM [patient] p
+            WHERE p.id = '${patientID}';
+        `)
+        return response
+    },
 }

@@ -31,8 +31,13 @@ export default {
     getPatient: async (req, res) => {
         if (!req.user || !req.params.patientID) return res.sendStatus(403)
         try {
-            const patient = await collections.physiotherapist.getOnePatientByEmail(req.user.email, req.params.patientID)
-            res.send(patient)
+            let patient
+            if (req.user.role == 'physiotherapist') {
+                patient = await collections.physiotherapist.getOnePatientByEmail(req.user.email, req.params.patientID)
+            } else if (req.user.role == 'admin') {
+                patient = await collections.physiotherapist.getOnePatientByID(req.params.patientID)
+            }
+            return res.send(patient)
         } catch (err) {
             logger.error({ error: err }, 'error getting patient: ')
             res.sendStatus(500)
@@ -81,6 +86,21 @@ export default {
             return res.sendStatus(204)
         } catch (err) {
             logger.error({ error: err }, 'error deleting patient: ')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    editPatient: async (req, res) => {
+        if (req.user.role !== 'admin') return res.sendStatus(403)
+        let patient = req.body
+        try {
+            await collections.physiotherapist.updateOnePatient(patient, req.params.patientID)
+            logger.info(`updated ${req.params.patientID}`)
+            return res.sendStatus(204)
+        }
+        catch (err) {
+            logger.error({ error: err }, 'something went wrong when updating patient: ')
             res.sendStatus(500)
             return
         }

@@ -58,6 +58,11 @@ let API = {
         let response = await axios.delete(URL_PRE + '/patients/' + patientID, { data: { physiotherapistID: physiotherapistId } })
         return response.data
     },
+
+    async editPatient(fullName, dateOfBirth, height, weight, injuries, patientID) {
+        let response = await axios.put(URL_PRE + '/patients/' + patientID, { fullName, dateOfBirth, height, weight, injuries })
+        return response.data
+    },
 }
 
 export default API
