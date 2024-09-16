@@ -117,6 +117,14 @@ export default {
         if (req.user.role !== 'admin') return res.sendStatus(403)
         let userID = req.params.userID
         try {
+            let therapist = await collections.users.getOneUser(userID)
+            let patients = await collections.physiotherapist.getPatientsByEmail(therapist.email)
+
+            if (patients.length >= 1) {
+                res.status(409).send('user is assigned with patients')
+                return
+            }
+
             await collections.users.deleteOneUser(userID)
             logger.info(`Deleted ${userID} permanently`)
             return res.sendStatus(204)

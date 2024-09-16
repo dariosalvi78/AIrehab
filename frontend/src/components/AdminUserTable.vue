@@ -151,10 +151,12 @@ export default {
         })
         this.$emit('getUsers')
       } catch (err) {
+        let errMsg = err
+        if (err.response.status === 409) errMsg = err.response.data
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Cannot delete ${this.selectedUser.email}: ${err}`,
+          message: `Cannot delete ${this.selectedUser.email}: ${errMsg}`,
           icon: 'warning'
         })
         return
