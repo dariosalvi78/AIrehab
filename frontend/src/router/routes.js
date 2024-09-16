@@ -4,12 +4,21 @@ const routes = [
     redirect: '/login'
   },
   {
-    path: '/',
+    path: '/login',
+    component: () => import('components/LoginPage.vue')
+  },
+  {
+    path: '/admin',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '/login', component: () => import('components/LoginPage.vue') },
-      { path: '/admin', component: () => import('components/AdminHome.vue') },
-      { path: '/physiotherapist', component: () => import('components/PhysiotherapistHome.vue') },
+      { path: '', component: () => import('components/AdminHome.vue') }
+    ]
+  },
+  {
+    path: '/physiotherapist',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('components/PhysiotherapistHome.vue') },
       { path: '/patient', component: () => import('components/PatientHome.vue') },
     ]
   },

@@ -1,37 +1,31 @@
 <template>
-  <router-view v-slot="{ MainLayout }">
-    <main-layout :is="MainLayout" :loggedInStatus="isloggedIn" @handle-status="handleStatus" />
-  </router-view>
+  <router-view />
 </template>
 
 <script>
-import storage from './utils/userStorage.js';
 import axios from 'axios';
 import API from './API.js';
 import MainLayout from './layouts/MainLayout.vue';
+import { Cookies } from 'quasar';
 
 export default {
   components: { MainLayout },
   name: 'App',
   data () {
-    return {
-      isloggedIn: false
-    }
+    return { }
   },
   beforeMount () {
     console.debug(`[Quasar app: ${this.$q.version}]`)
 
-    this.isloggedIn = storage.info().loggedIn
-    if (!storage.info().loggedIn) {
-      return this.$router.push('login')
+    if (!Cookies.get('token')) {
+      this.$router.push('login')
     }
 
     axios.interceptors.response.use((response) => {
       return response
-    }, (err) => {
-      if (err.response.status === 401) {
-        storage.logout()
-        this.isloggedIn = storage.info().loggedIn
+    }, async (err) => {
+      if (err.response.status === 401 && !err.config.url.includes('login')) {
+        await API.logout()
         this.$router.push('login')
         this.$q.notify({
           color: 'secondary',
@@ -42,11 +36,6 @@ export default {
       }
       return Promise.reject(err)
     })
-  },
-  methods: {
-    handleStatus (status) {
-      this.isloggedIn = status
-    }
   }
 }
 </script>

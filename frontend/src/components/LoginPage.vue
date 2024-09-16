@@ -27,8 +27,6 @@
 
 <script>
 import API from '../API.js'
-import storage from '../utils/userStorage.js'
-import router from '../router/routeHandler.js'
 
 export default {
   name: 'LoginPage',
@@ -45,8 +43,6 @@ export default {
         const data = await API.login(this.email.toLowerCase(), this.password)
         console.log('user:', data)
         if (data.user) {
-          storage.login(data)
-          this.$emit('handleStatus', true)
           if (data.user.role == 'admin') this.$router.push('admin')
           else if (data.user.role == 'physiotherapist') this.$router.push('physiotherapist')
           // else if (data.user.role == 'patient') this.$router.push('patient')

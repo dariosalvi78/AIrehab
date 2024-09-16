@@ -1,13 +1,13 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="mainLayout m-width">
-     <q-header v-show="loggedInStatus" elevated class="header m-width shadow-2 rounded-borders">
+     <q-header v-show="isLoggedIn" elevated class="header m-width shadow-2 rounded-borders">
         <q-toolbar>
           <q-btn flat round dense icon="menu" />
           <q-toolbar-title>Dashboard</q-toolbar-title>
           <q-btn flat dense icon="logout" label="Logout" @click="logout()"/>
         </q-toolbar>
       </q-header>
-    <router-view @handle-status="handleStatus" />
+    <router-view />
     <q-footer elevated class="m-width primary text-white flex flex-center">
       <div>App v. {{appVersion}}</div>
     </q-footer>
@@ -15,12 +15,11 @@
 </template>
 
 <script>
-import storage from '../utils/userStorage'
 import API from '../API'
+import { Cookies } from 'quasar'
 
 export default {
   name: 'MainLayout',
-  props: ['loggedInStatus'],
   data () {
     return {
       appVersion: JSON.parse(process.env.APP_VERSION)
@@ -28,13 +27,13 @@ export default {
   },
   methods: {
     async logout () {
-      storage.logout()
-      this.handleStatus(false)
       await API.logout()
       this.$router.push('login')
     },
-    handleStatus(status) { 
-      this.$emit('handleStatus', status)
+  },
+  computed: {
+    isLoggedIn () {
+      return this.$route.path !== '/login' && Cookies.get('token')
     }
   }
 }
