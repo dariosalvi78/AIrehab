@@ -48,6 +48,11 @@ let API = {
         let response = await axios.post(URL_PRE + '/patients', { fullName, dateOfBirth, height, weight, injuries })
         return response.data
     },
+
+    async deletePatient(patientID, physiotherapistId) {
+        let response = await axios.delete(URL_PRE + '/patients/' + patientID, { data: { physiotherapistID: physiotherapistId } })
+        return response.data
+    },
 }
 
 export default API

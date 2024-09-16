@@ -69,5 +69,20 @@ export default {
             res.sendStatus(500)
             return
         }
+    },
+
+    deletePatient: async (req, res) => {
+        console.log(req.user)
+        if (!req.user || !req.params.patientID) return res.sendStatus(403)
+        let physiotherapist = req.body
+        try {
+            await collections.physiotherapist.deleteOnePatient(physiotherapist.physiotherapistID, req.params.patientID)
+            logger.info(`Deleted ${req.params.patientID} permanently`)
+            return res.sendStatus(204)
+        } catch (err) {
+            logger.error({ error: err }, 'error deleting patient: ')
+            res.sendStatus(500)
+            return
+        }
     }
 }

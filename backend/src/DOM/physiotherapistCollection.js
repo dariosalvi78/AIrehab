@@ -90,5 +90,20 @@ export const physiotherapist = {
             VALUES(NEWID(), '${patient.fullName}', '${patient.dateOfBirth}', '${therapistId}', '${patient.height}', '${patient.weight}', '${patient.injuries}', CURRENT_TIMESTAMP);
         `)
         return response.recordset[0]
+    },
+
+    /**
+     * Delete one patient, also removed for physiotherapist
+     * @param {Types.User["id"]} therapistId 
+     * @param {Types.Patient["id"]} patientID 
+     */
+    deleteOnePatient: async function (therapistId, patientID) {
+        const response = await db.query(`
+            DELETE p FROM [patient] AS p
+            INNER JOIN [user] AS u ON p.physiotherapistId = u.id
+            WHERE p.id = '${patientID}'
+            AND u.id = '${therapistId}';
+        `)
+        return response
     }
 }

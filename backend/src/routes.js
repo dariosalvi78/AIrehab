@@ -27,4 +27,5 @@ export default async (app, isAuth) => {
     app.get(`${API_PREFIX}/patients`, isAuth, physiotherapists.getPatients)
     app.get(`${API_PREFIX}/patients/:patientID`, isAuth, physiotherapists.getPatient)
     app.post(`${API_PREFIX}/patients`, isAuth, physiotherapists.addNewPatient)
+    app.delete(`${API_PREFIX}/patients/:patientID`, isAuth, physiotherapists.deletePatient)
 }
