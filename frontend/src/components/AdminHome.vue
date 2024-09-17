@@ -1,6 +1,6 @@
 <template>
   <q-layout>
-    <q-card-actions class="flex flex-center">
+    <q-card-actions class="q-pb-xl flex flex-center">
       <q-btn padding="md" color="secondary" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
         <q-icon left name="group_add"/>
         <div>Add new Physiotherapist</div>
@@ -48,6 +48,14 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <div v-if="isLoadingData" class="q-pl-lg fit row wrap justify-left">
+      <q-chip :ripple="false" outline size="md" class="col-auto" icon="person">
+        Physiotherapists: {{this.users.therapists.length}}
+      </q-chip>
+       <q-chip :ripple="false" outline size="md" class="col-auto" icon="group">
+        Patients: {{this.users.patients.length}}
+      </q-chip>
+    </div>
     <admin-user-table :users="this.users" @getUsers="getUsers()"/>
   </q-layout>
 </template>
@@ -68,7 +76,8 @@ export default {
       new: {
         role: 'physiotherapist',
         email: undefined,
-        password: undefined
+        password: undefined,
+        isLoadingData: false
       },
       optionsRadio: [
         { label: 'Physiotherapist', value: 'physiotherapist' },
@@ -76,6 +85,7 @@ export default {
     }
   },
   async created () {
+    this.isLoadingData = false
     this.newUserPrompt = false
     await this.getUsers()
   },
@@ -107,6 +117,7 @@ export default {
       let users = await API.getUsers()
       let patients = await API.getPatients()
       this.users = { therapists: users, patients: patients }
+      this.isLoadingData = true
     }
   }
 }
