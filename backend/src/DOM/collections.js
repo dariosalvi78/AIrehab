@@ -5,6 +5,7 @@ import logger from '../utils/logger.js'
 
 import { users } from './usersCollection.js'
 import { physiotherapist } from './physiotherapistCollection.js'
+import { exercises } from './exercisesCollection.js'
 
 /**
  * Initialize access methods for querying db
@@ -19,6 +20,7 @@ export default {
             // access properties for db layer
             await users.init(this.db)
             await physiotherapist.init(this.db)
+            await exercises.init(this.db)
 
         } catch (err) {
             logger.error({ error: err }, 'cannot initialize db')
@@ -28,5 +30,6 @@ export default {
     },
 
     users,
-    physiotherapist
+    physiotherapist,
+    exercises
 }
