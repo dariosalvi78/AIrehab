@@ -6,74 +6,16 @@
               <q-icon left name="group_add"/>
               <div>Add new Patient</div>
             </q-btn>
-
-            <q-dialog v-model="newUserPrompt" persistent>
-              <q-card class="q-pl-mx" style="min-width: 350px">
-                <q-card-section>
-                  <div class="text-h6">Add new patient</div>
-                  <!-- <div class="text-subtitle2">Send invitation to patient</div> -->
-                </q-card-section>
-                  <q-form class="q-px-sm">
-                  <!-- <q-input
-                    filled
-                    v-model="this.new.email"
-                    label="Email"
-                    type="email"
-                    hint="e.g. user@email.com"
-                  /> -->
-                  <q-input
-                    class="q-my-md"            
-                    filled
-                    v-model="this.new.fullName"
-                    label="Full name"
-                    type="text"
-                    hint="Patient full name"
-                  />
-                  <q-input
-                    class="q-my-md"            
-                    filled
-                    v-model="this.new.dateOfBirth"
-                    label="date"
-                    type="date"
-                    hint="Date of birth - in yyyy-mm-dd"
-                  />
-                    <q-input
-                    class="q-my-md"            
-                    filled
-                    v-model="this.new.height"
-                    label="Height (cm)"
-                    type="number"
-                    hint="Optional. Patient height"
-                  />
-                    <q-input
-                    class="q-my-md"            
-                    filled
-                    v-model="this.new.weight"
-                    label="Weight (kg)"
-                    type="number"
-                    hint="Optional. Patient weight"
-                  />
-                    <q-input
-                    class="q-my-md"            
-                    filled
-                    v-model="this.new.injuries"
-                    label="Notes"
-                    type="textarea"
-                    hint="Optional. List of injuries"
-                  />
-                </q-form>
-                <q-card-actions align="right" class="text-primary">
-                  <q-btn flat label="Cancel" v-close-popup />
-                  <q-btn label="Submit" type="submit" color="primary" v-close-popup class="q-ml-sm" @click="addNewUser()"/>
-                </q-card-actions>
-              </q-card>
-            </q-dialog>
-            
             <q-btn class="action-button" padding="md" color="teal" @click="() => openExercisePrompt()">
               <q-icon left name="accessibility" />
               <div>Exercises</div>
             </q-btn>
-
+            <patient-edit-form
+              :user="{}"
+              formMode="new" 
+              v-model="newUserPrompt" 
+              @addNewUser="addNewUser"
+            />
             <q-dialog v-model="exercisePrompt" persistent>
               <q-card class="q-pl-mx" style="min-width: 350px">
                 <q-card-section>
@@ -172,9 +114,11 @@
 <script>
 import API from '../API'
 import nicers from '../utils/nicers'
+import PatientEditForm from './PatientEditForm.vue'
 
 export default {
   name: 'PhysiotherapistHome',
+  components: { PatientEditForm },
   data () {
     return {
       newUserPrompt: false,
@@ -198,10 +142,10 @@ export default {
     await this.getPatients()
   },
   methods: {
-     async addNewUser () {
+     async addNewUser (newUser) {
       try {
-        let user = this.new
-        await API.addPatient(user.fullName, user.dateOfBirth, user.height, user.weight, user.injuries)
+        const { fullName, dateOfBirth, height, weight, injuries } = newUser
+        await API.addPatient(fullName, dateOfBirth, height, weight, injuries)
       } catch (e) {
         let errorMsg = e
         if (e.status === 409 || e.status === 400) errorMsg = e.response.data

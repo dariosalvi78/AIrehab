@@ -187,15 +187,8 @@ export default {
       }
     },
     async editPatient (edited) {
-      this.edit = {
-        fullName: edited.fullName,
-        dateOfBirth: edited.dateOfBirth, 
-        height: +edited.height,
-        weight: +edited.weight,
-        injuries: edited.injuries
-      }
       try {
-        const { fullName, dateOfBirth, height, weight, injuries } = this.edit
+        const { fullName, dateOfBirth, height, weight, injuries } = edited
         await API.editPatient(fullName, dateOfBirth, height, weight, injuries, this.selectedUser.id)
         this.$q.notify({
           color: 'secondary',

@@ -114,8 +114,15 @@ export default {
     },
     methods: {
         formSubmit () {
-            if (this.mode === 'new') this.$emit('addNewUser', this.new)
-            else if (this.mode === 'edit') this.$emit('editPatient', this.new)
+            const userSubmitted = {
+                fullName: this.new.fullName,
+                dateOfBirth: this.new.dateOfBirth, 
+                height: +this.new.height,
+                weight: +this.new.weight,
+                injuries: this.new.injuries
+            }
+            if (this.mode === 'new') this.$emit('addNewUser', userSubmitted)
+            else if (this.mode === 'edit') this.$emit('editPatient', userSubmitted)
             this.resetForm()
             return
         },
