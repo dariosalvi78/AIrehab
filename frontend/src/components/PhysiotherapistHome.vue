@@ -98,7 +98,7 @@
             <div class="text-h6">Patients list</div>
           </div>
           <q-separator inset />
-          <q-tab-panels v-show="this.users.length >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
+          <q-tab-panels v-show="users.length >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
             <q-tab-panel id="panel" name="main">
             <div class="q-pa-md flex justify-center">
               <div style="max-width: 90%; width: 300px;">
@@ -140,10 +140,10 @@
                 <q-card-section>
                   <div class="text-subtitle1">Height and weight</div>
                   <div class="text-body2">
-                    {{ selectedPatient.height }} kg
+                    {{ selectedPatient.height }} cm
                   </div>
                   <div class="text-body2">
-                    {{ selectedPatient.weight }} cm
+                    {{ selectedPatient.weight }} kg
                   </div>
                 </q-card-section>
                 <q-separator inset />
@@ -159,7 +159,7 @@
               </q-card>
             </q-tab-panel>
         </q-tab-panels>
-        <div v-if="this.users.length == 0" class="q-ma-md flex flex-center">
+        <div v-if="isLoadingPatients" class="q-ma-md flex flex-center">
           <q-spinner-dots
               color="primary"
               size="3em"
@@ -188,13 +188,14 @@ export default {
       },
       panel: undefined,
       users: [],
-      selectedPatient: undefined
+      selectedPatient: undefined,
+      isLoadingPatients: true
     }
   },
   async mounted () {
     this.resetForm()
     this.$refs.panelForm.goTo('main')
-    await this.getUsers()
+    await this.getPatients()
   },
   methods: {
      async addNewUser () {
@@ -211,12 +212,15 @@ export default {
           icon: 'report_problem'
         })
       }
-      await this.getUsers()
+      await this.getPatients()
       this.resetForm()
     },
-    async getUsers () {
+    async getPatients () {
       let res = await API.getPatients()
-      this.users = res
+      if (res) {
+        this.users = res
+        this.isLoadingPatients = false
+      }
     },
     async openExercisePrompt () {
       if (!this.users || this.users.length <= 0) {
@@ -234,7 +238,6 @@ export default {
       let resp = await API.getPatient(selectedUser.patientID)
       this.selectedPatient = resp
       this.$refs.panelForm.goTo('view')
-      // this.$router.push('view/' + e.patientID)
     },
     resetForm () {
       this.newUserPrompt = false

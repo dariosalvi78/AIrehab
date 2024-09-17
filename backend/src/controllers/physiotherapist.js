@@ -82,7 +82,7 @@ export default {
         let physiotherapist = req.body
         try {
             await collections.physiotherapist.deleteOnePatient(physiotherapist.physiotherapistID, req.params.patientID)
-            logger.info(`Deleted ${req.params.patientID} permanently`)
+            logger.info({ data: { patientID: req.params.patientID } }, 'Deleted patient permanently')
             return res.sendStatus(204)
         } catch (err) {
             logger.error({ error: err }, 'error deleting patient: ')
@@ -95,8 +95,12 @@ export default {
         if (req.user.role !== 'admin') return res.sendStatus(403)
         let patient = req.body
         try {
+            if (!patient.fullName || !patient.dateOfBirth) {
+                return res.status(400).send('Please enter required fields')
+            }
+
             await collections.physiotherapist.updateOnePatient(patient, req.params.patientID)
-            logger.info(`updated ${req.params.patientID}`)
+            logger.info({ data: { patientID: req.params.patientID } }, 'updated patient information')
             return res.sendStatus(204)
         }
         catch (err) {

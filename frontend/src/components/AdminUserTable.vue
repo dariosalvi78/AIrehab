@@ -190,8 +190,8 @@ export default {
       this.edit = {
         fullName: edited.fullName,
         dateOfBirth: edited.dateOfBirth, 
-        height: ++edited.height,
-        weight: ++edited.weight,
+        height: +edited.height,
+        weight: +edited.weight,
         injuries: edited.injuries
       }
       try {
@@ -206,12 +206,15 @@ export default {
         this.resetForm()
         this.$emit('getUsers')
       } catch (err) {
+        this.selectedUser = {}
+        let errMsg = err
+        if (err.response.status == 400) errMsg = err.response.data
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Patient update failed: ' + err,
+          message: 'Patient update failed: ' + errMsg,
           icon: 'report_problem'
-        })  
+        })
       }
     },
     resetForm () {
