@@ -61,9 +61,9 @@
 </template>
 
 <script>
-import API from '../API.js'
-import routes from '../router/routeHandler.js'
-import storage from '../utils/userStorage.js'
+import API from '../../API.js'
+import routes from '../../router/routeHandler.js'
+import storage from '../../utils/userStorage.js'
 import AdminUserTable from './AdminUserTable.vue'
 
 export default {

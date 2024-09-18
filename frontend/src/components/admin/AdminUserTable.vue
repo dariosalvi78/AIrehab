@@ -87,12 +87,12 @@
 </template>
 
 <script>
-import API from '../API.js'
-import routes from '../router/routeHandler.js'
-import storage from '../utils/userStorage.js'
-import nicers from '../utils/nicers.js'
+import API from '../../API.js'
+import routes from '../../router/routeHandler.js'
+import storage from '../../utils/userStorage.js'
+import nicers from '../../utils/nicers.js'
 import { ref } from 'vue'
-import PatientEditForm from './PatientEditForm.vue'
+import PatientEditForm from '../PatientEditForm.vue'
 
 export default {
   name: 'AdminUserTable',
