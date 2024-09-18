@@ -14,4 +14,8 @@ export default {
     formattedDateLastLogin(date) {
         return formatDate(date, 'DD MMM HH:mm')
     },
+    
+    delay (ms) {
+        return new Promise(res => setTimeout(res, ms))
+    }
 }

@@ -37,6 +37,7 @@ export default {
             } else if (req.user.role == 'admin') {
                 patient = await collections.physiotherapist.getOnePatientByID(req.params.patientID)
             }
+            if (!patient["sessionID"]) delete patient.sessionID
             return res.send(patient)
         } catch (err) {
             logger.error({ error: err }, 'error getting patient: ')

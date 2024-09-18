@@ -71,7 +71,8 @@
             </q-tab-panel>
             <q-tab-panel name="view">
               <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$refs.panelForm.goTo('main')" />        
-              <q-btn size="sm" label="Start physiotherapy session" type="submit" color="secondary" class="q-ml-md" v-close-popup  @click="startNewSession(selectedPatient)"/>
+              <q-btn v-if="!selectedPatient.sessionID" size="sm" label="Start physiotherapy session" type="submit" color="secondary" class="q-ml-md" v-close-popup  @click="startNewSession(selectedPatient)"/>
+              <q-btn v-else icon-right="open_in_new" size="sm" label="Go to ongoing session" type="submit" color="secondary" class="q-ml-md" v-close-popup  @click="navigateToSession(selectedPatient.sessionID)"/>
               <q-card flat class="q-px-md patient-view-card">
                 <q-card-section>
                   <div class="text-h6">{{selectedPatient.names}}</div>
@@ -109,11 +110,13 @@
               size="3em"
             />
         </div>
-        <q-separator inset />
-        <div class="q-pa-md q-gutter-sm flex flex-center">
-          <div class="text-h6">Ongoing sessions</div>
+        <div v-if="panel == 'main'">
+          <q-separator inset />
+          <div class="q-pa-md q-gutter-sm flex flex-center">
+            <div class="text-h6">Ongoing sessions</div>
+          </div>
+          <exercise-sessions :selectedPatient="selectedPatient" />
         </div>
-        <exercise-sessions :selectedPatient="selectedPatient" />
       </q-page-container>
   </q-layout>
 </template>
@@ -201,16 +204,31 @@ export default {
     },
     async startNewSession (selectedPatient) {
       try {
-        await API.addSession(selectedPatient.id)    
+        this.$q.loading.show()
+        let resp = await API.addSession(selectedPatient.id)
+        await nicers.delay(500)
+        if (resp.data && resp.data.session.id) {
+          this.$q.notify({
+            type: 'positive',
+            position: 'top',
+            message: 'Created new session for ' + selectedPatient.names,
+          })
+          this.navigateToSession(resp.data.session.id)
+        }
       } catch (err) {
-          return this.$q.notify({
+          this.$q.notify({
           color: 'negative',
           position: 'top',
           message: 'Creating new session failed: ' + err,
           icon: 'report_problem'
         })
       }
+      this.$q.loading.hide()
+      return
     },
+    navigateToSession (sessionID) {
+      return this.$router.push('physiotherapist/sessions/' + sessionID)
+    }
   }
 }
 </script>

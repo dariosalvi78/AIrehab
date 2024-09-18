@@ -1,5 +1,5 @@
 <template>
-  <div v-if="sessions.length >= 1" class="q-py-md">
+  <div v-if="sessions.length >= 1">
     <div class="q-pa-md flex justify-center">
       <div style="max-width: 90%; width: 300px;">
         <q-intersection
@@ -27,7 +27,7 @@
       </div>
     </div>
   </div>
-  <div v-else class="text-body1 flex flex-center">No sessions found</div>
+  <div v-else class="q-py-md text-body1 flex flex-center">No sessions found</div>
 </template>
 
 <script>
@@ -54,8 +54,7 @@ export default {
     },
 
     openSessionView (session) {
-      console.log(session)
-      this.$router.push('physiotherapist/sessions/' + session.id)
+      return this.$router.push('physiotherapist/sessions/' + session.id)
     },
 
     formatDate (date) {
