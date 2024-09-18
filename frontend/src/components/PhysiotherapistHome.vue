@@ -21,12 +21,13 @@
                 <q-card-section>
                   <div class="text-h6">Create new exercises</div>
                 </q-card-section>
-                <q-form class="q-pt-lg">
+                <q-form class="q-px-lg">
                   <q-input
+                    class="q-py-md"
                     filled
                     v-model="this.new.email"
-                    label="Email"
-                    hint="e.g. user@email.com"
+                    label="Name"
+                    hint="Name of the exercise session"
                   />
                 </q-form>
                 <q-card-actions align="right" class="text-primary">
@@ -57,7 +58,7 @@
 
                     <q-item-section>
                       <q-item-label>{{ user.names }}</q-item-label>
-                      <q-item-label caption lines="1">{{ user.email }}</q-item-label>
+                      <q-item-label caption lines="1">{{ formatDate(user.createdTimestamp) }}</q-item-label>
                     </q-item-section>
 
                     <q-item-section side>
@@ -70,6 +71,7 @@
             </q-tab-panel>
             <q-tab-panel name="view">
               <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$refs.panelForm.goTo('main')" />        
+              <q-btn size="sm" label="Start physiotherapy session" type="submit" color="secondary" class="q-ml-md" v-close-popup  @click="startNewSession(selectedPatient)"/>
               <q-card flat class="q-px-md patient-view-card">
                 <q-card-section>
                   <div class="text-h6">{{selectedPatient.names}}</div>
@@ -107,6 +109,11 @@
               size="3em"
             />
         </div>
+        <q-separator inset />
+        <div class="q-pa-md q-gutter-sm flex flex-center">
+          <div class="text-h6">Ongoing sessions</div>
+        </div>
+        <exercise-sessions :selectedPatient="selectedPatient" />
       </q-page-container>
   </q-layout>
 </template>
@@ -115,10 +122,11 @@
 import API from '../API'
 import nicers from '../utils/nicers'
 import PatientEditForm from './PatientEditForm.vue'
+import ExerciseSessions from './sessions/SessionsList.vue'
 
 export default {
   name: 'PhysiotherapistHome',
-  components: { PatientEditForm },
+  components: { PatientEditForm, ExerciseSessions },
   data () {
     return {
       newUserPrompt: false,
@@ -190,7 +198,19 @@ export default {
     },
     formatDate(date) {
       return nicers.formattedDate(date)
-    }
+    },
+    async startNewSession (selectedPatient) {
+      try {
+        await API.addSession(selectedPatient.id)    
+      } catch (err) {
+          return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Creating new session failed: ' + err,
+          icon: 'report_problem'
+        })
+      }
+    },
   }
 }
 </script>

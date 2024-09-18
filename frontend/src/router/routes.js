@@ -20,6 +20,7 @@ const routes = [
     children: [
       { path: '', component: () => import('components/PhysiotherapistHome.vue') },
       { path: '/patient', component: () => import('components/PatientHome.vue') },
+      { path: 'sessions/:sessionID', component: () => import('components/sessions/SessionViewModal.vue'), props: true },
     ]
   },
 

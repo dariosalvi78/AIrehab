@@ -63,6 +63,21 @@ let API = {
         let response = await axios.put(URL_PRE + '/patients/' + patientID, { fullName, dateOfBirth, height, weight, injuries })
         return response.data
     },
+
+    async getSessions() {
+        let response = await axios.get(URL_PRE + '/sessions', { })
+        return response.data
+    },
+
+    async getSession(sessionID) {
+        let response = await axios.get(URL_PRE + '/sessions/' + sessionID, { })
+        return response.data
+    },
+
+    async addSession(patientID) {
+        let response = await axios.post(URL_PRE + '/sessions', { }, { params: { patientID } })
+        return response.data
+    }
 }
 
 export default API

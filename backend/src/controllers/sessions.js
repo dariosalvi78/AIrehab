@@ -1,6 +1,4 @@
 
-import bcrypt from 'bcrypt'
-import { signAccessToken } from "../utils/tokenAuth.js"
 import collections from "../DOM/collections.js"
 import logger from "../utils/logger.js"
 
@@ -11,9 +9,9 @@ export default {
         let sessions
         try {
             if (req.user.role == 'admin') {
-                sessions = await collections.exercises.getSessions()
+                sessions = await collections.sessions.getSessions()
             } else if (req.user.role == 'physiotherapist') {
-                sessions = await collections.exercises.getSessionsByEmail(req.user.email)
+                sessions = await collections.sessions.getSessionsByEmail(req.user.email)
             }
             res.send(sessions)
             return
@@ -24,12 +22,25 @@ export default {
         }
     },
 
+    getSession: async (req, res) => {
+        if (!req.user || !req.params.sessionID) return res.sendStatus(403)
+        let session, sessionID = req.params.sessionID
+        try {
+            session = await collections.sessions.getSessionByID(sessionID, req.user.email)
+            return res.send(session)
+        } catch (err) {
+            logger.error({ error: err }, 'error getting session: ')
+            res.sendStatus(500)
+            return
+        }
+    },
+
     addNewSession: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let patientID = req.query.patientID
 
         try {
-            const addedSession = await collections.exercises.createSession(patientID)
+            const addedSession = await collections.sessions.createSession(patientID)
             delete addedSession.patientId
 
             logger.info({ data: addedSession }, `new session created, assigned to: ${req.user.email}`)
@@ -42,5 +53,5 @@ export default {
             res.sendStatus(500)
             return
         }
-    },
+    }
 }

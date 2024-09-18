@@ -2,11 +2,11 @@ import * as Types from '../../../datamodel/modeljdocs.mjs'
 
 let db = undefined
 
-export const exercises = {
+export const sessions = {
     init: async function (DB) {
         if (DB) {
             db = DB
-            return exercises
+            return sessions
         }
     },
 
@@ -36,6 +36,24 @@ export const exercises = {
             ORDER BY s.startTimestamp DESC;
         `)
         return response.recordset
+    },
+
+    /**
+    * Get one session for a specific patient
+    * @param {Types.PhysiotherapySession["id"]} sessionID 
+    * @param {Types.User["email"]} therapistEmail 
+    * @returns {Promise<Array.<Types.PhysiotherapySession>>}
+    */
+    getSessionByID: async function (sessionID, therapistEmail) {
+        const response = await db.query(`
+            SELECT s.*, p.names AS patientName FROM [physiotherapy_session] s
+            INNER JOIN [patient] p ON p.id = s.patientId
+            INNER JOIN [user] u ON p.physiotherapistId = u.id
+            WHERE u.email = '${therapistEmail}'
+            AND s.id = '${sessionID}'
+            ORDER BY s.startTimestamp DESC;
+        `)
+        return response.recordset[0]
     },
 
     /**
