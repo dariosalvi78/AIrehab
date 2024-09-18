@@ -78,10 +78,14 @@ export default {
     },
 
     deletePatient: async (req, res) => {
-        console.log(req.user)
-        if (!req.user || !req.params.patientID) return res.sendStatus(403)
+        if (!req.params.patientID || req.user.role !== 'admin') return res.sendStatus(403)
         let physiotherapist = req.body
         try {
+            let patient = await collections.physiotherapist.getOnePatientByID(req.params.patientID)
+            if (patient.sessionID) {
+                return res.status(409).send('Patient is part of a session')
+            }
+
             await collections.physiotherapist.deleteOnePatient(physiotherapist.physiotherapistID, req.params.patientID)
             logger.info({ data: { patientID: req.params.patientID } }, 'Deleted patient permanently')
             return res.sendStatus(204)

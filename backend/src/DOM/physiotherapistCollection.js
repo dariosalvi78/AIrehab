@@ -58,8 +58,9 @@ export const physiotherapist = {
      */
      getOnePatientByID: async function (patientID) {
         const response = await db.query(`
-            SELECT TOP 1 p.*, u.email AS physiotherapistEmail FROM [patient] p
+            SELECT TOP 1 p.*, u.email AS physiotherapistEmail, s.id AS sessionID FROM [patient] p
             RIGHT JOIN [user] u ON p.physiotherapistId = u.id
+            LEFT JOIN [physiotherapy_session] s ON p.id = s.patientId
             WHERE p.id = '${patientID}'
         `)
         return response.recordset[0]
