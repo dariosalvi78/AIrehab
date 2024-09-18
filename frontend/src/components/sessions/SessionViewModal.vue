@@ -4,19 +4,26 @@
       <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />        
        <q-card flat class="q-pa-lg">
         <q-card-section>
-          <div class="text-h6">Session for {{session.patientName}}</div>
-          <div class="text-body2">
+          <div class="text-h6">
+            Session for {{session.patientName}}
+          </div>
+          <div class="text-subtitle-1">
             <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
             {{ formatDate(session.startTimestamp) }}
           </div>
-          <div>
+          <div class="text-body2">
             {{ session.endTimestamp ? formatDate(session.endTimestamp) : 'No end date' }}
-            <!-- <q-btn
+          </div>
+          <div>
+            <!-- TODO: update end date button, disabled for now -->
+            <q-btn
+              class="q-mr-md"
               v-if="!session.endTimestamp"
               label="Set end date"
               size="sm"
               dense
               color="secondary"
+              :disabled="true" 
             >
               <q-popup-proxy>
                 <q-date
@@ -36,7 +43,8 @@
                   </template>
                 </q-date>
               </q-popup-proxy>
-            </q-btn> -->
+            </q-btn>
+            <q-btn dense label="Close session" color="negative" size="sm" icon="close" @click="closeSession"/>
           </div>
         </q-card-section>
         <q-separator inset />
@@ -82,7 +90,29 @@ export default {
           icon: 'warning'
         })
       }
-      
+    },
+    async closeSession () {
+      try {
+        this.$q.loading.show()
+        await API.deleteSession(this.sessionID)
+        await nicers.delay(500)
+        this.$q.notify({
+          color: 'info',
+          position: 'top',
+          message: 'Session has been deleted',
+          icon: 'info'
+        })
+      } catch (err) {
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Something went wrong when closing session: ' + err,
+          icon: 'warning'
+        })
+      }
+      this.$q.loading.hide()
+      this.$router.go(-1)
+      return
     },
     selectDate (date) {
       return this.formatDate(date) >= this.date.from

@@ -27,9 +27,10 @@ export const physiotherapist = {
      */
     getPatientsByEmail: async function (therapistEmail) {
         const response = await db.query(`
-            SELECT p.names, p.id as patientID FROM [user] u
+            SELECT p.names, p.id as patientID, p.createdTimestamp FROM [user] u
             INNER JOIN [patient] p ON u.id = p.physiotherapistId
-            WHERE u.email = '${therapistEmail}';
+            WHERE u.email = '${therapistEmail}'
+            ORDER BY p.createdTimestamp DESC;
         `)
         return response.recordset
     },
@@ -41,8 +42,9 @@ export const physiotherapist = {
      */
     getOnePatientByEmail: async function (therapistEmail, patientID) {
         const response = await db.query(`
-            SELECT TOP 1 p.*, u.email AS therapistEmail FROM [patient] p
+            SELECT TOP 1 p.*, u.email AS therapistEmail, s.id AS sessionID FROM [patient] p
             INNER JOIN [user] u ON p.physiotherapistId = u.id
+            LEFT JOIN [physiotherapy_session] s ON p.id = s.patientId
             WHERE p.id = '${patientID}'
             AND u.email = '${therapistEmail}';
         `)

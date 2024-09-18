@@ -53,5 +53,20 @@ export default {
             res.sendStatus(500)
             return
         }
+    },
+
+    // TODO: delete exercises assoicated with session
+    deleteSession: async (req, res) => {
+        if (!req.user || !req.params.sessionID) return res.sendStatus(403)
+        let sessionID = req.params.sessionID
+        try {
+            await collections.sessions.deleteOneSession(sessionID)
+            logger.info({ data: { sessionID } }, 'Deleted session permanently')
+            return res.sendStatus(204)
+        } catch (err) {
+            logger.error({ error: err }, 'error deleting session: ')
+            res.sendStatus(500)
+            return
+        }
     }
 }

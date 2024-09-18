@@ -69,5 +69,17 @@ export const sessions = {
             VALUES(NEWID(), '${patientID}', CURRENT_TIMESTAMP, NULL)
         `)
         return response.recordset[0]
+    },
+
+    /**
+     * Delete one session
+     * @param {Types.PhysiotherapySession["id"]} sessionID 
+     */
+    deleteOneSession: async function (sessionID) {
+        const response = await db.query(`
+            DELETE s FROM [physiotherapy_session] AS s
+            WHERE s.id = '${sessionID}';
+        `)
+        return response
     }
 }

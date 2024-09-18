@@ -35,4 +35,5 @@ export default async (app, isAuth) => {
     app.get(`${API_PREFIX}/sessions`, isAuth, sessions.getSessions)
     app.get(`${API_PREFIX}/sessions/:sessionID`, isAuth, sessions.getSession)
     app.post(`${API_PREFIX}/sessions`, isAuth, sessions.addNewSession)
+    app.delete(`${API_PREFIX}/sessions/:sessionID`, isAuth, sessions.deleteSession)
 }

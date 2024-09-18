@@ -77,6 +77,11 @@ let API = {
     async addSession(patientID) {
         let response = await axios.post(URL_PRE + '/sessions', { }, { params: { patientID } })
         return response.data
+    },
+
+    async deleteSession(sessionID) {
+        let response = await axios.delete(URL_PRE + '/sessions/' + sessionID, {})
+        return response.data
     }
 }
 
