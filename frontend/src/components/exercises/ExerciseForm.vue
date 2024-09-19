@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import exerciseEnums from '../utils/exerciseDataTypes.js'
+import exerciseEnums from '../../utils/exerciseTypesEnum.js'
 
 export default {
     name: 'ExerciseForm',
@@ -61,11 +61,15 @@ export default {
           endTimestamp: null,
           videoFile: null
         },
-        exerciseTypes: exerciseEnums.types
+        exerciseTypes: []
       }
    },
    mounted () {
     this.resetForm()
+
+    exerciseEnums.types.map((type, i) => {
+      this.exerciseTypes[i] = exerciseEnums.typeToAsc(type)
+    })
    },
    methods: {
     formSubmit () {

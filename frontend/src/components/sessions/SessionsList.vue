@@ -17,6 +17,7 @@
               <q-item-label>{{ session.names }}</q-item-label>
               <q-item-label caption>Start: {{ formatDate(session.startTimestamp) }}</q-item-label>
               <q-item-label caption>{{ session.endTimestamp ? formatDate(session.endTimestamp) : 'No end date' }}</q-item-label>
+              <q-item-label caption>{{ session.numOfExercises ?  `${session.numOfExercises} ongoing exercise(s)` : 'No exercises' }}</q-item-label>
             </q-item-section>
 
             <q-item-section side>
@@ -48,7 +49,6 @@ export default {
   updated () { },
   methods: {
     async getSessions () {
-      console.log(this.selectedPatient)
       let resp = await API.getSessions()
       this.sessions = resp
     },

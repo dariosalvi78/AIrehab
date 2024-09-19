@@ -52,28 +52,16 @@
       </q-card>
       <exercise-form 
         v-model="newExercisePrompt"
-        @newExercise="addNewExercise"
+        @newExercise="(data) => (newExercise = data)"
       />
-      <div v-if="exercises.length >= 1">
-        <div 
-          v-for="exercise in exercises" 
-          :key="exercise.id"
-        >
-        <q-card class="q-ma-lg exercise-card">
-          <q-card-section>
-              <div class="text-h6">{{ exercise.type }}</div>
-              <div class="text-body2">Start: {{ formatDate(exercise.startTimestamp) }}</div>
-          </q-card-section>
-         <q-card-section>
-              <div class="text-body2">{{ exercise.notes }}</div>
-          </q-card-section>
-        </q-card>
-        </div>
-      </div>
-      <div v-else class="flex flex-center column">
-        <div class="text-h6 q-pa-md">No exercises in session</div>
-      </div>
+      <exercises-list :sessionID="sessionID" :newExerciseData="newExercise"/>
     </q-page>
+    <div v-else-if="isloadingSession" class="q-ma-md flex flex-center">
+      <q-spinner-dots
+          color="primary"
+          size="3em"
+        />
+    </div>
     <div v-else class="q-pa-lg flex flex-center column">
       <div class="q-py-md text-h6">No session found</div>
       <q-btn color="secondary" size="md" label="Go back" icon="chevron_left" @click="this.$router.go(-1)" />
@@ -83,27 +71,27 @@
 
 <script>
 import { ref } from 'vue'
-import ExerciseForm from '../ExerciseForm.vue'
-import exerciseDataTypes from '../../utils/exerciseDataTypes'
+import ExerciseForm from '../exercises/ExerciseForm.vue'
+import ExercisesList from '../exercises/ExercisesList.vue'
 import API from '../../API'
 import nicers from '../../utils/nicers'
 
 export default {
-  name: 'ExerciseViewModal',
-  components: { ExerciseForm },
+  name: 'SessionViewModal',
+  components: { ExerciseForm, ExercisesList },
   props: { sessionID: String },
   data () {
     return {
       session: undefined,
       endDate: undefined,
       newExercisePrompt: undefined,
-      exercises: []
+      isloadingSession: true,
+      newExercise: {}
     }
   },
   async created () {
     this.resetForm()
     await this.getSessionData()
-    await this.getExercisesData()
   },
   methods: {
     async getSessionData () {
@@ -113,31 +101,14 @@ export default {
         this.endDate = this.formatDate(resp.endTimestamp)
       } catch (err) {
         this.session = undefined  
-        return this.$q.notify({
+        this.$q.notify({
           color: 'negative',
           position: 'top',
           message: err.response.status == 404 ? 'Found no session with the given ID' : 'Cannot fetch current session: ' + err,
           icon: 'warning'
         })
-      }
-    },
-      async getExercisesData () {
-      try {
-        if (this.session) {
-          let resp = await API.getExercises(this.sessionID)
-          resp.map((exercise) => {
-            exercise.type = exerciseDataTypes.typeToAsc(exercise.type)
-          })
-          this.exercises = resp
-        }
-      } catch (err) {
-        this.session = undefined  
-        return this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: 'Cannot fetch current exercises: ' + err,
-          icon: 'warning'
-        })
+        this.isloadingSession = false
+        return
       }
     },
     async submitNewEndDate () {
@@ -178,22 +149,6 @@ export default {
       this.$q.loading.hide()
       return
     },
-    async addNewExercise (newExercise) {
-      try {
-        let exercise = newExercise
-        const { startTimestamp, type, notes } = exercise
-        await API.addExercise(this.sessionID, startTimestamp, type, notes)
-      } catch (err) {
-        let errMsg = err
-        if (err.response.status == 400) errMsg = err.response.data
-         this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: 'Creating new exercise failed: ' + errMsg,
-          icon: 'report_problem'
-        })
-      }
-    },
     selectDate (date) {
       return this.formatDate(date) >= this.date.from
     },
@@ -201,9 +156,9 @@ export default {
       return nicers.formattedDate(date)
     },
     resetForm () {
-      this.exercises = []
       this.session = undefined
       this.newExercisePrompt = undefined
+      this.newExercise = {}
     }
   }
 }
