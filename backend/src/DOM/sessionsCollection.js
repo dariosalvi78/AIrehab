@@ -16,8 +16,17 @@ export const sessions = {
     */
     getSessions: async function () {
         const response = await db.query(`
-            SELECT s.*, e.id AS exerciseID FROM [physiotherapy_session] s
-            LEFT JOIN [exercise] e ON s.id = e.physiotherapySessionId
+            SELECT
+                s.id AS sessionID,
+                s.startTimestamp AS sessionStartTimestamp,
+                s.patientId,
+                COUNT(e.id) AS numOfExercises
+            FROM [physiotherapy_session] s
+                LEFT JOIN [exercise] e ON s.id = e.physiotherapySessionId
+            GROUP BY
+                s.id,
+                s.patientId,
+                s.startTimestamp
             ORDER BY s.startTimestamp DESC;
         `)
         return response.recordset
@@ -30,10 +39,21 @@ export const sessions = {
     */
     getSessionsByEmail: async function (therapistEmail) {
         const response = await db.query(`
-            SELECT s.*, p.names FROM [physiotherapy_session] s
-            INNER JOIN [patient] p ON p.id = s.patientId
-            INNER JOIN [user] u ON p.physiotherapistId = u.id
+            SELECT s.id,
+                s.startTimestamp, 
+                s.endTimestamp, 
+                CAST(p.names AS NVARCHAR(100)) names, 
+                COUNT(e.id) AS numOfExercises 
+            FROM [physiotherapy_session] s
+                INNER JOIN [patient] p ON p.id = s.patientId
+                INNER JOIN [user] u ON p.physiotherapistId = u.id
+                LEFT JOIN [exercise] e ON s.id = e.physiotherapySessionId
             WHERE u.email = '${therapistEmail}'
+            GROUP BY 
+                s.id, 
+                s.startTimestamp, 
+                s.endTimestamp, 
+                CAST(p.names AS NVARCHAR(100))
             ORDER BY s.startTimestamp DESC;
         `)
         return response.recordset
