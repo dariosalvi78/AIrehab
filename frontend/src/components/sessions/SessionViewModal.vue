@@ -1,8 +1,8 @@
 <template>
   <q-page-container class="q-pa-lg">
-    <q-page>
+    <q-page v-if="session">
       <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />        
-       <q-card flat class="q-pa-lg">
+       <q-card flat class="q-py-lg">
         <q-card-section>
           <div class="text-h6">
             Session for {{session.patientName}}
@@ -44,37 +44,101 @@
                 </q-date>
               </q-popup-proxy>
             </q-btn>
-            <q-btn dense label="Close session" color="negative" size="sm" icon="close" @click="closeSession"/>
+            <q-btn dense class="q-mr-md" label="Close session" color="negative" size="sm" icon="close" @click="closeSession"/>
+            <q-btn dense class="q-my-md" color="secondary" size="sm" label="Start new exercise" icon-right="chevron_right" @click="newExercisePrompt = !newExercisePrompt" />
           </div>
         </q-card-section>
         <q-separator inset />
       </q-card>
+      <exercise-form 
+        v-model="newExercisePrompt"
+        @newExercise="addNewExercise"
+      />
+      <div v-if="exercises.length >= 1">
+        <div 
+          v-for="exercise in exercises" 
+          :key="exercise.id"
+        >
+        <q-card class="q-ma-lg exercise-card">
+          <q-card-section>
+              <div class="text-h6">{{ exercise.type }}</div>
+              <div class="text-body2">Start: {{ formatDate(exercise.startTimestamp) }}</div>
+          </q-card-section>
+         <q-card-section>
+              <div class="text-body2">{{ exercise.notes }}</div>
+          </q-card-section>
+        </q-card>
+        </div>
+      </div>
+      <div v-else class="flex flex-center column">
+        <div class="text-h6 q-pa-md">No exercises in session</div>
+      </div>
     </q-page>
+    <div v-else class="q-pa-lg flex flex-center column">
+      <div class="q-py-md text-h6">No session found</div>
+      <q-btn color="secondary" size="md" label="Go back" icon="chevron_left" @click="this.$router.go(-1)" />
+    </div>
   </q-page-container>
 </template>
 
 <script>
 import { ref } from 'vue'
+import ExerciseForm from '../ExerciseForm.vue'
+import exerciseDataTypes from '../../utils/exerciseDataTypes'
 import API from '../../API'
 import nicers from '../../utils/nicers'
 
 export default {
   name: 'ExerciseViewModal',
+  components: { ExerciseForm },
   props: { sessionID: String },
   data () {
     return {
-      session: {},
-      endDate: undefined
+      session: undefined,
+      endDate: undefined,
+      newExercisePrompt: undefined,
+      exercises: []
     }
   },
   async created () {
+    this.resetForm()
     await this.getSessionData()
+    await this.getExercisesData()
   },
   methods: {
     async getSessionData () {
-      let resp = await API.getSession(this.sessionID)
-      this.session = resp
-      this.endDate = this.formatDate(resp.endTimestamp)
+      try {
+        let resp = await API.getSession(this.sessionID)
+        this.session = resp
+        this.endDate = this.formatDate(resp.endTimestamp)
+      } catch (err) {
+        this.session = undefined  
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: err.response.status == 404 ? 'Found no session with the given ID' : 'Cannot fetch current session: ' + err,
+          icon: 'warning'
+        })
+      }
+    },
+      async getExercisesData () {
+      try {
+        if (this.session) {
+          let resp = await API.getExercises(this.sessionID)
+          resp.map((exercise) => {
+            exercise.type = exerciseDataTypes.typeToAsc(exercise.type)
+          })
+          this.exercises = resp
+        }
+      } catch (err) {
+        this.session = undefined  
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Cannot fetch current exercises: ' + err,
+          icon: 'warning'
+        })
+      }
     },
     async submitNewEndDate () {
       try {
@@ -102,6 +166,7 @@ export default {
           message: 'Session has been deleted',
           icon: 'info'
         })
+        this.$router.go(-1)
       } catch (err) {
         this.$q.notify({
           color: 'negative',
@@ -111,14 +176,34 @@ export default {
         })
       }
       this.$q.loading.hide()
-      this.$router.go(-1)
       return
+    },
+    async addNewExercise (newExercise) {
+      try {
+        let exercise = newExercise
+        const { startTimestamp, type, notes } = exercise
+        await API.addExercise(this.sessionID, startTimestamp, type, notes)
+      } catch (err) {
+        let errMsg = err
+        if (err.response.status == 400) errMsg = err.response.data
+         this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Creating new exercise failed: ' + errMsg,
+          icon: 'report_problem'
+        })
+      }
     },
     selectDate (date) {
       return this.formatDate(date) >= this.date.from
     },
     formatDate (date) {
       return nicers.formattedDate(date)
+    },
+    resetForm () {
+      this.exercises = []
+      this.session = undefined
+      this.newExercisePrompt = undefined
     }
   }
 }

@@ -3,6 +3,7 @@ import healthcheck from "./controllers/healthCheck.js";
 import users from "./controllers/users.js";
 import physiotherapists from "./controllers/physiotherapist.js";
 import sessions from "./controllers/sessions.js";
+import exercises from "./controllers/exercises.js";
 
 const API_PREFIX = '/api'
 
@@ -36,4 +37,7 @@ export default async (app, isAuth) => {
     app.get(`${API_PREFIX}/sessions/:sessionID`, isAuth, sessions.getSession)
     app.post(`${API_PREFIX}/sessions`, isAuth, sessions.addNewSession)
     app.delete(`${API_PREFIX}/sessions/:sessionID`, isAuth, sessions.deleteSession)
+
+    app.get(`${API_PREFIX}/exercises`, isAuth, exercises.getExercises)
+    app.post(`${API_PREFIX}/exercises`, isAuth, exercises.addNewExercise)
 }

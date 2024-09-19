@@ -27,6 +27,8 @@ export default {
         let session, sessionID = req.params.sessionID
         try {
             session = await collections.sessions.getSessionByID(sessionID, req.user.email)
+            if (!session) return res.sendStatus(404)
+
             return res.send(session)
         } catch (err) {
             logger.error({ error: err }, 'error getting session: ')

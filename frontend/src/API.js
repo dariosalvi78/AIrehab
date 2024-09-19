@@ -82,7 +82,17 @@ let API = {
     async deleteSession(sessionID) {
         let response = await axios.delete(URL_PRE + '/sessions/' + sessionID, {})
         return response.data
-    }
+    },
+
+    async getExercises(sessionID) {
+        let response = await axios.get(URL_PRE + '/exercises', { params: { sessionID } })
+        return response.data
+    },
+
+    async addExercise(sessionID, startTimestamp, type, notes) {
+        let response = await axios.post(URL_PRE + '/exercises/', { sessionID, startTimestamp, type, notes })
+        return response.data
+    },
 }
 
 export default API

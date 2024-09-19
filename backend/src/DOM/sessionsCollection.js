@@ -16,7 +16,8 @@ export const sessions = {
     */
     getSessions: async function () {
         const response = await db.query(`
-            SELECT s.* FROM [physiotherapy_session] s
+            SELECT s.*, e.id AS exerciseID FROM [physiotherapy_session] s
+            LEFT JOIN [exercise] e ON s.id = e.physiotherapySessionId
             ORDER BY s.startTimestamp DESC;
         `)
         return response.recordset

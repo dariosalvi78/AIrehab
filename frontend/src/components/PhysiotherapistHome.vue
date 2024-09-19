@@ -216,7 +216,7 @@ export default {
           this.navigateToSession(resp.data.session.id)
         }
       } catch (err) {
-          this.$q.notify({
+        this.$q.notify({
           color: 'negative',
           position: 'top',
           message: 'Creating new session failed: ' + err,
