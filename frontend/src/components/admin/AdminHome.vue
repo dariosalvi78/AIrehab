@@ -56,7 +56,8 @@
         Patients: {{this.users.patients.length}}
       </q-chip>
     </div>
-    <admin-user-table :users="this.users" @getUsers="getUsers()"/>
+    <admin-user-table :users="users" @getUsers="getUsers()"/>
+    <admin-sessions-table :sessions="sessions"/>
   </q-layout>
 </template>
 
@@ -64,14 +65,16 @@
 import API from '../../API.js'
 import routes from '../../router/routeHandler.js'
 import storage from '../../utils/userStorage.js'
+import AdminSessionsTable from './AdminSessionsTable.vue'
 import AdminUserTable from './AdminUserTable.vue'
 
 export default {
-  components: { AdminUserTable },
+  components: { AdminUserTable, AdminSessionsTable },
   name: 'AdminHome',
   data () {
     return {
       users: [],
+      sessions: [],
       newUserPrompt: false,
       new: {
         role: 'physiotherapist',
@@ -88,6 +91,7 @@ export default {
     this.isLoadingData = false
     this.newUserPrompt = false
     await this.getUsers()
+    await this.getSessions()
   },
   methods: {
      async addNewUser () {
@@ -117,6 +121,11 @@ export default {
       let users = await API.getUsers()
       let patients = await API.getPatients()
       this.users = { therapists: users, patients: patients }
+      this.isLoadingData = true
+    },
+    async getSessions () {
+      let sessions = await API.getSessions()
+      this.sessions = sessions
       this.isLoadingData = true
     }
   }
