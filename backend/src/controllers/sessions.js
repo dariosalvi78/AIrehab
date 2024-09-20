@@ -62,6 +62,12 @@ export default {
         if (!req.user || !req.params.sessionID) return res.sendStatus(403)
         let sessionID = req.params.sessionID
         try {
+            const physiotherapist = await collections.users.getUserByEmail(req.user.email)
+            const checkIfExercises = await collections.exercises.getExercisesBySession(sessionID, physiotherapist.id)
+            if (checkIfExercises.length >= 1) {
+                return res.status(409).send('Session has ongoing exercises')
+            }
+
             await collections.sessions.deleteOneSession(sessionID)
             logger.info({ data: { sessionID } }, 'Deleted session permanently')
             return res.sendStatus(204)
