@@ -110,12 +110,15 @@
               size="3em"
             />
         </div>
+        <div v-else class="q-py-md text-body1 flex flex-center">
+          No patients found
+        </div>
         <div v-if="panel == 'main'">
           <q-separator inset />
           <div class="q-pa-md q-gutter-sm flex flex-center">
             <div class="text-h6">Ongoing sessions</div>
           </div>
-          <exercise-sessions :selectedPatient="selectedPatient" />
+          <sessions-list :selectedPatient="selectedPatient" />
         </div>
       </q-page-container>
   </q-layout>
@@ -125,11 +128,11 @@
 import API from '../API'
 import nicers from '../utils/nicers'
 import PatientEditForm from './PatientEditForm.vue'
-import ExerciseSessions from './sessions/SessionsList.vue'
+import SessionsList from './sessions/SessionsList.vue'
 
 export default {
   name: 'PhysiotherapistHome',
-  components: { PatientEditForm, ExerciseSessions },
+  components: { PatientEditForm, SessionsList },
   data () {
     return {
       newUserPrompt: false,
