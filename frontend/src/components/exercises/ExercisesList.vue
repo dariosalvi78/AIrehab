@@ -7,12 +7,17 @@
           :key="exercise.id"
         >
         <q-card class="q-ma-lg exercise-card">
-          <q-card-section>
+          <q-card-section class="row">
+            <div class="col-11">
               <div class="text-h6">{{ exercise.type }}</div>
               <div class="text-body2">Start: {{ exercise.startTimestamp }}</div>
+            </div>
+            <div class="col">
+              <q-btn dense color="negative" size="sm" icon="close" @click="closeExercise(exercise.id)"/>
+            </div>
           </q-card-section>
           <q-card-section>
-              <div class="text-body2">{{ exercise.notes }}</div>
+            <div class="text-body2">{{ exercise.notes }}</div>
           </q-card-section>
         </q-card>
         </div>
@@ -92,6 +97,27 @@ export default {
         })
       }
     },
+    async closeExercise (exerciseID) {
+      try {
+        await API.deleteExercise(exerciseID, this.sessionID)
+        this.$q.notify({
+            color: 'info',
+            position: 'top',
+            message: 'Deleted exercise',
+            icon: 'info'
+          })
+        return this.getExercises()     
+      } catch (err) {
+         this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Cannot delete selected exercise from session: ' + err,
+          icon: 'warning'
+        })
+        return
+      }
+   
+    }
   }
 }
 </script>

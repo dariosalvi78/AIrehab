@@ -55,4 +55,18 @@ export const exercises = {
         return response.recordset[0]
     },
 
+    /**
+     * Delete one exercise for given physiotherapy session
+     * @param {Types.Exercise["id"]} exerciseID 
+     * @param {Types.PhysiotherapySession["id"]} sessionID 
+     */
+    deleteOneExercise: async function (exerciseID, sessionID) {
+        const response = await db.query(`
+            DELETE e FROM [exercise] AS e
+            INNER JOIN [physiotherapy_session] s ON s.id = e.physiotherapySessionId
+            WHERE e.id = '${exerciseID}'
+            AND s.id = '${sessionID}';
+        `)
+        return response
+    }
 }

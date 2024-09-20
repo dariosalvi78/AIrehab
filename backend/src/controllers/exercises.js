@@ -49,5 +49,20 @@ export default {
             res.sendStatus(500)
             return
         }
-    }
+    },
+
+    // TODO: delete attachments/uploads associated with exercise
+    deleteExercise: async (req, res) => {
+        if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
+        let exerciseID = req.params.exerciseID, sessionID = req.body.sessionID
+        try {
+            await collections.exercises.deleteOneExercise(exerciseID, sessionID)
+            logger.info({ data: { exerciseID } }, 'Deleted exercise permanently')
+            return res.sendStatus(204)
+        } catch (err) {
+            logger.error({ error: err }, 'error deleting exercise: ')
+            res.sendStatus(500)
+            return
+        }
+    },
 }
