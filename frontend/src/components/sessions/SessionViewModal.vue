@@ -139,10 +139,12 @@ export default {
         })
         this.$router.go(-1)
       } catch (err) {
+        let errMsg = err
+        if (err.response && err.response.status == 409) errMsg = err.response.data
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Something went wrong when closing session: ' + err,
+          message: 'Something went wrong when closing session: ' + errMsg,
           icon: 'warning'
         })
       }

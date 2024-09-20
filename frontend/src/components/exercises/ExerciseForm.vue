@@ -1,20 +1,42 @@
 <template>
-  <q-dialog>
+  <q-dialog ref="qDialog">
     <q-card class="q-pl-mx" style="min-width: 350px">
       <q-card-section>
         <div class="text-h6">Add exercise</div>
       </q-card-section>
       <q-form class="q-px-sm">
         <q-input
+          ref="qDate"
           class="q-my-md"            
           filled
-          v-model="this.exercise.startTimestamp"
+          v-model="exercise.startTimestamp"
           label="Start date"
-          type="date"
+          mask="####-##-##"
+          :rules="[(date) => dateRestrictions(date) || 'Please enter valid date']"
           hint="When to start exercise"
-        />
+        >
+          <template v-slot:append>
+            <q-icon name="event" style="cursor:pointer;">
+              <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                <q-date 
+                  mask="YYYY-MM-DD"
+                  v-model="exercise.startTimestamp" 
+                  @update:model="() => qDateProxy.hide()" 
+                  today-btn
+                  :options="dateRestrictions"
+                >
+                <template v-slot>
+                  <div class="row items-center justify-end q-gutter-sm">
+                    <q-btn label="Confirm" color="primary" size="sm" v-close-popup />
+                  </div>
+                </template>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
         <q-select
-          class="q-my-md"         
+          class="q-my-md"
           filled
           clearable
           behavior="menu"
@@ -24,7 +46,7 @@
           hint="Optional. Type of exercise"
         />
         <q-input
-          class="q-my-md"            
+          class="q-my-md"
           filled
           v-model="this.exercise.notes"
           label="Notes"
@@ -38,7 +60,7 @@
             label="Confirm" 
             type="submit" 
             color="primary" 
-            v-close-popup class="q-ml-sm" 
+            class="q-ml-sm" 
             @click="formSubmit"
           />
       </q-card-actions>
@@ -48,6 +70,8 @@
 
 <script>
 import exerciseEnums from '../../utils/exerciseTypesEnum.js'
+import nicers from '../../utils/nicers.js'
+import { ref } from 'vue'
 
 export default {
     name: 'ExerciseForm',
@@ -61,7 +85,8 @@ export default {
           endTimestamp: null,
           videoFile: null
         },
-        exerciseTypes: []
+        exerciseTypes: [],
+        qDate: ref()
       }
    },
    mounted () {
@@ -73,6 +98,14 @@ export default {
    },
    methods: {
     formSubmit () {
+     if (this.$refs.qDate.hasError) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Please review fields and try again',
+          icon: 'report_problem'
+        })
+      }
       let submittedExercise  = {
         type: exerciseEnums.typeToAsc(this.exercise.type),
         notes: this.exercise.notes,
@@ -81,10 +114,17 @@ export default {
         videoFile: this.exercise.videoFile
       }
       this.$emit('newExercise', submittedExercise)
+      this.$refs.qDialog.hide()
       this.resetForm()
     },
     resetForm () {
       this.exercise = {}
+    },
+    formatDate (date) {
+      return nicers.formattedDate(date)
+    },
+    dateRestrictions (qDate) {
+      return nicers.formDatetimeValidation(qDate, 'exercise')
     }
    }
 }

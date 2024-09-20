@@ -1,5 +1,5 @@
 <template>
-    <q-dialog persistent>
+    <q-dialog ref="qDialog">
         <q-card class="q-pl-mx" style="min-width: 350px">
             <q-card-section>
                 <div class="text-h6">{{mode == 'new' ? 'Add new patient' : 'Edit patient'}}</div>
@@ -32,13 +32,35 @@
                 hint="Patient full name"
             />
             <q-input
-                class="q-my-md"            
-                filled
-                v-model="this.new.dateOfBirth"
-                label="Date"
-                type="date"
-                hint="Date of birth - in yyyy-mm-dd"
-            />
+              ref="qDate"
+              class="q-my-md"            
+              filled
+              v-model="this.new.dateOfBirth"
+              label="Date"
+              mask="####-##-##"
+              :rules="[(date) => dateRestrictions(date) || 'Please enter valid date']"
+              hint="Date of birth - in yyyy-mm-dd"
+            >
+              <template v-slot:append>
+                <q-icon name="event" style="cursor:pointer;">
+                <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                    <q-date 
+                      mask="YYYY-MM-DD"
+                      v-model="this.new.dateOfBirth" 
+                      @update:model="() => qDateProxy.hide()" 
+                      today-btn
+                      :options="dateRestrictions"
+                      >
+                      <template v-slot>
+                        <div class="row items-center justify-end q-gutter-sm">
+                            <q-btn label="Confirm" color="primary" size="sm" v-close-popup />
+                        </div>
+                      </template>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
             <q-input
                 class="q-my-md"            
                 filled
@@ -70,7 +92,7 @@
                 label="Submit" 
                 type="submit" 
                 color="primary" 
-                v-close-popup class="q-ml-sm" 
+                class="q-ml-sm" 
                 @click="formSubmit()"
             />
         </q-card-actions>
@@ -114,6 +136,14 @@ export default {
     },
     methods: {
         formSubmit () {
+            if (this.$refs.qDate.hasError) {
+                return this.$q.notify({
+                    color: 'negative',
+                    position: 'top',
+                    message: 'Please review fields and try again',
+                    icon: 'report_problem'
+                })
+            }
             const userSubmitted = {
                 fullName: this.new.fullName,
                 dateOfBirth: this.new.dateOfBirth, 
@@ -123,6 +153,7 @@ export default {
             }
             if (this.mode === 'new') this.$emit('addNewUser', userSubmitted)
             else if (this.mode === 'edit') this.$emit('editPatient', userSubmitted)
+            this.$refs.qDialog.hide()
             this.resetForm()
             return
         },
@@ -132,6 +163,9 @@ export default {
         resetForm () {
             this.mode = 'new'
             this.new = {}
+        },
+        dateRestrictions (qDate) {
+            return nicers.formDatetimeValidation(qDate, 'patient')
         }
     }
 }
