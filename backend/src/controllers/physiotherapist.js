@@ -14,7 +14,6 @@ export default {
     getPatients: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let patients
-        // console.log(req.query.pagination)
         try {
             if (req.user.role == 'admin') {
                 patients = await collections.physiotherapist.getPatients()
@@ -22,7 +21,6 @@ export default {
                 let results = await collections.physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
                 patients = { patients: results[0], maxPageNo: results[results.length - 1][0].maxPage }
             }
-            // console.log(patients)
             res.send(patients)
             return
         } catch (err) {

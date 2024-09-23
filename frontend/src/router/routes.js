@@ -21,6 +21,7 @@ const routes = [
       { path: '', component: () => import('components/PhysiotherapistHome.vue') },
       { path: '/patient', component: () => import('components/PatientHome.vue') },
       { path: 'sessions/:sessionID', component: () => import('components/sessions/SessionViewModal.vue'), props: true },
+      { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true }
     ]
   },
 

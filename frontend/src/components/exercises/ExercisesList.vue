@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-h5 q-ml-md">Exercises</div>
+    <div class="text-h5 q-ml-md">Exercises {{getCountExercises}}</div>
       <div v-if="exercises.length >= 1">
         <div 
           v-for="exercise in exercises" 
@@ -10,11 +10,12 @@
             <q-card class="q-ma-lg exercise-card">
               <q-card-section class="row">
                 <div class="col-11">
+                  <q-btn label="Go to exercise" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
                   <div class="text-h6">{{ exercise.type ? exercise.type : 'Exercise' }}</div>
                   <q-icon style="bottom: 2px" size="sm" name="schedule" />
                   {{ exercise.startTimestamp }}
                   <div style="margin-left:2px;">
-                    {{ exercise.endTimestamp ? exercise.endTimestamp : 'No end date' }}                    
+                    {{ exercise.endTimestamp ? exercise.endTimestamp : 'Ongoing exercise' }}
                   </div>
                 </div>
                 <div class="col">
@@ -63,6 +64,11 @@ export default {
       await this.addNewExercise()
     }
   },
+  computed: {
+    getCountExercises () {
+      return this.exercises.length >= 1 ? `(${this.exercises.length})` : ''
+    }
+  },
   methods: {
     async getExercises () {
       try {
@@ -88,17 +94,19 @@ export default {
     async addNewExercise () {
       try {
         if (this.newExerciseData && this.sessionID) {
+          this.$q.loading.show()
+          await nicers.delay(500)
           let exercise = this.newExerciseData
           const { startTimestamp, endTimestamp, type, notes, videoFile } = exercise
           let resp = await API.addExercise(this.sessionID, startTimestamp, endTimestamp, type, notes, videoFile)
-          if (resp) {
+          if (resp.data.exercise) {
             this.$q.notify({
               type: 'positive',
               position: 'top',
               message: 'Created new exercise for current session',
             })
             await this.getExercises()
-            return
+            this.navigateToExercise(resp.data.exercise.id)
           }
         }
       } catch (err) {
@@ -111,6 +119,8 @@ export default {
           icon: 'report_problem'
         })
       }
+      this.$q.loading.hide()
+      return
     },
     async closeExercise (exerciseID) {
       try {
@@ -131,8 +141,10 @@ export default {
         })
         return
       }
-   
-    }
+    },
+    navigateToExercise (exerciseID) {
+      return this.$router.push(this.sessionID + '/exercise/' + exerciseID)
+    },
   }
 }
 </script>

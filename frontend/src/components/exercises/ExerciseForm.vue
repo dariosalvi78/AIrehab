@@ -5,36 +5,6 @@
         <div class="text-h6">Add exercise</div>
       </q-card-section>
       <q-form class="q-px-sm">
-        <q-input
-          ref="qDate"
-          class="q-my-md"            
-          filled
-          v-model="exercise.startTimestamp"
-          label="Start date"
-          mask="####-##-##"
-          :rules="[(date) => dateRestrictions(date) || 'Please enter valid date']"
-          hint="When to start exercise"
-        >
-          <template v-slot:append>
-            <q-icon name="event" style="cursor:pointer;">
-              <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                <q-date 
-                  mask="YYYY-MM-DD"
-                  v-model="exercise.startTimestamp" 
-                  @update:model="() => qDateProxy.hide()" 
-                  today-btn
-                  :options="dateRestrictions"
-                >
-                <template v-slot>
-                  <div class="row items-center justify-end q-gutter-sm">
-                    <q-btn label="Confirm" color="primary" size="sm" v-close-popup />
-                  </div>
-                </template>
-                </q-date>
-              </q-popup-proxy>
-            </q-icon>
-          </template>
-        </q-input>
         <q-select
           class="q-my-md"
           filled
@@ -98,18 +68,9 @@ export default {
    },
    methods: {
     formSubmit () {
-     if (this.$refs.qDate.hasError) {
-        return this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: 'Please review fields and try again',
-          icon: 'report_problem'
-        })
-      }
       let submittedExercise  = {
         type: this.exercise.type ? exerciseEnums.typeToAsc(this.exercise.type) : '',
         notes: this.exercise.notes ? this.exercise.notes : '',
-        startTimestamp: this.exercise.startTimestamp ? this.exercise.startTimestamp : null,
         endTimestamp: null,
         videoFile: null
       }

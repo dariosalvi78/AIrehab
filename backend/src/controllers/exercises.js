@@ -45,7 +45,7 @@ export default {
         if (!req.user) return res.sendStatus(403)
         let exercise = req.body
         try {
-            if (!exercise || !exercise.startTimestamp || !exercise.sessionID) {
+            if (!exercise || !exercise.sessionID) {
                 return res.status(400).send('Please enter required fields')
             }
 
@@ -56,7 +56,7 @@ export default {
 
             logger.info({ data: addedExercise }, `new exercise created for session: ${exercise.sessionID}`)
             return res.status(201).json({
-                status: 'created', data: { session: addedExercise }
+                status: 'created', data: { exercise: addedExercise }
             })
         }
         catch (err) {

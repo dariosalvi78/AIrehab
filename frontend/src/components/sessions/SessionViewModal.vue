@@ -15,35 +15,6 @@
             {{ session.endTimestamp ? formatDate(session.endTimestamp) : 'No end date' }}
           </div>
           <div>
-            <!-- TODO: update end date button, disabled for now -->
-            <q-btn
-              class="q-mr-md"
-              v-if="!session.endTimestamp"
-              label="Set end date"
-              size="sm"
-              dense
-              color="secondary"
-              :disabled="true" 
-            >
-              <q-popup-proxy>
-                <q-date
-                  ref="datePicker"
-                  v-model="endDate"
-                  minimal
-                  :options="date => formatDate(date) >= session.startTimestamp"
-                  mask="YYYY-MM-DD"
-                  today-btn
-                >
-                  <template v-slot>
-                    <div class="row items-center justify-end q-gutter-sm">
-                      <div class="text-weight-bold">{{endDate}}</div>
-                      <q-btn label="Cancel" color="primary" size="sm" v-close-popup />
-                      <q-btn label="Confirm" color="primary" size="sm" @click="submitNewEndDate" />
-                    </div>
-                  </template>
-                </q-date>
-              </q-popup-proxy>
-            </q-btn>
             <q-btn dense class="q-mr-md" label="Close session" color="negative" size="sm" icon="close" @click="closeSession"/>
             <q-btn dense class="q-my-md" color="secondary" size="sm" label="Start new exercise" icon-right="chevron_right" @click="newExercisePrompt = !newExercisePrompt" />
           </div>
