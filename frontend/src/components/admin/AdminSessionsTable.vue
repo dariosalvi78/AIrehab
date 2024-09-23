@@ -73,7 +73,7 @@ export default {
       let sessions = rowsOfSessions
 
       sessions.map((session) => {
-        session["sessionStartTimestamp"] = nicers.formattedDateLastLogin(session["sessionStartTimestamp"])
+        session["sessionStartTimestamp"] = nicers.formattedDayOfMonth(session["sessionStartTimestamp"])
       })
 
       this.rows = sessions
@@ -85,7 +85,7 @@ export default {
       return nicers.formattedDate(date)
     },
     formatDateLastLogin (date) {
-      return nicers.formattedDateLastLogin(date)
+      return nicers.formattedDayOfMonth(date)
     },
     resetForm () {
       this.rows = []

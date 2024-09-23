@@ -11,7 +11,7 @@ export default {
     /**
     * @returns Date with format: MMM-DD HH:MM
     */
-    formattedDateLastLogin(date) {
+    formattedDayOfMonth(date) {
         return formatDate(date, 'DD MMM HH:mm')
     },
 

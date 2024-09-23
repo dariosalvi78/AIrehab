@@ -50,7 +50,9 @@ export default {
   methods: {
     async getSessions () {
       let resp = await API.getSessions()
-      this.sessions = resp
+      if (resp) {
+        this.sessions = resp
+      }
     },
 
     openSessionView (session) {
@@ -58,7 +60,7 @@ export default {
     },
 
     formatDate (date) {
-      return nicers.formattedDateLastLogin(date)
+      return nicers.formattedDayOfMonth(date)
     } 
   }
 }

@@ -50,7 +50,7 @@ export const exercises = {
             INSERT INTO [exercise] 
             (id, startTimestamp, endTimestamp, physiotherapySessionId, type, videoFile, notes)
             OUTPUT Inserted.id, Inserted.startTimestamp, Inserted.endTimestamp, Inserted.physiotherapySessionId, Inserted.type, Inserted.videoFile, Inserted.notes
-            VALUES(NEWID(), '${exercise.startTimestamp}', NULL, '${sessionID}', '${exercise.type}', '${exercise.videoFile}', '${exercise.notes}');
+            VALUES(NEWID(), '${exercise.startTimestamp}', ${exercise.endTimestamp ? `'${exercise.endTimestamp}'` : null}, '${sessionID}', '${exercise.type}', '${exercise.videoFile}', '${exercise.notes}');
         `)
         return response.recordset[0]
     },

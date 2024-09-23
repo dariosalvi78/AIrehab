@@ -107,11 +107,11 @@ export default {
         })
       }
       let submittedExercise  = {
-        type: exerciseEnums.typeToAsc(this.exercise.type),
-        notes: this.exercise.notes,
-        startTimestamp: this.exercise.startTimestamp,
-        endTimestamp: this.exercise.endTimestamp,
-        videoFile: this.exercise.videoFile
+        type: this.exercise.type ? exerciseEnums.typeToAsc(this.exercise.type) : '',
+        notes: this.exercise.notes ? this.exercise.notes : '',
+        startTimestamp: this.exercise.startTimestamp ? this.exercise.startTimestamp : null,
+        endTimestamp: null,
+        videoFile: null
       }
       this.$emit('newExercise', submittedExercise)
       this.$refs.qDialog.hide()

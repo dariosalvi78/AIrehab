@@ -10,15 +10,19 @@
             <q-card class="q-ma-lg exercise-card">
               <q-card-section class="row">
                 <div class="col-11">
-                  <div class="text-h6">{{ exercise.type }}</div>
-                  <div class="text-body2">Start: {{ exercise.startTimestamp }}</div>
+                  <div class="text-h6">{{ exercise.type ? exercise.type : 'Exercise' }}</div>
+                  <q-icon style="bottom: 2px" size="sm" name="schedule" />
+                  {{ exercise.startTimestamp }}
+                  <div style="margin-left:2px;">
+                    {{ exercise.endTimestamp ? exercise.endTimestamp : 'No end date' }}                    
+                  </div>
                 </div>
                 <div class="col">
                   <q-btn dense color="negative" size="sm" icon="close" @click="closeExercise(exercise.id)"/>
                 </div>
               </q-card-section>
               <q-card-section>
-                <div class="text-body2">{{ exercise.notes }}</div>
+                <div class="text-body2 notes">{{ exercise.notes }}</div>
               </q-card-section>
             </q-card>
           </transition>
@@ -66,7 +70,7 @@ export default {
           let resp = await API.getExercises(this.sessionID)
           resp.map((exercise) => {
             exercise.type = exerciseEnum.typeToAsc(exercise.type)
-            exercise.startTimestamp = nicers.formattedDate(exercise.startTimestamp)
+            exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
           })
           this.exercises = resp
         }
@@ -85,8 +89,8 @@ export default {
       try {
         if (this.newExerciseData && this.sessionID) {
           let exercise = this.newExerciseData
-          const { startTimestamp, type, notes } = exercise
-          let resp = await API.addExercise(this.sessionID, startTimestamp, type, notes)
+          const { startTimestamp, endTimestamp, type, notes, videoFile } = exercise
+          let resp = await API.addExercise(this.sessionID, startTimestamp, endTimestamp, type, notes, videoFile)
           if (resp) {
             this.$q.notify({
               type: 'positive',
@@ -134,5 +138,7 @@ export default {
 </script>
 
 <style scoped>
-
+.notes {
+  white-space: break-spaces;
+}
 </style>

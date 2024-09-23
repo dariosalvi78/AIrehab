@@ -133,7 +133,7 @@ export default {
       allUsers.map((user) => {
         user["createdTimestamp"] = nicers.formattedDate(user["createdTimestamp"])
         if (user.role == 'physiotherapist') {
-          user["lastLoginTimestamp"] = nicers.formattedDateLastLogin(user["lastLoginTimestamp"])
+          user["lastLoginTimestamp"] = nicers.formattedDayOfMonth(user["lastLoginTimestamp"])
         }
       })
 
@@ -146,7 +146,7 @@ export default {
       return nicers.formattedDate(date)
     },
     formatDateLastLogin (date) {
-      return nicers.formattedDateLastLogin(date)
+      return nicers.formattedDayOfMonth(date)
     },
     async onRowClick (prompt, row) {
       this.selectedUser = row
