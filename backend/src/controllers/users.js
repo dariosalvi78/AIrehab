@@ -1,4 +1,5 @@
 
+import * as Types from '../../../datamodel/modeljdocs.mjs'
 import bcrypt from 'bcrypt'
 import { signAccessToken } from "../utils/tokenAuth.js"
 import collections from "../DOM/collections.js"
@@ -6,10 +7,12 @@ import logger from "../utils/logger.js"
 
 export default {
     /**
-     * login user, checks if user
-     * has valid credentials
-     * @returns user object
-     */
+     * Login user, checks if user has valid credentials
+     * @param {Object} req - express request
+     * @param {Object} req.body user data
+     * @param {Object} res - express response
+     * @returns {Promise<Types.User>}
+    */
     login: async (req, res) => {
         if (!req.body.email || !req.body.password) {
             res.sendStatus(401)
@@ -42,7 +45,11 @@ export default {
             return
         }
     },
-
+    /**
+     * Log out user, removes token auth
+     * @param {Object} req - express request
+     * @param {Object} res - express response
+     */
     logout: async (req, res) => {
         try {
             if (req.user) {
@@ -54,7 +61,12 @@ export default {
             return res.status(500).send('Cannot log out ' + req.user.email)
         }
     },
-
+    /**
+     * Get all users
+     * @param {Object} req - express request
+     * @param {Object} res - express response
+     * @returns {Promise<Array<Types.User>>}
+     */
     getUsers: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
@@ -66,7 +78,13 @@ export default {
             return
         }
     },
-
+    /**
+     * Get one user
+     * @param {Object} req - express request
+     * @param {Object} req.params - userID
+     * @param {Object} res - express response
+     * @returns {Promise<Types.User>}
+     */
     getUser: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
@@ -80,6 +98,13 @@ export default {
     },
 
     // TODO: let user complete registration using email
+    /**
+     * Add one new user (physiotherapist)
+     * @param {Object} req - express request
+     * @param {Object} req.body - new user data
+     * @param {Object} res - express response
+     * @returns {Promise<Types.User>} added user
+     */
     addNewUser: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         let body = req.body
@@ -112,6 +137,12 @@ export default {
         }
     },
 
+    /**
+     * Delete one user
+     * @param {Object} req - express request
+     * @param {Object} req.params - userID
+     * @param {Object} res - express response
+     */
     deleteUser: async (req, res) => {
         console.log(req.user)
         if (req.user.role !== 'admin') return res.sendStatus(403)

@@ -1,9 +1,17 @@
 
+import * as Types from '../../../datamodel/modeljdocs.mjs'
 import collections from "../DOM/collections.js"
 import logger from "../utils/logger.js"
 
 export default {
 
+    /**
+     * Get all exercises in physiotherapy session
+     * @param {Object} req - express request
+     * @param {Object} req.query sessionID
+     * @param {Object} res - express response
+     * @returns {Promise<Array<Types.Exercise>>} array with exercises
+    */
     getExercises: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let exercises, sessionID = req.query.sessionID
@@ -26,6 +34,13 @@ export default {
         }
     },
 
+    /**
+     * Add one new exercise for physiotherapy session
+     * @param {Object} req - express request
+     * @param {Object} req.body new exercise data
+     * @param {Object} res - express response
+     * @returns {Promise<Types.Exercise>} added exercise
+     */
     addNewExercise: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let exercise = req.body
@@ -52,6 +67,13 @@ export default {
     },
 
     // TODO: delete attachments/uploads associated with exercise
+    /**
+     * Delete one exercise in an ongoing physiotherapy session
+     * @param {Object} req - express request
+     * @param {Object} req.params exerciseID
+     * @param {Object} req.body sessionID
+     * @param {Object} res - express response
+     */
     deleteExercise: async (req, res) => {
         if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
         let exerciseID = req.params.exerciseID, sessionID = req.body.sessionID

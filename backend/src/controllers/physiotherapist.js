@@ -1,12 +1,16 @@
-
+import * as Types from '../../../datamodel/modeljdocs.mjs'
 import collections from "../DOM/collections.js"
 import logger from "../utils/logger.js"
 
 export default {
 
     /**
-     * Get all patients for a specific physiotherapist
-     */
+    * Get all patients for a specific user (physiotherapist, admin)
+    * @param {Object} req - express request
+    * @param {Object} req.query pagination params: limit, pageNo, sortOrder
+    * @param {Object} res - express response
+    * @returns {Promise<Array<Types.Patient>>} array of patients (with maxPageNo if physiotherapist)
+    */
     getPatients: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let patients
@@ -15,7 +19,7 @@ export default {
                 patients = await collections.physiotherapist.getPatients()
             } else {
                 let results = await collections.physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
-                patients = { patients: results[0], maxPageNo: results[results.length-1][0].maxPage }
+                patients = { patients: results[0], maxPageNo: results[results.length - 1][0].maxPage }
             }
             res.send(patients)
             return
@@ -28,7 +32,11 @@ export default {
 
     /**
      * Get one patient for a specific physiotherapist
-     */
+     * @param {Object} req - express request
+     * @param {Object} req.params - patientID
+     * @param {Object} res - express response
+     * @returns {Promise<Types.Patient>}
+    */
     getPatient: async (req, res) => {
         if (!req.user || !req.params.patientID) return res.sendStatus(403)
         try {
@@ -49,6 +57,13 @@ export default {
 
     // TODO: let user complete registration using email
     // allow physiotherapist to add user for now
+    /**
+     * Add one new patient and assigns them to a physiotherapist
+     * @param {Object} req - express request
+     * @param {Object} req.body - new patient data
+     * @param {Object} res - express response
+     * @returns {Promise<Types.Patient>} added patient
+     */
     addNewPatient: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let patient = req.body
@@ -78,6 +93,13 @@ export default {
         }
     },
 
+    /**
+     * Removes one patient permanently from physiotherapist
+     * @param {Object} req - express request
+     * @param {Object} req.body - physiotherapist data for deletion
+     * @param {Object} req.params - patientID
+     * @param {Object} res - express response
+    */
     deletePatient: async (req, res) => {
         if (!req.params.patientID || req.user.role !== 'admin') return res.sendStatus(403)
         let physiotherapist = req.body
@@ -97,6 +119,13 @@ export default {
         }
     },
 
+    /**
+     * Edit data for one specific patient
+     * @param {Object} req - express request
+     * @param {Object} req.body - new patient data
+     * @param {Object} req.params - patientID
+     * @param {Object} res - express response
+    */
     editPatient: async (req, res) => {
         if (req.user.role !== 'admin') return res.sendStatus(403)
         let patient = req.body

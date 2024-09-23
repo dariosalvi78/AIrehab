@@ -63,7 +63,7 @@ export const sessions = {
     * Get one session for a specific patient
     * @param {Types.PhysiotherapySession["id"]} sessionID 
     * @param {Types.User["email"]} therapistEmail 
-    * @returns {Promise<Array.<Types.PhysiotherapySession>>}
+    * @returns {Promise<Types.PhysiotherapySession>}
     */
     getSessionByID: async function (sessionID, therapistEmail) {
         const response = await db.query(`

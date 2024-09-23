@@ -1,9 +1,16 @@
 
+import * as Types from '../../../datamodel/modeljdocs.mjs'
 import collections from "../DOM/collections.js"
 import logger from "../utils/logger.js"
 
 export default {
 
+    /**
+     * Get all ongoing physiotherapy sessions
+     * @param {Object} req - express request
+     * @param {Object} res - express response
+     * @returns {Promise<Array<Types.PhysiotherapySession>>}
+     */
     getSessions: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let sessions
@@ -22,6 +29,13 @@ export default {
         }
     },
 
+    /**
+     * Get one ongoing physiotherapy session
+     * @param {Object} req - express request
+     * @param {Object} req.params - sessionID
+     * @param {Object} res - express response
+     * @returns {Promise<Types.PhysiotherapySession>}
+     */
     getSession: async (req, res) => {
         if (!req.user || !req.params.sessionID) return res.sendStatus(403)
         let session, sessionID = req.params.sessionID
@@ -37,6 +51,13 @@ export default {
         }
     },
 
+    /**
+     * Add one new physiotherapy session for a patient
+     * @param {Object} req - express request
+     * @param {Object} req.query - patientID
+     * @param {Object} res - express response
+     * @returns {Promise<Types.PhysiotherapySession>} added session
+     */
     addNewSession: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let patientID = req.query.patientID
@@ -58,6 +79,12 @@ export default {
     },
 
     // TODO: delete exercises assoicated with session
+    /**
+     * Delete one session
+     * @param {Object} req - express request
+     * @param {Object} req.params - sessionID
+     * @param {Object} res - express response
+    */
     deleteSession: async (req, res) => {
         if (!req.user || !req.params.sessionID) return res.sendStatus(403)
         let sessionID = req.params.sessionID
