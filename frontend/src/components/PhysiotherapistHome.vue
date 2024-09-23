@@ -41,7 +41,7 @@
             <div class="text-h6">Patients list</div>
           </div>
           <q-separator inset />
-          <q-tab-panels v-show="users.length >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
+          <q-tab-panels v-show="users.length >= 1 && pagination.maxPageNo >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
             <q-tab-panel id="panel" name="main">
             <div class="q-pa-md flex justify-center">
               <div style="max-width: 90%; width: 300px;">
@@ -68,6 +68,18 @@
                 </q-intersection>
               </div>
             </div>
+            <q-pagination
+              v-if="pagination.maxPageNo >= 1"
+              v-model="pagination.pageNo"
+              :max="pagination.maxPageNo"
+              :min="1"
+              flat
+              @update:model-value="(e) => handlePagePatient(e)"
+              direction-links
+              color="grey"
+              active-color="primary"
+              class="flex flex-center"
+            />
             </q-tab-panel>
             <q-tab-panel name="view">
               <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$refs.panelForm.goTo('main')" />        
@@ -110,7 +122,7 @@
               size="3em"
             />
         </div>
-        <div v-else class="q-py-md text-body1 flex flex-center">
+        <div v-else-if="pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
           No patients found
         </div>
         <div v-if="panel == 'main'">
@@ -147,7 +159,13 @@ export default {
       panel: undefined,
       users: [],
       selectedPatient: undefined,
-      isLoadingPatients: true
+      isLoadingPatients: true,
+      pagination: {
+        limit: 5,
+        pageNo: 1,
+        sortOrder: 'DESC',
+        maxPageNo: 1
+      }
     }
   },
   async mounted () {
@@ -174,9 +192,10 @@ export default {
       this.resetForm()
     },
     async getPatients () {
-      let res = await API.getPatients()
+      let res = await API.getPatients(this.pagination)
       if (res) {
-        this.users = res
+        this.users = res.patients
+        this.pagination.maxPageNo = res.maxPageNo
         this.isLoadingPatients = false
       }
     },
@@ -231,6 +250,10 @@ export default {
     },
     navigateToSession (sessionID) {
       return this.$router.push('physiotherapist/sessions/' + sessionID)
+    },
+    async handlePagePatient (no) {
+      this.pagination.pageNo = no
+      await this.getPatients()
     }
   }
 }

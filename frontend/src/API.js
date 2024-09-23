@@ -39,8 +39,8 @@ let API = {
         return response.data
     },
 
-    async getPatients() {
-        let response = await axios.get(URL_PRE + '/patients')
+    async getPatients(pagination) {
+        let response = await axios.get(URL_PRE + '/patients', { params: { pagination: pagination } })
         return response.data
     },
 
@@ -89,8 +89,8 @@ let API = {
         return response.data
     },
 
-    async addExercise(sessionID, startTimestamp, type, notes) {
-        let response = await axios.post(URL_PRE + '/exercises/', { sessionID, startTimestamp, type, notes })
+    async addExercise(sessionID, startTimestamp, endTimestamp, type, notes, videoFile) {
+        let response = await axios.post(URL_PRE + '/exercises/', { sessionID, startTimestamp, endTimestamp, type, notes, videoFile })
         return response.data
     },
 

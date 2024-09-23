@@ -40,9 +40,9 @@
                   />
                 </template>
               </q-input>
-              <div class="flex row justify-end">
+              <!-- <div class="flex row justify-end">
                 <q-btn class="q-pr-none" flat size="sm" label="Forgot password" @click="resetPassword()" />
-              </div>
+              </div> -->
               </form>
             </q-card-section>
             <q-card-actions class="flex flex-center">

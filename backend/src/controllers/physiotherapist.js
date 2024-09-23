@@ -14,7 +14,8 @@ export default {
             if (req.user.role == 'admin') {
                 patients = await collections.physiotherapist.getPatients()
             } else {
-                patients = await collections.physiotherapist.getPatientsByEmail(req.user.email)
+                let results = await collections.physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
+                patients = { patients: results[0], maxPageNo: results[results.length-1][0].maxPage }
             }
             res.send(patients)
             return

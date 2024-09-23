@@ -16,23 +16,38 @@ export const physiotherapist = {
     getPatients: async function () {
         const response = await db.query(`
             SELECT p.* FROM [patient] p
-            ORDER BY p.id DESC;
+            ORDER BY p.createdTimestamp DESC;
         `)
         return response.recordset
     },
     /**
      * Get all patients for a specific physiotherapist
      * @param {Types.User["email"]} therapistEmail 
+     * @param {Object} pagination limit, pageNo, sortOrder
      * @returns {Promise<Array.<Types.Patient>>}
      */
-    getPatientsByEmail: async function (therapistEmail) {
+    getPatientsByEmail: async function (therapistEmail, pagination) {
         const response = await db.query(`
-            SELECT p.names, p.id as patientID, p.createdTimestamp FROM [user] u
-            INNER JOIN [patient] p ON u.id = p.physiotherapistId
-            WHERE u.email = '${therapistEmail}'
-            ORDER BY p.createdTimestamp DESC;
+            DECLARE @pageNo AS INT
+            DECLARE @maxPage AS FLOAT
+            SET @pageNo=${pagination.pageNo}
+            SELECT @maxPage = COUNT(p.id) FROM [patient] p 
+                INNER JOIN [user] u ON p.physiotherapistId = u.id
+                WHERE u.email = '${therapistEmail}'
+            SET @maxPage = CEILING(@maxPage/${pagination.limit})
+            WHILE @maxPage >= @pageNo
+            BEGIN
+                SELECT p.names, p.id as patientID, p.createdTimestamp FROM [user] u
+                INNER JOIN [patient] p ON u.id = p.physiotherapistId
+                WHERE u.email = '${therapistEmail}'
+                ORDER BY p.createdTimestamp ${pagination.sortOrder}
+                OFFSET (@pageNo-1) * ${pagination.limit} ROWS
+                FETCH NEXT ${pagination.limit} ROWS ONLY
+                SET @pageNo = @pageNo + 1
+            END
+            SELECT @maxPage AS maxPage
         `)
-        return response.recordset
+        return response.recordsets
     },
     /**
      * Get one patient for a specific physiotherapist
