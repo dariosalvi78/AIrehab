@@ -2,7 +2,7 @@
     <q-dialog ref="qDialog">
         <q-card class="q-pl-mx" style="min-width: 350px">
             <q-card-section>
-                <div class="text-h6">{{mode == 'new' ? 'Add new patient' : 'Edit patient'}}</div>
+                <div class="text-h6">{{mode == 'new' || mode == 'admin' ? 'Add new patient' : 'Edit patient'}}</div>
                 <!-- <div class="text-subtitle2">Send invitation to patient</div> -->
             </q-card-section>
             <q-card-section v-if="mode == 'edit'">
@@ -16,6 +16,14 @@
                 </div>
             </q-card-section>
             <q-form class="q-px-sm">
+            <q-input
+                v-if="mode == 'admin'"
+                filled
+                v-model="this.physiotherapistEmail"
+                label="Physiotherapist email"
+                type="email"
+                hint="e.g. user@email.com"
+            />
             <!-- <q-input
                 filled
                 v-model="this.new.email"
@@ -115,6 +123,7 @@ export default {
                 weight: undefined,
                 injuries: undefined
             },
+            physiotherapistEmail: undefined,
             mode: 'new'
         }
     },
@@ -144,14 +153,15 @@ export default {
                     icon: 'report_problem'
                 })
             }
-            const userSubmitted = {
+            let userSubmitted = {
                 fullName: this.new.fullName,
                 dateOfBirth: this.new.dateOfBirth, 
                 height: +this.new.height,
                 weight: +this.new.weight,
                 injuries: this.new.injuries
             }
-            if (this.mode === 'new') this.$emit('addNewUser', userSubmitted)
+            if (this.mode == 'admin') userSubmitted.physiotherapistEmail = this.physiotherapistEmail
+            if (this.mode === 'new' || this.mode == 'admin') this.$emit('addNewUser', userSubmitted)
             else if (this.mode === 'edit') this.$emit('editPatient', userSubmitted)
             this.$refs.qDialog.hide()
             this.resetForm()

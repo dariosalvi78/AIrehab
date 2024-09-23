@@ -29,6 +29,11 @@ let API = {
         return response.data
     },
 
+    async getUser(userID) {
+        let response = await axios.get(URL_PRE + '/users' + userID, {})
+        return response.data
+    },
+
     async addUser(role, email, password) {
         let response = await axios.post(URL_PRE + '/users', { role, email, password })
         return response.data
@@ -49,8 +54,8 @@ let API = {
         return response.data
     },
 
-    async addPatient(fullName, dateOfBirth, height, weight, injuries) {
-        let response = await axios.post(URL_PRE + '/patients', { fullName, dateOfBirth, height, weight, injuries })
+    async addPatient(fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail) {
+        let response = await axios.post(URL_PRE + '/patients', { fullName, dateOfBirth, height, weight, injuries }, { params: { physiotherapistEmail } })
         return response.data
     },
 

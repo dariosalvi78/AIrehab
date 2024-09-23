@@ -2,11 +2,20 @@
   <q-layout>
     <q-card-actions class="q-pb-xl flex flex-center">
       <q-btn padding="md" color="secondary" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
-        <q-icon left name="group_add"/>
+        <q-icon left name="person"/>
         <div>Add new Physiotherapist</div>
       </q-btn>
+      <q-btn class="action-button" padding="md" color="accent" @click="() => { this.newPatientPrompt = !this.newPatientPrompt }">
+        <q-icon left name="group_add"/>
+        <div>Add new Patient</div>
+      </q-btn>
     </q-card-actions>
-
+    <patient-edit-form
+      :user="{}"
+      formMode="admin" 
+      v-model="newPatientPrompt" 
+      @addNewUser="addNewPatient"
+    />
     <q-dialog v-model="newUserPrompt" persistent>
       <q-card class="q-pl-mx" style="min-width: 350px">
         <q-card-section>
@@ -65,17 +74,19 @@
 import API from '../../API.js'
 import routes from '../../router/routeHandler.js'
 import storage from '../../utils/userStorage.js'
+import PatientEditForm from '../PatientEditForm.vue'
 import AdminSessionsTable from './AdminSessionsTable.vue'
 import AdminUserTable from './AdminUserTable.vue'
 
 export default {
-  components: { AdminUserTable, AdminSessionsTable },
+  components: { AdminUserTable, AdminSessionsTable, PatientEditForm },
   name: 'AdminHome',
   data () {
     return {
       users: [],
       sessions: [],
       newUserPrompt: false,
+      newPatientPrompt: false,
       new: {
         role: 'physiotherapist',
         email: undefined,
@@ -99,6 +110,13 @@ export default {
         let user = this.new
         let resp = await API.addUser(user.role, user.email, user.password)
         console.log('added: ', resp)
+        if (resp) {
+          this.$q.notify({
+            type: 'positive',
+            position: 'top',
+            message: 'Physiotherapist created: ' + user.email,
+          })
+        }
       } catch (e) {
         if (e.status === 409) {
           return this.$q.notify({
@@ -112,6 +130,30 @@ export default {
           color: 'negative',
           position: 'top',
           message: 'User registration failed' + e,
+          icon: 'report_problem'
+        })
+      }
+      await this.getUsers()
+    },
+    async addNewPatient (newPatient) {
+      try {
+        const { fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail } = newPatient
+        console.log(newPatient)
+        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail)
+        if (resp) {
+          this.$q.notify({
+            type: 'positive',
+            position: 'top',
+            message: 'Patient created for ' + physiotherapistEmail,
+          })
+        }
+      } catch (e) {
+        let errorMsg = e
+        if (e.status === 404 || e.status === 400) errorMsg = e.response.data
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Patient registration failed: ' + errorMsg,
           icon: 'report_problem'
         })
       }

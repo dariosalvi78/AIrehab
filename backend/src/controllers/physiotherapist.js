@@ -14,6 +14,7 @@ export default {
     getPatients: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let patients
+        // console.log(req.query.pagination)
         try {
             if (req.user.role == 'admin') {
                 patients = await collections.physiotherapist.getPatients()
@@ -21,6 +22,7 @@ export default {
                 let results = await collections.physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
                 patients = { patients: results[0], maxPageNo: results[results.length - 1][0].maxPage }
             }
+            // console.log(patients)
             res.send(patients)
             return
         } catch (err) {
@@ -61,13 +63,13 @@ export default {
      * Add one new patient and assigns them to a physiotherapist
      * @param {Object} req - express request
      * @param {Object} req.body - new patient data
+     * @param {Object} req.query - physiotherapist email (used by admin)
      * @param {Object} res - express response
      * @returns {Promise<Types.Patient>} added patient
      */
     addNewPatient: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let patient = req.body
-
+        let patient = req.body, physiotherapist
         if (!patient || !patient.fullName || !patient.dateOfBirth) {
             return res.status(400).send('Please enter required fields')
         }
@@ -78,7 +80,12 @@ export default {
         }
 
         try {
-            const physiotherapist = await collections.physiotherapist.getOneTherapistByEmail(req.user.email)
+            if (req.user.role == 'physiotherapist') {
+                physiotherapist = await collections.physiotherapist.getOneTherapistByEmail(req.user.email)
+            } else if (req.user.role == 'admin' && req.query.physiotherapistEmail) {
+                physiotherapist = await collections.physiotherapist.getOneTherapistByEmail(req.query.physiotherapistEmail)
+                if (!physiotherapist) return res.status(404).send('No physiotherapist with given email')
+            }
             const addedPatient = await collections.physiotherapist.createPatient(patient, physiotherapist.id)
 
             logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to physiotherapist ${physiotherapist.email}`)
