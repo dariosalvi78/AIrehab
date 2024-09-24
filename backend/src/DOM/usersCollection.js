@@ -1,14 +1,9 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
+import db from '../db/dbDriver.js'
 
-let db = undefined
 
 export const users = {
-    init: async function (DB) {
-        if (DB) {
-            db = DB
-            return users
-        }
-    },
+
     /**
      * Gets all users, except admin
      * @returns {Promise<Array.<Types.User>>}

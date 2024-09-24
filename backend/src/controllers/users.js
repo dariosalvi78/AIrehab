@@ -121,6 +121,9 @@ export default {
         }
 
         try {
+            // send email to email address with the provided password
+            // await sendPhysioEmailCreated(body.email, body.password);
+
             let hash = bcrypt.hashSync(body.password, 8)
             const user = await collections.users.createUser(body.email, hash, body.role)
             logger.info({ data: user }, 'new user created: ')

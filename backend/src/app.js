@@ -9,7 +9,9 @@ import setRoutes from './routes.js'
 import config from './utils/config.js'
 import { authenticateToken, createAdmin } from './utils/tokenAuth.js'
 import cookieParser from 'cookie-parser'
-import collections from './DOM/collections.js'
+import connection from '../db/dbConnection.js'
+import db from '../db/dbDriver.js'
+
 
 (async () => {
 
@@ -21,7 +23,7 @@ import collections from './DOM/collections.js'
     app.use(helmet())
     app.use(cookieParser())
 
-    await collections.init()
+    await db.init(connection.msSQLConnection)
 
     if (config.admin) await createAdmin()
 
