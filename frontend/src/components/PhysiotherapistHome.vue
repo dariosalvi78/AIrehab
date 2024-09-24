@@ -45,6 +45,12 @@
             <q-tab-panel id="panel" name="main">
             <div class="q-pa-md flex justify-center">
               <div style="max-width: 90%; width: 300px;">
+                <q-btn style="marginLeft:2px;" color="grey-8" flat fab-mini :ripple="false" 
+                    :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
+                    v-touch-repeat.mouse="handleSortOrder"
+                >
+                <q-icon name="calendar_month" />
+                </q-btn>
                 <q-intersection
                   v-for="user in users"
                   :key="user.id"
@@ -253,6 +259,13 @@ export default {
     },
     async handlePagePatient (no) {
       this.pagination.pageNo = no
+      await this.getPatients()  
+    },
+    async handleSortOrder () {
+      this.pagination.sortOrder == 'DESC' 
+        ? this.pagination.sortOrder = 'ASC' 
+        : this.pagination.sortOrder = 'DESC'
+
       await this.getPatients()
     }
   }

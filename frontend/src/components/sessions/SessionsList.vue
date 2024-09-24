@@ -10,7 +10,7 @@
         >
           <q-item clickable v-ripple @click="(e) => openSessionView(session)">
             <q-item-section avatar>
-              <q-avatar color="secondary" text-color="white" icon="accessibility" />        
+              <q-avatar color="secondary" text-color="white" icon="accessibility" />
             </q-item-section>
 
             <q-item-section>
@@ -49,6 +49,7 @@ export default {
   updated () { },
   methods: {
     async getSessions () {
+      console.log(this.selectedPatient)
       let resp = await API.getSessions()
       if (resp) {
         this.sessions = resp
@@ -56,6 +57,7 @@ export default {
     },
 
     openSessionView (session) {
+      console.log(session)
       return this.$router.push('physiotherapist/sessions/' + session.id)
     },
 
