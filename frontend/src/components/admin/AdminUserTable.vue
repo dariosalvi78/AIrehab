@@ -1,5 +1,13 @@
   <template>
   <div>
+     <div v-if="!isLoadingUsers" class="q-pl-lg fit row wrap justify-left">
+      <q-chip :ripple="false" outline size="md" class="col-auto" icon="person">
+        Physiotherapists: {{this.users.therapists.length}}
+      </q-chip>
+       <q-chip :ripple="false" outline size="md" class="col-auto" icon="group">
+        Patients: {{this.users.patients.length}}
+      </q-chip>
+    </div>
     <q-table 
       class="q-ma-lg" 
       title="Users"
@@ -97,6 +105,7 @@ import PatientEditForm from '../PatientEditForm.vue'
 export default {
   name: 'AdminUserTable',
   props: { users: Object },
+  emits: ['getUsers'],
   components: { PatientEditForm },
   data () {
     return {
@@ -137,7 +146,7 @@ export default {
         }
       })
 
-      this.rows = allUsers 
+      this.rows = allUsers
       this.isLoadingUsers = false
     }
   },

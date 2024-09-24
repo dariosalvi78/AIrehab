@@ -1,8 +1,16 @@
   <template>
   <div>
+    <div v-if="!isLoadingSessions" class="q-pl-lg fit row wrap justify-left">
+      <q-chip :ripple="false" outline size="md" class="col-auto" icon="person">
+        Physiotherapy sessions: {{this.rows.length}}
+      </q-chip>
+       <q-chip :ripple="false" outline size="md" class="col-auto" icon="group">
+        Exercises: {{this.exercisesTotal}}
+      </q-chip>
+    </div>
     <q-table 
       class="q-ma-lg" 
-      title="Sessions"
+      title="Physiotherapy Sessions"
       :rows="rows"
       :columns="columns"
       row-key="sessionid"
@@ -25,6 +33,17 @@
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td auto-width>
+            <q-btn-dropdown :ripple="false" rounded flat size="sm" menu-anchor="center right" menu-self="center left">
+              <q-item clickable v-close-popup @click="onRowClick(props.row)">
+                <q-item-section avatar>
+                  <q-avatar icon="accessibility" size="lg"/>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Delete</q-item-label>
+                  <q-item-label caption>Delete session {{props.row.sessionID}}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-btn-dropdown>
           </q-td>
           <q-td key="sessionid" name="sessionid" :props="props">
             {{ props.row.sessionID }}
@@ -38,6 +57,21 @@
         </q-tr>
       </template>
     </q-table>
+    <q-dialog v-model="openSessionDeletePrompt">
+      <q-card class="q-pl-mx" style="min-width: 350px">
+        <q-card-section>
+          <div class="text-body1">Delete physiotherapy session</div>
+          <div class="text-body2">
+            <div><b>- ID:</b> {{selectedSession.sessionID}}</div>
+            <div><b>- Created:</b> {{selectedSession.sessionStartTimestamp}}</div>
+          </div>
+        </q-card-section>
+        <q-card-actions align="center">
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn label="Delete" type="submit" color="negative" v-close-popup class="q-ml-sm" @click="deleteSession"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <div v-if="isLoadingSessions" class="q-ma-md flex flex-center">
       <q-separator inset />
         <q-spinner-dots
@@ -49,11 +83,13 @@
 </template>
 
 <script>
+import API from '../../API.js'
 import nicers from '../../utils/nicers.js'
 
 export default {
   name: 'AdminSessionTable',
   props: { sessions: Object },
+  emits: ['getSessions'],
   data () {
     return {
       columns: [
@@ -62,7 +98,10 @@ export default {
         { name: 'sessionStartTimestamp', align:'left' , label: 'Created', field: 'sessionStartTimestamp', sortable: true }
       ],
       rows: [],
-      isLoadingSessions: true
+      exercisesTotal: 0,
+      isLoadingSessions: true,
+      openSessionDeletePrompt: false,
+      selectedSession: {}
     }
   },
   mounted () {
@@ -70,10 +109,12 @@ export default {
   },
   watch: {
     sessions(rowsOfSessions) { 
+      this.exercisesTotal = 0
       let sessions = rowsOfSessions
 
       sessions.map((session) => {
         session["sessionStartTimestamp"] = nicers.formattedDayOfMonth(session["sessionStartTimestamp"])
+        this.exercisesTotal += session.numOfExercises
       })
 
       this.rows = sessions
@@ -81,6 +122,34 @@ export default {
     }
   },
   methods: {
+    async onRowClick (row) {
+      this.selectedSession = row
+      this.openSessionDeletePrompt = !this.openSessionDeletePrompt
+    },
+    async deleteSession () {
+      let deletedSession = this.selectedSession
+      try {
+        if (deletedSession.numOfExercises >= 1) throw new Error('Session has ongoing exercises')
+        await API.deleteSession(deletedSession.sessionID)
+        this.$q.notify({
+          color: 'info',
+          position: 'top',
+          message: 'Deleted selected session',
+          icon: 'info'
+        })
+        this.$emit('getSessions')
+      } catch (err) {
+        let errMsg = err
+        if (err.response && err.response.status === 409) errMsg = err.response.data
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: `Cannot delete session: ${errMsg}`,
+          icon: 'warning'
+        })
+        return
+      }
+    },
     formatDate (date) {
       return nicers.formattedDate(date)
     },
@@ -89,7 +158,8 @@ export default {
     },
     resetForm () {
       this.rows = []
-      this.selectedUser = {}
+      this.selectedSession = {}
+      this.exercisesTotal = 0
       this.isLoadingSessions = true
     }
   }

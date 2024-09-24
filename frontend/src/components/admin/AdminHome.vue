@@ -16,7 +16,7 @@
       v-model="newPatientPrompt" 
       @addNewUser="addNewPatient"
     />
-    <q-dialog v-model="newUserPrompt" persistent>
+    <q-dialog v-model="newUserPrompt">
       <q-card class="q-pl-mx" style="min-width: 350px">
         <q-card-section>
           <div class="text-h6">New Physiotherapist</div>
@@ -57,16 +57,14 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <div v-if="isLoadingData" class="q-pl-lg fit row wrap justify-left">
-      <q-chip :ripple="false" outline size="md" class="col-auto" icon="person">
-        Physiotherapists: {{this.users.therapists.length}}
-      </q-chip>
-       <q-chip :ripple="false" outline size="md" class="col-auto" icon="group">
-        Patients: {{this.users.patients.length}}
-      </q-chip>
-    </div>
-    <admin-user-table :users="users" @getUsers="getUsers()"/>
-    <admin-sessions-table :sessions="sessions"/>
+    <admin-user-table 
+      :users="users" 
+      @getUsers="getUsers()"
+    />
+    <admin-sessions-table 
+      :sessions="sessions" 
+      @getSessions="getSessions()"
+    />
   </q-layout>
 </template>
 
@@ -90,8 +88,7 @@ export default {
       new: {
         role: 'physiotherapist',
         email: undefined,
-        password: undefined,
-        isLoadingData: false
+        password: undefined
       },
       optionsRadio: [
         { label: 'Physiotherapist', value: 'physiotherapist' },
@@ -99,7 +96,6 @@ export default {
     }
   },
   async created () {
-    this.isLoadingData = false
     this.newUserPrompt = false
     await this.getUsers()
     await this.getSessions()
@@ -109,7 +105,6 @@ export default {
       try {
         let user = this.new
         let resp = await API.addUser(user.role, user.email, user.password)
-        console.log('added: ', resp)
         if (resp) {
           this.$q.notify({
             type: 'positive',
@@ -138,7 +133,6 @@ export default {
     async addNewPatient (newPatient) {
       try {
         const { fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail } = newPatient
-        console.log(newPatient)
         let resp = await API.addPatient(fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail)
         if (resp) {
           this.$q.notify({
@@ -160,15 +154,31 @@ export default {
       await this.getUsers()
     },
     async getUsers () {
-      let users = await API.getUsers()
-      let patients = await API.getPatients()
-      this.users = { therapists: users, patients: patients }
-      this.isLoadingData = true
+      try {
+        let users = await API.getUsers()
+        let patients = await API.getPatients()
+        this.users = { therapists: users, patients: patients }
+      } catch (err) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: `Error retrieving users table: ${err}`,
+          icon: 'warning'
+        })
+      }
     },
     async getSessions () {
-      let sessions = await API.getSessions()
-      this.sessions = sessions
-      this.isLoadingData = true
+      try {
+        let sessions = await API.getSessions()
+        this.sessions = sessions
+      } catch (err) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: `Error retrieving sessions table: ${err}`,
+          icon: 'warning'
+        })
+      }
     }
   }
 }
