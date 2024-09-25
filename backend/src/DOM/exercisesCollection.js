@@ -1,14 +1,7 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
+import db from '../db/dbDriver.js'
 
-let db = undefined
-
-export const exercises = {
-    init: async function (DB) {
-        if (DB) {
-            db = DB
-            return exercises
-        }
-    },
+export default {
     /**
      * Get all exercises
      * @returns {Promise<Array.<Types.Exercise>>}

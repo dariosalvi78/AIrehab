@@ -1,6 +1,8 @@
 
 import * as Types from '../../../datamodel/modeljdocs.mjs'
-import collections from "../DOM/collections.js"
+import sessions from "../DOM/physiotherapySessionCollection.js"
+import users from "../DOM/usersCollection.js"
+import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
 
 export default {
@@ -13,14 +15,14 @@ export default {
      */
     getSessions: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let sessions
+        let results
         try {
             if (req.user.role == 'admin') {
-                sessions = await collections.sessions.getSessions()
+                results = await sessions.getSessions()
             } else if (req.user.role == 'physiotherapist') {
-                sessions = await collections.sessions.getSessionsByEmail(req.user.email)
+                results = await sessions.getSessionsByEmail(req.user.email)
             }
-            res.send(sessions)
+            res.send(results)
             return
         } catch (err) {
             logger.error({ error: err }, 'error getting sessions: ')
@@ -40,7 +42,7 @@ export default {
         if (!req.user || !req.params.sessionID) return res.sendStatus(403)
         let session, sessionID = req.params.sessionID
         try {
-            session = await collections.sessions.getSessionByID(sessionID, req.user.email)
+            session = await sessions.getSessionByID(sessionID, req.user.email)
             if (!session) return res.sendStatus(404)
 
             return res.send(session)
@@ -63,7 +65,7 @@ export default {
         let patientID = req.query.patientID
 
         try {
-            const addedSession = await collections.sessions.createSession(patientID)
+            const addedSession = await sessions.createSession(patientID)
             delete addedSession.patientId
 
             logger.info({ data: addedSession }, `new session created, assigned to: ${req.user.email}`)
@@ -90,13 +92,13 @@ export default {
         let sessionID = req.params.sessionID
         try {
             if (req.user.role == 'physiotherapist') {
-                const physiotherapist = await collections.users.getUserByEmail(req.user.email)
-                const checkIfExercises = await collections.exercises.getExercisesBySession(sessionID, physiotherapist.id)    
+                const physiotherapist = await users.getUserByEmail(req.user.email)
+                const checkIfExercises = await exercises.getExercisesBySession(sessionID, physiotherapist.id)    
                 if (checkIfExercises.length >= 1) {
                     return res.status(409).send('Session has ongoing exercises')
                 }
             }
-            await collections.sessions.deleteOneSession(sessionID)
+            await sessions.deleteOneSession(sessionID)
             logger.info({ data: { sessionID } }, 'Deleted session permanently')
             return res.sendStatus(204)
         } catch (err) {
@@ -104,5 +106,26 @@ export default {
             res.sendStatus(500)
             return
         }
-    }
+    },
+
+    editSession: async (req, res) => {
+        if (!req.user) return res.sendStatus(403)
+        let session = req.body.data, sessionID = req.params.sessionID
+
+        try {
+            console.log(sessionID, session)
+            // const addedSession = await sessions.createSession(patientID)
+            // delete addedSession.patientId
+
+            // logger.info({ data: addedSession }, `new session created, assigned to: ${req.user.email}`)
+            // return res.status(201).json({
+            //     status: 'created', data: { session: addedSession }
+            // })
+        }
+        catch (err) {
+            logger.error({ error: err }, 'something went wrong when editing session: ')
+            res.sendStatus(500)
+            return
+        }
+    },
 }

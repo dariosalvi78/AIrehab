@@ -1,14 +1,7 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
+import db from '../db/dbDriver.js'
 
-let db = undefined
-
-export const physiotherapist = {
-    init: async function (DB) {
-        if (DB) {
-            db = DB
-            return physiotherapist
-        }
-    },
+export default {
     /**
      * Get all patients, only used by admin
      * @returns {Promise<Array.<Types.Patient>>}
@@ -88,9 +81,11 @@ export const physiotherapist = {
      */
     getOneTherapistByEmail: async function (therapistEmail) {
         const response = await db.query(`
-            SELECT TOP 1 u.* FROM [user] u
+            SELECT TOP 1 u.*, COUNT(p.id) AS numOfPatients FROM [user] u
+            LEFT JOIN [patient] p ON p.physiotherapistId = u.id
             WHERE u.email = '${therapistEmail}'
-            AND u.role = 'physiotherapist';
+            AND u.role = 'physiotherapist'
+            GROUP BY u.email, u.id, u.hashedPassword, u.role, u.createdTimestamp, u.lastloginTimestamp;
         `)
         return response.recordset[0]
     },

@@ -1,6 +1,7 @@
 
 import * as Types from '../../../datamodel/modeljdocs.mjs'
-import collections from "../DOM/collections.js"
+import exercises from "../DOM/exercisesCollection.js"
+import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
 
 export default {
@@ -14,18 +15,18 @@ export default {
     */
     getExercises: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let exercises, sessionID = req.query.sessionID
+        let results, sessionID = req.query.sessionID
         try {
             if (req.user.role == 'admin') {
-                exercises = await collections.exercises.getExercises()
+                results = await exercises.getExercises()
             } else if (req.user.role == 'physiotherapist' && sessionID) {
-                let physiotherapist = await collections.physiotherapist.getOneTherapistByEmail(req.user.email)
-                delete physiotherapist.hashedPassword
-                delete physiotherapist.email
+                let user = await physiotherapist.getOneTherapistByEmail(req.user.email)
+                delete user.hashedPassword
+                delete user.email
 
-                exercises = await collections.exercises.getExercisesBySession(sessionID, physiotherapist.id)
+                results = await exercises.getExercisesBySession(sessionID, user.id)
             }
-            res.send(exercises)
+            res.send(results)
             return
         } catch (err) {
             logger.error({ error: err }, 'error getting exercises: ')
@@ -49,7 +50,7 @@ export default {
                 return res.status(400).send('Please enter required fields')
             }
 
-            const addedExercise = await collections.exercises.createExercise(exercise.sessionID, exercise)
+            const addedExercise = await exercises.createExercise(exercise.sessionID, exercise)
             delete addedExercise.type
             delete addedExercise.notes
             delete addedExercise.videoFile
@@ -78,7 +79,7 @@ export default {
         if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
         let exerciseID = req.params.exerciseID, sessionID = req.body.sessionID
         try {
-            await collections.exercises.deleteOneExercise(exerciseID, sessionID)
+            await exercises.deleteOneExercise(exerciseID, sessionID)
             logger.info({ data: { exerciseID } }, 'Deleted exercise permanently')
             return res.sendStatus(204)
         } catch (err) {

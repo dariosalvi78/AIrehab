@@ -2,7 +2,8 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import bcrypt from 'bcrypt'
 import { signAccessToken } from "../utils/tokenAuth.js"
-import collections from "../DOM/collections.js"
+import users from "../DOM/usersCollection.js"
+import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
 
 export default {
@@ -19,13 +20,13 @@ export default {
             return
         }
         try {
-            const user = await collections.users.getUserByEmail(req.body.email)
+            const user = await users.getUserByEmail(req.body.email)
 
             if (!user) return res.sendStatus(404)
 
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
-                await collections.users.updateUserLoginTimestamp(user.id)
+                await users.updateUserLoginTimestamp(user.id)
                 delete user.id
                 delete user.hashedPassword
                 delete user.createdTimestamp
@@ -70,8 +71,8 @@ export default {
     getUsers: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
-            const users = await collections.users.getUsers()
-            res.send(users)
+            const results = await users.getUsers()
+            res.send(results)
         } catch (err) {
             logger.error({ error: err }, 'error getting users')
             res.sendStatus(500)
@@ -88,7 +89,7 @@ export default {
     getUser: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
         try {
-            const user = await collections.users.getOneUser(req.params.userID)
+            const user = await users.getOneUser(req.params.userID)
             return res.send(user)
         } catch (err) {
             logger.error({ error: err }, 'error getting user')
@@ -114,7 +115,7 @@ export default {
             return
         }
 
-        const isUser = await collections.users.getUserByEmail(body.email)
+        const isUser = await users.getUserByEmail(body.email)
         if (isUser) {
             res.status(409).send(`${body.email} is already registered`)
             return
@@ -125,7 +126,7 @@ export default {
             // await sendPhysioEmailCreated(body.email, body.password);
 
             let hash = bcrypt.hashSync(body.password, 8)
-            const user = await collections.users.createUser(body.email, hash, body.role)
+            const user = await users.createUser(body.email, hash, body.role)
             logger.info({ data: user }, 'new user created: ')
 
             const token = await signAccessToken({ userID: user.id })
@@ -147,19 +148,19 @@ export default {
      * @param {Object} res - express response
      */
     deleteUser: async (req, res) => {
-        console.log(req.user)
         if (req.user.role !== 'admin') return res.sendStatus(403)
         let userID = req.params.userID
         try {
-            let therapist = await collections.users.getOneUser(userID)
-            let patients = await collections.physiotherapist.getPatientsByEmail(therapist.email)
+            let therapist = await users.getOneUser(userID)
+            let results = await physiotherapist.getOneTherapistByEmail(therapist.email)
+            delete results.hashedpassword
 
-            if (patients.length >= 1) {
+            if (results.numOfPatients >= 1) {
                 res.status(409).send('user is assigned with patients')
                 return
             }
 
-            await collections.users.deleteOneUser(userID)
+            await users.deleteOneUser(userID)
             logger.info(`Deleted ${userID} permanently`)
             return res.sendStatus(204)
         } catch (err) {

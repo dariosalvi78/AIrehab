@@ -2,8 +2,7 @@ import * as Types from '../../../datamodel/modeljdocs.mjs'
 import db from '../db/dbDriver.js'
 
 
-export const users = {
-
+export default {
     /**
      * Gets all users, except admin
      * @returns {Promise<Array.<Types.User>>}

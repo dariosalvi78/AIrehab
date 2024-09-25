@@ -1,15 +1,7 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
+import db from '../db/dbDriver.js'
 
-let db = undefined
-
-export const sessions = {
-    init: async function (DB) {
-        if (DB) {
-            db = DB
-            return sessions
-        }
-    },
-
+export default {
     /**
      * Get all physiotherapy sessions
      * @returns {Promise<Array.<Types.PhysiotherapySession>>}

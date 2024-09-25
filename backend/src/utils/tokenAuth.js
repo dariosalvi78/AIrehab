@@ -3,7 +3,7 @@ import * as Types from '../../../datamodel/modeljdocs.mjs'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import config from './config.js'
-import collections from '../DOM/collections.js'
+import users from '../DOM/usersCollection.js'
 import logger from './logger.js'
 
 /**
@@ -41,11 +41,11 @@ const authenticateToken = async (req, res, next) => {
  * Creates admin user if not in DB
  */
 const createAdmin = async () => {
-    const users = await collections.users.getUsersByRole('admin')
-    if (users.length <= 0) {
+    const admin = await users.getUsersByRole('admin')
+    if (admin.length <= 0) {
         let hash = bcrypt.hashSync(config.admin.password, 8)
         try {
-            const newUser = await collections.users.createUser(config.admin.username, hash, 'admin')
+            const newUser = await users.createUser(config.admin.username, hash, 'admin')
             delete newUser.hashedPassword
             logger.info({ data: newUser }, 'no admin in db, new user created')
             await signAccessToken(newUser)

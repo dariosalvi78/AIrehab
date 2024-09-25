@@ -2,7 +2,7 @@
 import healthcheck from "./controllers/healthCheck.js";
 import users from "./controllers/users.js";
 import physiotherapists from "./controllers/physiotherapist.js";
-import sessions from "./controllers/sessions.js";
+import sessions from "./controllers/physiotherapySession.js";
 import exercises from "./controllers/exercises.js";
 
 const API_PREFIX = '/api'

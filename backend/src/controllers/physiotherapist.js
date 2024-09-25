@@ -1,5 +1,5 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
-import collections from "../DOM/collections.js"
+import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
 
 export default {
@@ -16,9 +16,9 @@ export default {
         let patients
         try {
             if (req.user.role == 'admin') {
-                patients = await collections.physiotherapist.getPatients()
+                patients = await physiotherapist.getPatients()
             } else {
-                let results = await collections.physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
+                let results = await physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
                 patients = { patients: results[0], maxPageNo: results[results.length - 1][0].maxPage }
             }
             res.send(patients)
@@ -42,9 +42,9 @@ export default {
         try {
             let patient
             if (req.user.role == 'physiotherapist') {
-                patient = await collections.physiotherapist.getOnePatientByEmail(req.user.email, req.params.patientID)
+                patient = await physiotherapist.getOnePatientByEmail(req.user.email, req.params.patientID)
             } else if (req.user.role == 'admin') {
-                patient = await collections.physiotherapist.getOnePatientByID(req.params.patientID)
+                patient = await physiotherapist.getOnePatientByID(req.params.patientID)
             }
             if (!patient["sessionID"]) delete patient.sessionID
             return res.send(patient)
@@ -67,26 +67,30 @@ export default {
      */
     addNewPatient: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let patient = req.body, physiotherapist
+        let patient = req.body, results
         if (!patient || !patient.fullName || !patient.dateOfBirth) {
             return res.status(400).send('Please enter required fields')
         }
 
-        const checkIfPatient = await collections.physiotherapist.getOnePatientByName(patient.fullName)
+        const checkIfPatient = await physiotherapist.getOnePatientByName(patient.fullName)
         if (checkIfPatient) {
             return res.status(409).send(`${patient.fullName} is already a patient`)
         }
 
+        if (req.user.role == 'admin' && !req.query.physiotherapistEmail) {
+            return res.status(400).send('Please enter physiotherapist email')
+        }
+
         try {
             if (req.user.role == 'physiotherapist') {
-                physiotherapist = await collections.physiotherapist.getOneTherapistByEmail(req.user.email)
+                results = await physiotherapist.getOneTherapistByEmail(req.user.email)
             } else if (req.user.role == 'admin' && req.query.physiotherapistEmail) {
-                physiotherapist = await collections.physiotherapist.getOneTherapistByEmail(req.query.physiotherapistEmail)
-                if (!physiotherapist) return res.status(404).send('No physiotherapist with given email')
+                results = await physiotherapist.getOneTherapistByEmail(req.query.physiotherapistEmail)
+                if (!results) return res.status(404).send('No physiotherapist with given email')
             }
-            const addedPatient = await collections.physiotherapist.createPatient(patient, physiotherapist.id)
+            const addedPatient = await physiotherapist.createPatient(patient, results.id)
 
-            logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to physiotherapist ${physiotherapist.email}`)
+            logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to physiotherapist ${results.email}`)
             return res.status(201).json({
                 status: 'created', data: { patient: addedPatient }
             })
@@ -107,14 +111,14 @@ export default {
     */
     deletePatient: async (req, res) => {
         if (!req.params.patientID || req.user.role !== 'admin') return res.sendStatus(403)
-        let physiotherapist = req.body
+        let body = req.body
         try {
-            let patient = await collections.physiotherapist.getOnePatientByID(req.params.patientID)
+            let patient = await physiotherapist.getOnePatientByID(req.params.patientID)
             if (patient.sessionID) {
                 return res.status(409).send('Patient is part of a session')
             }
 
-            await collections.physiotherapist.deleteOnePatient(physiotherapist.physiotherapistID, req.params.patientID)
+            await physiotherapist.deleteOnePatient(body.physiotherapistID, req.params.patientID)
             logger.info({ data: { patientID: req.params.patientID } }, 'Deleted patient permanently')
             return res.sendStatus(204)
         } catch (err) {
@@ -139,7 +143,7 @@ export default {
                 return res.status(400).send('Please enter required fields')
             }
 
-            await collections.physiotherapist.updateOnePatient(patient, req.params.patientID)
+            await physiotherapist.updateOnePatient(patient, req.params.patientID)
             logger.info({ data: { patientID: req.params.patientID } }, 'updated patient information')
             return res.sendStatus(204)
         }

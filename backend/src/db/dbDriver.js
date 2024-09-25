@@ -10,7 +10,10 @@ export default {
         try {
             // make sure that any items are correctly URL encoded in the connection string
             const dbConnection = await mssql.connect(dbConnectionConfig)
-            return dbConnection
+            if (dbConnection) {
+                logger.debug('connected to db')
+                return dbConnection
+            }
         } catch (err) {
             logger.error({ error: err }, 'db connection failed')
         }
