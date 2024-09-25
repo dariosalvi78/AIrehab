@@ -12,7 +12,7 @@
     </q-card-actions>
     <patient-edit-form
       :user="{}"
-      formMode="admin" 
+      formMode="adminNew" 
       v-model="newPatientPrompt" 
       @addNewUser="addNewPatient"
     />
@@ -70,9 +70,7 @@
 
 <script>
 import API from '../../API.js'
-import routes from '../../router/routeHandler.js'
-import storage from '../../utils/userStorage.js'
-import PatientEditForm from '../PatientEditForm.vue'
+import PatientEditForm from '../patients/PatientEditForm.vue'
 import AdminSessionsTable from './AdminSessionsTable.vue'
 import AdminUserTable from './AdminUserTable.vue'
 

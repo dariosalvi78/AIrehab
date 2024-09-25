@@ -43,20 +43,20 @@
           <q-separator inset />
           <q-tab-panels v-show="users.length >= 1 && pagination.maxPageNo >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
             <q-tab-panel id="panel" name="main">
-            <div class="q-pa-md flex justify-center">
-              <div style="max-width: 90%; width: 300px;">
-                <q-btn style="marginLeft:2px;" color="grey-8" flat fab-mini :ripple="false" 
+              <div class="q-pa-md flex justify-center">
+                <div style="max-width: 90%; width: 300px;">
+                  <q-btn style="marginLeft:2px;" color="grey-8" flat fab-mini :ripple="false" 
                     :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
                     v-touch-repeat.mouse="handleSortOrder"
-                >
-                <q-icon name="calendar_month" />
-                </q-btn>
-                <q-intersection
-                  v-for="user in users"
-                  :key="user.id"
-                  transition="jump-up"
-                  class="example-item"
-                >
+                  >
+                  <q-icon name="calendar_month" />
+                  </q-btn>
+                  <q-intersection
+                    v-for="user in users"
+                    :key="user.id"
+                    transition="jump-up"
+                    class="example-item"
+                  >
                   <q-item clickable v-ripple @click="(e) => openPatientView(user)">
                     <q-item-section avatar>
                       <q-avatar color="primary" text-color="white" icon="person" />        
@@ -70,58 +70,31 @@
                     <q-item-section side>
                       <q-icon name="arrow_forward" />
                     </q-item-section>
-                  </q-item>
-                </q-intersection>
+                    </q-item>
+                  </q-intersection>
+                </div>
               </div>
-            </div>
-            <q-pagination
-              v-if="pagination.maxPageNo >= 1"
-              v-model="pagination.pageNo"
-              :max="pagination.maxPageNo"
-              :min="1"
-              flat
-              @update:model-value="(e) => handlePagePatient(e)"
-              direction-links
-              color="grey"
-              active-color="primary"
-              class="flex flex-center"
-            />
+              <q-pagination
+                v-if="pagination.maxPageNo >= 1"
+                v-model="pagination.pageNo"
+                :max="pagination.maxPageNo"
+                :min="1"
+                flat
+                @update:model-value="(e) => handlePagePatient(e)"
+                direction-links
+                color="grey"
+                active-color="primary"
+                class="flex flex-center"
+              />
             </q-tab-panel>
             <q-tab-panel name="view">
-              <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$refs.panelForm.goTo('main')" />        
-              <q-btn v-if="!selectedPatient.sessionID" size="sm" label="Start physiotherapy session" type="submit" color="secondary" class="q-ml-md" v-close-popup  @click="startNewSession(selectedPatient)"/>
-              <q-btn v-else icon-right="open_in_new" size="sm" label="Go to ongoing session" type="submit" color="secondary" class="q-ml-md" v-close-popup  @click="navigateToSession(selectedPatient.sessionID)"/>
-              <q-card flat class="q-px-md patient-view-card">
-                <q-card-section>
-                  <div class="text-h6">{{selectedPatient.names}}</div>
-                  <div class="text-body2">
-                    <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
-                    {{ formatDate(selectedPatient.createdTimestamp) }}
-                    </div>
-                </q-card-section>
-                <q-separator inset />
-                <q-card-section>
-                  <div class="text-subtitle1">Height and weight</div>
-                  <div class="text-body2">
-                    {{ selectedPatient.height }} cm
-                  </div>
-                  <div class="text-body2">
-                    {{ selectedPatient.weight }} kg
-                  </div>
-                </q-card-section>
-                <q-separator inset />
-                 <q-card-section>
-                  <div class="text-subtitle1">Date of birth</div>
-                  <div class="text-body2">{{ formatDate(selectedPatient.dateofbirth) }}</div>
-                </q-card-section>                
-                <q-separator inset />
-                  <q-card-section>
-                  <div class="text-subtitle1">Description</div>
-                  <div style="whiteSpace: break-spaces" class="text-body2">{{ selectedPatient.injuries }}</div>
-                </q-card-section>
-              </q-card>
+              <patients-list 
+                :selectedPatient="selectedPatient" 
+                @openView="openPatientView"
+                @panelFormGoBack="this.$refs.panelForm.goTo('main')"
+              />
             </q-tab-panel>
-        </q-tab-panels>
+          </q-tab-panels>
         <div v-if="isLoadingPatients" class="q-ma-md flex flex-center">
           <q-spinner-dots
               color="primary"
@@ -145,16 +118,17 @@
 <script>
 import API from '../API'
 import nicers from '../utils/nicers'
-import PatientEditForm from './PatientEditForm.vue'
+import PatientEditForm from './patients/PatientEditForm.vue'
+import PatientsList from './patients/PatientsList.vue'
 import SessionsList from './sessions/SessionsList.vue'
 
 export default {
   name: 'PhysiotherapistHome',
-  components: { PatientEditForm, SessionsList },
+  components: { PatientEditForm, SessionsList, PatientsList },
   data () {
     return {
       newUserPrompt: false,
-      exercisePrompt: false, 
+      exercisePrompt: false,
       new: {
         fullName: undefined,
         dateOfBirth: undefined,
@@ -230,33 +204,6 @@ export default {
     formatDate(date) {
       return nicers.formattedDate(date)
     },
-    async startNewSession (selectedPatient) {
-      try {
-        this.$q.loading.show()
-        let resp = await API.addSession(selectedPatient.id)
-        await nicers.delay(500)
-        if (resp.data && resp.data.session.id) {
-          this.$q.notify({
-            type: 'positive',
-            position: 'top',
-            message: 'Created new session for ' + selectedPatient.names,
-          })
-          this.navigateToSession(resp.data.session.id)
-        }
-      } catch (err) {
-        this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: 'Creating new session failed: ' + err,
-          icon: 'report_problem'
-        })
-      }
-      this.$q.loading.hide()
-      return
-    },
-    navigateToSession (sessionID) {
-      return this.$router.push('physiotherapist/sessions/' + sessionID)
-    },
     async handlePagePatient (no) {
       this.pagination.pageNo = no
       await this.getPatients()  
@@ -279,10 +226,6 @@ export default {
 }
 .shadow-2 {
   box-shadow: none;
-}
-.patient-view-card {
-  margin: 0 auto;
-  max-width: 300px;
 }
 
 @media only screen and (max-width: 450px) {

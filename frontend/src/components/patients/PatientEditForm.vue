@@ -2,10 +2,10 @@
     <q-dialog ref="qDialog">
         <q-card class="q-pl-mx" style="min-width: 350px">
             <q-card-section>
-                <div class="text-h6">{{mode == 'new' || mode == 'admin' ? 'Add new patient' : 'Edit patient'}}</div>
+                <div class="text-h6">{{mode == 'new' || mode == 'adminNew' ? 'Add new patient' : 'Edit patient'}}</div>
                 <!-- <div class="text-subtitle2">Send invitation to patient</div> -->
             </q-card-section>
-            <q-card-section v-if="mode == 'edit'">
+            <q-card-section v-if="mode == 'adminEdit'">
                 <div class="text-body2">
                     <q-icon style="bottom: 2px" size="sm" name="person"/>
                     {{ 'Assigned to: ' + user.physiotherapistEmail }}
@@ -17,7 +17,7 @@
             </q-card-section>
             <q-form class="q-px-sm">
             <q-input
-                v-if="mode == 'admin'"
+                v-if="mode == 'adminNew'"
                 filled
                 v-model="this.physiotherapistEmail"
                 label="Physiotherapist email"
@@ -109,8 +109,8 @@
 </template>
 
 <script>
-import API from '../API'
-import nicers from '../utils/nicers'
+import nicers from '../../utils/nicers'
+
 export default {
     name: 'PatientEditForm',
     props: { formMode: String, user: Object },
@@ -127,20 +127,13 @@ export default {
             mode: 'new'
         }
     },
-    mounted () {
+    async mounted () {
         this.resetForm()
+        if (this.formMode == 'edit' ) await this.populateEdit()
     },
     watch: {
         async user () {
-            this.resetForm()
-            this.mode = this.formMode
-            if (this.mode === 'edit' && this.user && this.user.role === 'patient') {
-                this.new.fullName = this.user.email
-                this.new.dateOfBirth = new Date(this.user.dateofbirth).toLocaleDateString()
-                this.new.height = this.user.height
-                this.new.weight = this.user.weight
-                this.new.injuries = this.user.injuries
-            }
+            await this.populateEdit()
         }
     },
     methods: {
@@ -160,18 +153,29 @@ export default {
                 weight: +this.new.weight,
                 injuries: this.new.injuries
             }
-            if (this.mode == 'admin') userSubmitted.physiotherapistEmail = this.physiotherapistEmail
-            if (this.mode === 'new' || this.mode == 'admin') this.$emit('addNewUser', userSubmitted)
-            else if (this.mode === 'edit') this.$emit('editPatient', userSubmitted)
+            if (this.mode == 'adminNew') userSubmitted.physiotherapistEmail = this.physiotherapistEmail
+            if (this.mode === 'new' || this.mode == 'adminNew') this.$emit('addNewUser', userSubmitted)
+            else if (this.mode === 'edit' || this.mode === 'adminEdit') this.$emit('editPatient', userSubmitted)
             this.$refs.qDialog.hide()
             this.resetForm()
             return
+        },
+        populateEdit () {
+            this.mode = this.formMode
+            if (this.mode == 'edit' || this.mode == 'adminEdit' && this.user) {
+                this.new.fullName = this.mode == 'edit' ? this.user.names : this.user.email
+                this.new.dateOfBirth = new Date(this.user.dateofbirth).toLocaleDateString()
+                this.new.height = this.user.height
+                this.new.weight = this.user.weight
+                this.new.injuries = this.user.injuries
+            }
         },
         formatDate (date) {
             return nicers.formattedDate(date)
         },
         resetForm () {
             this.mode = 'new'
+            this.physiotherapistEmail = undefined
             this.new = {}
         },
         dateRestrictions (qDate) {

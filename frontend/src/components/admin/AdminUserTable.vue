@@ -83,7 +83,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <patient-edit-form :user="selectedUser" formMode="edit" v-model="openUserEditPrompt" @editPatient="editPatient" />
+    <patient-edit-form :user="selectedUser" formMode="adminEdit" v-model="openUserEditPrompt" @editPatient="editPatient" />
     <div v-if="isLoadingUsers" class="q-ma-md flex flex-center">
       <q-separator inset />
         <q-spinner-dots
@@ -96,11 +96,8 @@
 
 <script>
 import API from '../../API.js'
-import routes from '../../router/routeHandler.js'
-import storage from '../../utils/userStorage.js'
 import nicers from '../../utils/nicers.js'
-import { ref } from 'vue'
-import PatientEditForm from '../PatientEditForm.vue'
+import PatientEditForm from '../patients/PatientEditForm.vue'
 
 export default {
   name: 'AdminUserTable',
