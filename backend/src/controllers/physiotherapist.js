@@ -136,7 +136,7 @@ export default {
      * @param {Object} res - express response
     */
     editPatient: async (req, res) => {
-        if (req.user.role !== 'admin') return res.sendStatus(403)
+        if (!req.user) return res.sendStatus(403)
         let patient = req.body
         try {
             if (!patient.fullName || !patient.dateOfBirth) {

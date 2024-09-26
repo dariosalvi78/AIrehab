@@ -4,6 +4,7 @@ import users from "./controllers/users.js";
 import physiotherapists from "./controllers/physiotherapist.js";
 import sessions from "./controllers/physiotherapySession.js";
 import exercises from "./controllers/exercises.js";
+import poe from "./controllers/poe.js";
 
 const API_PREFIX = '/api'
 
@@ -41,4 +42,6 @@ export default async (app, isAuth) => {
     app.get(`${API_PREFIX}/exercises`, isAuth, exercises.getExercises)
     app.post(`${API_PREFIX}/exercises`, isAuth, exercises.addNewExercise)
     app.delete(`${API_PREFIX}/exercises/:exerciseID`, isAuth, exercises.deleteExercise)
+
+    app.post(`${API_PREFIX}/poe/:exerciseID`, isAuth, poe.sendEvaluation)
 }

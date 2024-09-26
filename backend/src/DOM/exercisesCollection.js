@@ -15,6 +15,19 @@ export default {
     },
 
     /**
+    * Get one exercise for a specific physiotherapy session
+    * @param {Types.Exercise["id"]} exerciseID
+    * @returns {Promise<Types.PhysiotherapySession>}
+    */
+    getExerciseByID: async function (exerciseID) {
+        const response = await db.query(`
+            SELECT TOP 1 e.* FROM [exercise] e
+            WHERE e.id = '${exerciseID}';
+        `)
+        return response.recordset[0]
+    },
+
+    /**
      * Get all exercises for a specific session and physiotherapist
      * @param {Types.PhysiotherapySession["id"]} sessionID 
      * @param {Types.User["id"]} therapistID 

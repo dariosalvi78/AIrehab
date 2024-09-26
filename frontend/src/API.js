@@ -103,6 +103,16 @@ let API = {
         let response = await axios.delete(URL_PRE + '/exercises/' + exerciseID, { data: { sessionID } })
         return response.data
     },
+
+    async getPOE(exerciseID) {
+        let response = await axios.get(URL_PRE + '/poe/' + exerciseID, { })
+        return response.data
+    },
+
+    async sendPOE(uploadedFile, exerciseID) {
+        let response = await axios.post(URL_PRE + '/poe/' + exerciseID, uploadedFile, { headers: { 'Content-Type': 'multipart/form-data' } })
+        return response.data
+    }
 }
 
 export default API

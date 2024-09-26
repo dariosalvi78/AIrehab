@@ -16,12 +16,13 @@
           <q-btn label="Stop recording" color="secondary" size="md" icon-right="camera" @click="stopVideoCapture" />
         </q-card-section>
         <q-card-section class="column items-center">
-          <q-file name="file[]" accept="video/*" capture="environment" color="secondary" v-model="uploadedFile" label="Upload video" @change.capture="uploadedRecordedVideo">
+          <q-file type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" v-model="uploadedFile" label="Upload video" @change.capture="uploadedRecordedVideo">
             <template v-slot:prepend>
               <q-icon name="camera" />
             </template>
           </q-file>
-            <!-- <input name="file[]" type="file" accept="video/*" capture="environment" @change="uploadedRecordedVideo"> -->
+          <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
+          </form>
             <div class="col">
             <video v-if="isRecording" ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
                 <source src="" type="video/mp4">
@@ -41,6 +42,7 @@
 </template>
 
 <script>
+import API from '../../API'
 import nicers from '../../utils/nicers'
 export default {
   name: 'ExerciseViewModal',
@@ -101,8 +103,6 @@ export default {
             icon: 'report_problem'
           })
         })
-      // document.querySelector('#infoTxt').innerText = 'recording video...'
-
     },
     async stopVideoCapture () {
       this.isRecording = false
@@ -120,24 +120,28 @@ export default {
       a.href = mediaBlobUrl
       a.download = 'test.webm'
       a.click()
+      URL.revokeObjectURL(mediaBlobUrl)
     },
     uploadedRecordedVideo(e) {
       const output = this.$refs.uploadedVideoPreview
       const file = e.target.files[0]
-      console.log(file)
-      console.log(e)
-      this.uploadedFile = {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        lastModified: file.lastModified
-      }
-      console.log(this.uploadedFile)
+      this.uploadedFile = file
       output.style.display = 'block'
       output.src = URL.createObjectURL(file)
     },
-    saveVideo () {
-
+    async saveVideo () {
+      if (this.uploadedFile && this.exerciseID) {
+        const form = new FormData()
+        form.append('uploaded_file', this.uploadedFile)
+        let results = await API.sendPOE(form, this.exerciseID)
+        if (results) {
+          return this.$q.notify({
+            type: 'positive',
+            position: 'top',
+            message: 'Video has been saved for exercise',
+          })
+        }
+      }
     }
   },
   computed: {
