@@ -11,11 +11,13 @@
               <q-card-section class="row">
                 <div class="col-11">
                   <q-btn label="Go to exercise" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
-                  <div class="text-h6">{{ exercise.type ? exercise.type : 'Exercise' }}</div>
-                  <q-icon style="bottom: 2px" size="sm" name="schedule" />
-                  {{ exercise.startTimestamp }}
-                  <div style="margin-left:2px;">
-                    {{ exercise.endTimestamp ? exercise.endTimestamp : 'Ongoing exercise' }}
+                  <div class="text-h6">{{ exercise.type ? exercise.type : 'Exercise' }}
+                    <q-icon v-if="exercise.videoFile" size="sm" name="video_file" />
+                  </div>
+                  <div style="margin-left:2px;" class="text-capitalize">
+                    <q-icon style="bottom:2px;" size="sm" name="schedule" />
+                    {{ exercise.startTimestamp }}
+                    - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
                   </div>
                 </div>
                 <div class="col">
@@ -77,6 +79,7 @@ export default {
           resp.map((exercise) => {
             exercise.type = exerciseEnum.typeToAsc(exercise.type)
             exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
+            exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
           })
           this.exercises = resp
         }

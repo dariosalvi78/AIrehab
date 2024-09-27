@@ -17,12 +17,14 @@ export default {
     /**
     * Get one exercise for a specific physiotherapy session
     * @param {Types.Exercise["id"]} exerciseID
-    * @returns {Promise<Types.PhysiotherapySession>}
+    * @param {Types.PhysiotherapySession["id"]} sessionID
+    * @returns {Promise<Types.Exercise>}
     */
-    getExerciseByID: async function (exerciseID) {
+    getExerciseByID: async function (exerciseID, sessionID) {
         const response = await db.query(`
             SELECT TOP 1 e.* FROM [exercise] e
-            WHERE e.id = '${exerciseID}';
+            WHERE e.id = '${exerciseID}'
+            AND e.physiotherapySessionId = '${sessionID}';
         `)
         return response.recordset[0]
     },
@@ -54,9 +56,9 @@ export default {
     createExercise: async function (sessionID, exercise) {
         const response = await db.query(`
             INSERT INTO [exercise] 
-            (id, startTimestamp, endTimestamp, physiotherapySessionId, type, videoFile, notes)
-            OUTPUT Inserted.id, Inserted.startTimestamp, Inserted.endTimestamp, Inserted.physiotherapySessionId, Inserted.type, Inserted.videoFile, Inserted.notes
-            VALUES(NEWID(), CURRENT_TIMESTAMP, ${exercise.endTimestamp ? `'${exercise.endTimestamp}'` : null}, '${sessionID}', '${exercise.type}', '${exercise.videoFile}', '${exercise.notes}');
+            (id, startTimestamp, physiotherapySessionId, type, notes)
+            OUTPUT Inserted.id, Inserted.startTimestamp, Inserted.physiotherapySessionId, Inserted.type, Inserted.notes
+            VALUES(NEWID(), CURRENT_TIMESTAMP, '${sessionID}', '${exercise.type}', '${exercise.notes}');
         `)
         return response.recordset[0]
     },

@@ -34,6 +34,27 @@ export default {
             return
         }
     },
+    
+    /**
+     * Get one exercise in physiotherapy session
+     * @param {Object} req - express request
+     * @param {Object} req.params - exerciseID
+     * @param {Object} req.query sessionID
+     * @param {Object} res - express response
+     * @returns {Promise<Types.Exercise>}
+    */
+    getExercise: async (req, res) => {
+        if (!req.user) return res.sendStatus(403)
+        let exerciseID = req.params.exerciseID, sessionID = req.query.sessionID
+        try {
+            const exercise = await exercises.getExerciseByID(exerciseID, sessionID)
+            return res.send(exercise)
+        } catch (err) {
+            logger.error({ error: err }, 'error getting exercise: ')
+            res.sendStatus(500)
+            return
+        }
+    },
 
     /**
      * Add one new exercise for physiotherapy session

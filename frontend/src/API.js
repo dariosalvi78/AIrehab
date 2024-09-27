@@ -94,6 +94,11 @@ let API = {
         return response.data
     },
 
+    async getExercise(sessionID, exerciseID) {
+        let response = await axios.get(URL_PRE + '/exercises/' + exerciseID, { params: { sessionID } })
+        return response.data
+    },
+
     async addExercise(sessionID, startTimestamp, endTimestamp, type, notes, videoFile) {
         let response = await axios.post(URL_PRE + '/exercises/', { sessionID, startTimestamp, endTimestamp, type, notes, videoFile })
         return response.data
@@ -104,13 +109,13 @@ let API = {
         return response.data
     },
 
-    async getPOE(exerciseID) {
-        let response = await axios.get(URL_PRE + '/poe/' + exerciseID, { })
+    async getPOE(exerciseID, sessionID) {
+        let response = await axios.get(URL_PRE + '/poe/' + sessionID + '/' + exerciseID, { })
         return response.data
     },
 
-    async sendPOE(uploadedFile, exerciseID) {
-        let response = await axios.post(URL_PRE + '/poe/' + exerciseID, uploadedFile, { headers: { 'Content-Type': 'multipart/form-data' } })
+    async sendPOE(uploadedFile, exerciseID, sessionID) {
+        let response = await axios.post(URL_PRE + '/poe/' + sessionID + '/' + exerciseID, uploadedFile, { headers: { 'Content-Type': 'multipart/form-data' } })
         return response.data
     }
 }
