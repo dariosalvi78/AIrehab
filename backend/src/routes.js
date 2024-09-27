@@ -41,6 +41,7 @@ export default async (app, isAuth) => {
 
     app.get(`${API_PREFIX}/exercises`, isAuth, exercises.getExercises)
     app.get(`${API_PREFIX}/exercises/:exerciseID`, isAuth, exercises.getExercise)
+    app.get(`${API_PREFIX}/exercises/:exerciseID/file`, isAuth, exercises.getExerciseFile)
     app.post(`${API_PREFIX}/exercises`, isAuth, exercises.addNewExercise)
     app.delete(`${API_PREFIX}/exercises/:exerciseID`, isAuth, exercises.deleteExercise)
 

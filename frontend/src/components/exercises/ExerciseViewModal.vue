@@ -11,12 +11,12 @@
             </div>
           </q-card-section>
         </q-card>
-        <q-card v-else class="q-pa-lg q-ma-md">
-          <q-card-section class="flex flex-center">
+        <q-card flat v-else class="q-pt-lg q-ma-md">
+          <q-card-section class="flex flex-center q-gutter-md">
             <q-btn label="Open camera" color="positive" size="md" icon-right="camera" @click="videoCapture" />
             <q-btn label="Stop recording" color="secondary" size="md" icon-right="camera" @click="stopVideoCapture" />
           </q-card-section>
-          <q-card-section class="column items-center">
+          <q-card-section class="column items-center q-pa-sm">
             <q-file ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" v-model="uploadedFile" label="Upload video" @change.capture="uploadedRecordedVideo">
               <template v-slot:prepend>
                 <q-icon name="camera" />
@@ -51,7 +51,7 @@
             </div>
           </q-card-section>
         </q-card>
-        <q-card v-else flat class="q-px-md patient-view-card">
+        <q-card v-else flat class="q-ma-lg evaluation-card">
           <q-card-section>
             <div class="text-h6">Video Evaluation</div>
           </q-card-section>
@@ -76,6 +76,10 @@
             <div class="text-body2">{{ poe.repetition }}</div>
           </q-card-section>
         </q-card>
+        <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
+          <source :src="getVideoPathForExercise" type="video/mp4">
+          Your browser does not support HTML5 video.
+        </video>
       </div>
     </q-page>
   </q-page-container>
@@ -162,7 +166,7 @@ export default {
       let a = document.createElement('a')
       a.style = 'display: none'
       a.href = mediaBlobUrl
-      a.download = 'test.webm'
+      a.download = 'exercise_' + this.exerciseID + '.webm'
       a.click()
       URL.revokeObjectURL(mediaBlobUrl)
     },
@@ -239,7 +243,7 @@ export default {
         console.log(resp)
         if (resp) {
           this.poe = resp
-        }    
+        }
       } catch (err) {
         return this.$q.notify({
           type: 'negative',
@@ -253,6 +257,9 @@ export default {
   computed: {
     formatModifiedDate () {
       return nicers.formattedDayOfMonth(this.uploadedFile.lastModified)
+    },
+    getVideoPathForExercise () {
+      return `/api/exercises/${this.exerciseID}/file?videoFile=${this.poe.videoFile}&sessionID=${this.sessionID}`
     }
   }
 }
@@ -263,9 +270,10 @@ export default {
   max-width: 350px;
 }
 video {
-  max-width: 300px;
+  max-width: 100%;
   height: 400px;
   object-fit: cover;
+  margin-top: 1em;
 }
 .evaluation-card {
   margin: 0 auto;
