@@ -52,4 +52,17 @@ export default {
         `)
         return response.recordset[0]
     },
+
+    /**
+     * Delete POE results for given exercise
+     * @param {Types.Exercise["id"]} exerciseID 
+     */
+      deletePOEForExerciseByID: async function (exerciseID) {
+        const response = await db.query(`
+            DELETE poe FROM [poe_evaluation] AS poe
+            INNER JOIN [exercise] e ON poe.exerciseID = e.id
+            WHERE e.id = '${exerciseID}';
+        `)
+        return response
+    }
 }

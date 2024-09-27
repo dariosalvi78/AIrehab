@@ -21,7 +21,7 @@
                   </div>
                 </div>
                 <div class="col">
-                  <q-btn dense color="negative" size="sm" icon="close" @click="closeExercise(exercise.id)"/>
+                  <q-btn dense color="negative" size="sm" icon="close" @click="closeExercise(exercise)"/>
                 </div>
               </q-card-section>
               <q-card-section>
@@ -125,9 +125,9 @@ export default {
       this.$q.loading.hide()
       return
     },
-    async closeExercise (exerciseID) {
+    async closeExercise (exercise) {
       try {
-        await API.deleteExercise(exerciseID, this.sessionID)
+        await API.deleteExercise(exercise.id, this.sessionID, exercise.videoFile)
         this.$q.notify({
             color: 'info',
             position: 'top',

@@ -104,8 +104,8 @@ let API = {
         return response.data
     },
 
-    async deleteExercise(exerciseID, sessionID) {
-        let response = await axios.delete(URL_PRE + '/exercises/' + exerciseID, { data: { sessionID } })
+    async deleteExercise(exerciseID, sessionID, videoFile) {
+        let response = await axios.delete(URL_PRE + '/exercises/' + exerciseID, { data: { videoFile }, params: { sessionID } })
         return response.data
     },
 

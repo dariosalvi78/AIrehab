@@ -2,7 +2,10 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import exercises from "../DOM/exercisesCollection.js"
 import physiotherapist from "../DOM/physiotherapistCollection.js"
+import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
+import config from '../utils/config.js'
+import fs from 'node:fs'
 
 export default {
 
@@ -88,18 +91,27 @@ export default {
         }
     },
 
-    // TODO: delete attachments/uploads associated with exercise
     /**
      * Delete one exercise in an ongoing physiotherapy session
+     * This will also remove POE results & video for exercise
      * @param {Object} req - express request
+     * @param {Object} req.body videoFile
      * @param {Object} req.params exerciseID
-     * @param {Object} req.body sessionID
+     * @param {Object} req.query sessionID
      * @param {Object} res - express response
      */
     deleteExercise: async (req, res) => {
         if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
-        let exerciseID = req.params.exerciseID, sessionID = req.body.sessionID
+        let videoName = req.body.videoFile, exerciseID = req.params.exerciseID, sessionID = req.query.sessionID
         try {
+            let directory = config.uploads.base_path + '/session_' + sessionID
+            let fullPath = directory + '/exercise_' + videoName
+            if (fs.existsSync(fullPath)) {
+                fs.unlink(fullPath , (err) => {
+                    if (err) logger.error({ error: err }, 'cannot remove video: ')
+                })
+            }
+            await poe.deletePOEForExerciseByID(exerciseID)
             await exercises.deleteOneExercise(exerciseID, sessionID)
             logger.info({ data: { exerciseID } }, 'Deleted exercise permanently')
             return res.sendStatus(204)

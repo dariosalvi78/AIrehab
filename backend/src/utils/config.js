@@ -18,6 +18,9 @@ const config = {
     },
     log: {
         path: process.env.LOG_PATH
+    },
+    uploads: {
+        base_path: process.env.BASE_PATH_UPLOADS
     }
 }
 

@@ -6,6 +6,7 @@ import logger from "../utils/logger.js"
 import formidable from 'formidable'
 import { mkdir } from 'fs/promises'
 import fs from 'node:fs'
+import config from '../utils/config.js'
 
 export default {
 
@@ -46,7 +47,7 @@ export default {
             if (!exercise) return res.status(404).send('Exercise does not exist')
 
             let filename = undefined
-            let directory = './uploads/' + '/session_' + sessionID
+            let directory = config.uploads.base_path + '/session_' + sessionID
 
             if (!fs.existsSync(directory)) {
                 await mkdir(directory, { recursive: true })
