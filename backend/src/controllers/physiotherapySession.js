@@ -4,6 +4,8 @@ import sessions from "../DOM/physiotherapySessionCollection.js"
 import users from "../DOM/usersCollection.js"
 import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
+import config from '../utils/config.js'
+import fs from 'node:fs'
 
 export default {
 
@@ -80,7 +82,6 @@ export default {
         }
     },
 
-    // TODO: delete exercises assoicated with session
     /**
      * Delete one session
      * @param {Object} req - express request
@@ -98,6 +99,11 @@ export default {
                     return res.status(409).send('Session has ongoing exercises')
                 }
             }
+            let directory = config.uploads.base_path + '/session_' + sessionID
+            fs.rmdir(directory, (err) => {
+                if (err) logger.error({ error: err }, 'cannot remove folder: ')
+            })
+
             await sessions.deleteOneSession(sessionID)
             logger.info({ data: { sessionID } }, 'Deleted session permanently')
             return res.sendStatus(204)
