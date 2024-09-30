@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --env-file ./config/.env ./src/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine --config= ./tests/jasmine.json ./tests/jasmine/controllers/*.spec.js"
   },
   "author": "Dario Salvi and Elliott Hellstrand",
   "license": "ISC",
@@ -22,6 +22,7 @@
     "pino": "^9.4.0"
   },
   "devDependencies": {
+    "jasmine": "^5.3.0",
     "nodemon": "^3.1.4"
   }
 }
