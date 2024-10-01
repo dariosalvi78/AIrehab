@@ -192,13 +192,12 @@ export default {
       if (this.uploadedFile && this.exerciseID) {
         try {
           this.$q.loading.show({
-            message: 'Saving video to server, please wait...'
+            message: 'Uploading video to server, please wait...'
           })
           await nicers.delay(300)
           const form = new FormData()
           form.append('uploaded_file', this.uploadedFile)
-          // TODO: rename sendPOE to sendVideo (or attachment) ?
-          let results = await API.sendPOE(form, this.exerciseID, this.sessionID)
+          let results = await API.uploadFile(form, this.exerciseID)
           if (results) {
             this.$q.notify({
               type: 'positive',
@@ -261,7 +260,7 @@ export default {
       return nicers.formattedDayOfMonth(this.uploadedFile.lastModified)
     },
     getVideoPathForExercise () {
-      return `/api/exercises/${this.exerciseID}/file?videoFile=${this.poe.videoFile}&sessionID=${this.sessionID}`
+      return `/api/attachments/${this.exerciseID}`
     }
   }
 }

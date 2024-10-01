@@ -121,27 +121,5 @@ export default {
             res.sendStatus(500)
             return
         }
-    },
-
-     /**
-     * Get video for one exercise in physiotherapy session
-     * @param {Object} req - express request
-     * @param {Object} req.params - exerciseID
-     * @param {Object} req.query - sessionID
-     * @param {Object} req.query videoFile
-     * @param {Object} res - express response
-     * @returns {Promise<Types.Exercise>}
-    */
-     getExerciseFile: async (req, res) => {
-        if (!req.user) return res.sendStatus(403)
-        let exerciseID = req.params.exerciseID, sessionID = req.query.sessionID, videoFile = req.query.videoFile
-        try {
-            // TODO: add some validation
-            res.sendFile(path.join(import.meta.dirname, '../../' + config.uploads.base_path + '/session_' + sessionID +  '/exercise_' + videoFile ))
-        } catch (err) {
-            logger.error({ error: err }, 'error getting file: ')
-            res.sendStatus(500)
-            return
-        }
-    },
+    }
 }

@@ -5,6 +5,7 @@ import physiotherapists from "./controllers/physiotherapist.js";
 import sessions from "./controllers/physiotherapySession.js";
 import exercises from "./controllers/exercises.js";
 import poe from "./controllers/poe.js";
+import attachments from "./controllers/attachments.js";
 
 const API_PREFIX = '/api'
 
@@ -41,10 +42,12 @@ export default async (app, isAuth) => {
 
     app.get(`${API_PREFIX}/exercises`, isAuth, exercises.getExercises)
     app.get(`${API_PREFIX}/exercises/:exerciseID`, isAuth, exercises.getExercise)
-    app.get(`${API_PREFIX}/exercises/:exerciseID/file`, isAuth, exercises.getExerciseFile)
     app.post(`${API_PREFIX}/exercises`, isAuth, exercises.addNewExercise)
     app.delete(`${API_PREFIX}/exercises/:exerciseID`, isAuth, exercises.deleteExercise)
 
     app.get(`${API_PREFIX}/poe/:sessionID/:exerciseID`, isAuth, poe.getEvaluation)
     app.post(`${API_PREFIX}/poe/:sessionID/:exerciseID`, isAuth, poe.sendEvaluation)
+
+    app.get(`${API_PREFIX}/attachments/:exerciseID`, isAuth, attachments.getExerciseFile)
+    app.post(`${API_PREFIX}/attachments/:exerciseID`, isAuth, attachments.sendExerciseFile)
 }

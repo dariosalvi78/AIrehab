@@ -114,9 +114,13 @@ let API = {
     return response.data
   },
 
-  // TODO: consider removing the session ID and query it when the video is sent
   async sendPOE (uploadedFile, exerciseID, sessionID) {
     let response = await axios.post(URL_PRE + '/poe/' + sessionID + '/' + exerciseID, uploadedFile, { headers: { 'Content-Type': 'multipart/form-data' } })
+    return response.data
+  },
+
+  async uploadFile (uploadedFile, exerciseID) {
+    let response = await axios.post(URL_PRE + '/attachments/' + exerciseID, uploadedFile, { headers: { 'Content-Type': 'multipart/form-data' } })
     return response.data
   }
 }
