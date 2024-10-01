@@ -39,15 +39,15 @@ export default {
      * Get one exercise in physiotherapy session
      * @param {Object} req - express request
      * @param {Object} req.params - exerciseID
-     * @param {Object} req.query sessionID
      * @param {Object} res - express response
      * @returns {Promise<Types.Exercise>}
     */
     getExercise: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let exerciseID = req.params.exerciseID, sessionID = req.query.sessionID
+        let exerciseID = req.params.exerciseID
         try {
-            const exercise = await exercises.getExerciseByID(exerciseID, sessionID)
+            if (!exerciseID) return res.sendStatus(400)
+            const exercise = await exercises.getExerciseByID(exerciseID)
             return res.send(exercise)
         } catch (err) {
             logger.error({ error: err }, 'error getting exercise: ')

@@ -70,5 +70,23 @@ export default {
             WHERE e.id = '${exerciseID}';
         `)
         return response
+    },
+
+    /**
+     * Update exercise with video and timestamp
+     * @param {Promise<Types.Exercise["id"]>} exerciseID
+     * @param {Object} video fileName, endTimestamp
+     * @returns {Promise<Types.Exercise>} video with new timestamp
+     */
+    updateExerciseVideo: async function (exerciseID, video) {
+        const response = await db.query(`
+            UPDATE e SET 
+            videoFile = '${video.fileName}',
+            endTimestamp = ${video.endTimestamp}
+            OUTPUT Inserted.videoFile, Inserted.endTimestamp
+            FROM [exercise] e
+            WHERE e.id = '${exerciseID}';
+        `)
+        return response.recordset[0]
     }
 }
