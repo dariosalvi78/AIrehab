@@ -2,7 +2,7 @@
   <q-page-container class="q-pa-lg">
     <q-page>
       <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />
-      <div v-if="!exercise.videoFile">
+      <div v-if="!videoFile">
         <q-card v-if="!hasVideoDevice" flat class="q-pa-lg">
           <q-card-section class="flex column items-center">
             <div class="text-h6 col">Device has no video inputs</div>
@@ -103,14 +103,14 @@ export default {
       isLoadingExercise: true,
       hasPermissions: false,
       uploadedFile: undefined,
-      exercise: {},
+      videoFile: undefined,
       poe: undefined
     }
   },
   async beforeMount () {
     await this.checkForVideoSupport()
-    await this.getExercise()
     await this.getPOE()
+    if (!this.videoFile) await this.getVideoExercise()
   },
   methods: {
     async checkForVideoSupport () {
@@ -199,14 +199,24 @@ export default {
           form.append('uploaded_file', this.uploadedFile)
           let results = await API.uploadFile(form, this.exerciseID)
           if (results) {
+            this.$q.loading.hide()
             this.$q.notify({
               type: 'positive',
               position: 'top',
               message: 'Video has been saved for exercise',
             })
-            // TODO: if you have the POE results you can show them instead of going back
-
-            this.$router.go(-1)
+            this.videoFile = results.videoFile
+            let poe_evaluation = await API.sendPOE(results.videoFile, this.exerciseID)
+            if (poe_evaluation) {
+              this.$q.notify({
+                type: 'info',
+                position: 'top',
+                message: 'Video evaluation complete, see results',
+                icon: 'info'
+              })
+              this.poe = poe_evaluation
+              console.log(this.poe)
+            }
           }
         } catch (err) {
           let errMsg = err
@@ -222,12 +232,12 @@ export default {
         return
       }
     },
-    async getExercise() {
+    async getVideoExercise() {
       try {
-        let resp = await API.getExercise(this.sessionID, this.exerciseID)
+        let resp = await API.getExercise(this.exerciseID)
         console.log(resp)
         if (resp) {
-          this.exercise = resp
+          this.videoFile = resp.videoFile
         }
       } catch (err) {
         return this.$q.notify({
@@ -243,6 +253,7 @@ export default {
         let resp = await API.getPOE(this.exerciseID, this.sessionID)
         console.log(resp)
         if (resp) {
+          this.videoFile = resp.videoFile
           this.poe = resp
         }
       } catch (err) {
