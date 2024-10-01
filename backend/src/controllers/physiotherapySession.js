@@ -93,8 +93,7 @@ export default {
         let sessionID = req.params.sessionID
         try {
             if (req.user.role == 'physiotherapist') {
-                const physiotherapist = await users.getUserByEmail(req.user.email)
-                const checkIfExercises = await exercises.getExercisesBySession(sessionID, physiotherapist.id)    
+                const checkIfExercises = await exercises.getExercisesBySession(sessionID)    
                 if (checkIfExercises.length >= 1) {
                     return res.status(409).send('Session has ongoing exercises')
                 }

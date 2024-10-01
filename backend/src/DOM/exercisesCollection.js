@@ -14,36 +14,30 @@ export default {
         return response.recordset
     },
 
-    // TODO: remove the session ID, the exercise ID is unique!
     /**
     * Get one exercise for a specific physiotherapy session
     * @param {Types.Exercise["id"]} exerciseID
-    * @param {Types.PhysiotherapySession["id"]} sessionID
     * @returns {Promise<Types.Exercise>}
     */
-    getExerciseByID: async function (exerciseID, sessionID) {
+    getExerciseByID: async function (exerciseID) {
         const response = await db.query(`
             SELECT TOP 1 e.* FROM [exercise] e
-            WHERE e.id = '${exerciseID}'
-            AND e.physiotherapySessionId = '${sessionID}';
+            WHERE e.id = '${exerciseID}';
         `)
         return response.recordset[0]
     },
 
-    // TODO: therapistID is redundat, session ID is unique
     /**
      * Get all exercises for a specific session and physiotherapist
      * @param {Types.PhysiotherapySession["id"]} sessionID 
-     * @param {Types.User["id"]} therapistID 
      * @returns {Promise<Array.<Types.Exercise>>}
      */
-    getExercisesBySession: async function (sessionID, therapistID) {
+    getExercisesBySession: async function (sessionID) {
         const response = await db.query(`
             SELECT e.* FROM [exercise] e
             INNER JOIN [physiotherapy_session] s ON e.physiotherapySessionId = s.id
             INNER JOIN [patient] p ON p.id = s.patientId
-            WHERE p.physiotherapistId = '${therapistID}'
-            AND s.id = '${sessionID}'
+            WHERE s.id = '${sessionID}'
             ORDER BY e.startTimestamp DESC;
         `)
         return response.recordset
@@ -65,18 +59,15 @@ export default {
         return response.recordset[0]
     },
 
-    // TODO: exercise ID is enough
     /**
      * Delete one exercise for given physiotherapy session
      * @param {Types.Exercise["id"]} exerciseID 
-     * @param {Types.PhysiotherapySession["id"]} sessionID 
      */
-    deleteOneExercise: async function (exerciseID, sessionID) {
+    deleteOneExercise: async function (exerciseID) {
         const response = await db.query(`
             DELETE e FROM [exercise] AS e
             INNER JOIN [physiotherapy_session] s ON s.id = e.physiotherapySessionId
-            WHERE e.id = '${exerciseID}'
-            AND s.id = '${sessionID}';
+            WHERE e.id = '${exerciseID}';
         `)
         return response
     }

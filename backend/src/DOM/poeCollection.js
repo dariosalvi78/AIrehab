@@ -19,11 +19,11 @@ export default {
     },
 
     /**
-     * Send video for POE
+     * Update POE results from processed video
      * @param {Promise<Types.Exercise["id"]>} exerciseID
      * @returns {Promise<Types.POEEvaluation>} mock results, update later
      */
-    sendEvaluation: async function (exerciseID) {
+    updateEvaluationResults: async function (exerciseID) {
         const response = await db.query(`
             INSERT INTO [poe_evaluation] 
             (id, exerciseId, posturalOrientation, score, scoreConfidence_0, scoreConfidence_1, scoreConfidence_2, repetition)
@@ -33,24 +33,20 @@ export default {
         return response.recordset
     },
 
-    // TODO: no need of the session ID because exrecise ID is unique
-
     /**
      * Update exercise with video and timestamp
-     * @param {Promise<Types.Exercise["physiotherapySessionId"]>} sessionID
      * @param {Promise<Types.Exercise["id"]>} exerciseID
      * @param {Promise<Types.Exercise["videoFile"]>} videoFile
      * @returns {Promise<Types.POEEvaluation>}
      */
-    updateExerciseVideo: async function (sessionID, exerciseID, videoFile) {
+    updateExerciseVideo: async function (exerciseID, videoFile) {
         const response = await db.query(`
             UPDATE e SET 
             videoFile = '${videoFile}',
             endTimestamp = CURRENT_TIMESTAMP
             OUTPUT Inserted.videoFile
             FROM [exercise] e
-            WHERE e.id = '${exerciseID}'
-            AND e.physiotherapySessionId = '${sessionID}';
+            WHERE e.id = '${exerciseID}';
         `)
         return response.recordset[0]
     },

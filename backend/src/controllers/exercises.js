@@ -24,11 +24,7 @@ export default {
             if (req.user.role == 'admin') {
                 results = await exercises.getExercises()
             } else if (req.user.role == 'physiotherapist' && sessionID) {
-                let user = await physiotherapist.getOneTherapistByEmail(req.user.email)
-                delete user.hashedPassword
-                delete user.email
-
-                results = await exercises.getExercisesBySession(sessionID, user.id)
+                results = await exercises.getExercisesBySession(sessionID)
             }
             res.send(results)
             return
@@ -113,7 +109,7 @@ export default {
                 })
             }
             await poe.deletePOEForExerciseByID(exerciseID)
-            await exercises.deleteOneExercise(exerciseID, sessionID)
+            await exercises.deleteOneExercise(exerciseID)
             logger.info({ data: { exerciseID } }, 'Deleted exercise permanently')
             return res.sendStatus(204)
         } catch (err) {
