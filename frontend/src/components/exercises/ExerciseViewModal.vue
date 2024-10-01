@@ -69,7 +69,7 @@
           <q-card-section>
             <div class="text-subtitle1">Postural orientation</div>
             <div class="text-body2">{{ poe.posturalOrientation }}</div>
-          </q-card-section>                
+          </q-card-section>
           <q-separator inset />
           <q-card-section>
             <div class="text-subtitle1">Repetition</div>
@@ -197,7 +197,7 @@ export default {
           await nicers.delay(300)
           const form = new FormData()
           form.append('uploaded_file', this.uploadedFile)
-
+          // TODO: rename sendPOE to sendVideo (or attachment) ?
           let results = await API.sendPOE(form, this.exerciseID, this.sessionID)
           if (results) {
             this.$q.notify({
@@ -205,6 +205,8 @@ export default {
               position: 'top',
               message: 'Video has been saved for exercise',
             })
+            // TODO: if you have the POE results you can show them instead of going back
+
             this.$router.go(-1)
           }
         } catch (err) {
@@ -227,7 +229,7 @@ export default {
         console.log(resp)
         if (resp) {
           this.exercise = resp
-        }    
+        }
       } catch (err) {
         return this.$q.notify({
           type: 'negative',

@@ -14,6 +14,7 @@ export default {
         return response.recordset
     },
 
+    // TODO: remove the session ID, the exercise ID is unique!
     /**
     * Get one exercise for a specific physiotherapy session
     * @param {Types.Exercise["id"]} exerciseID
@@ -29,6 +30,7 @@ export default {
         return response.recordset[0]
     },
 
+    // TODO: therapistID is redundat, session ID is unique
     /**
      * Get all exercises for a specific session and physiotherapist
      * @param {Types.PhysiotherapySession["id"]} sessionID 
@@ -63,6 +65,7 @@ export default {
         return response.recordset[0]
     },
 
+    // TODO: exercise ID is enough
     /**
      * Delete one exercise for given physiotherapy session
      * @param {Types.Exercise["id"]} exerciseID 

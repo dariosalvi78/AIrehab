@@ -33,6 +33,8 @@ export default {
         return response.recordset
     },
 
+    // TODO: no need of the session ID because exrecise ID is unique
+
     /**
      * Update exercise with video and timestamp
      * @param {Promise<Types.Exercise["physiotherapySessionId"]>} sessionID
@@ -57,7 +59,7 @@ export default {
      * Delete POE results for given exercise
      * @param {Types.Exercise["id"]} exerciseID 
      */
-      deletePOEForExerciseByID: async function (exerciseID) {
+    deletePOEForExerciseByID: async function (exerciseID) {
         const response = await db.query(`
             DELETE poe FROM [poe_evaluation] AS poe
             INNER JOIN [exercise] e ON poe.exerciseID = e.id
