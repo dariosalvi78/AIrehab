@@ -45,9 +45,9 @@ export default async (app, isAuth) => {
     app.post(`${API_PREFIX}/exercises`, isAuth, exercises.addNewExercise)
     app.delete(`${API_PREFIX}/exercises/:exerciseID`, isAuth, exercises.deleteExercise)
 
-    app.get(`${API_PREFIX}/poe/:sessionID/:exerciseID`, isAuth, poe.getEvaluation)
-    app.post(`${API_PREFIX}/poe/:sessionID/:exerciseID`, isAuth, poe.sendEvaluation)
+    app.get(`${API_PREFIX}/poe/:exerciseID`, isAuth, poe.getEvaluation)
+    app.post(`${API_PREFIX}/poe/:exerciseID`, isAuth, poe.sendEvaluation)
 
     app.get(`${API_PREFIX}/attachments/:exerciseID`, isAuth, attachments.getExerciseFile)
-    app.post(`${API_PREFIX}/attachments/:exerciseID`, isAuth, attachments.sendExerciseFile)
+    app.post(`${API_PREFIX}/attachments/:exerciseID`, isAuth, attachments.uploadExerciseFile)
 }

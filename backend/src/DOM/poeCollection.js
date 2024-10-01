@@ -5,15 +5,13 @@ export default {
     /**
      * Get POE from exercise
      * @param {Promise<Types.Exercise["id"]>} exerciseID
-     * @param {Promise<Types.Exercise["physiotherapySessionId"]>} sessionID
      * @returns {Promise<Types.POEEvaluation>}
      */
-    getEvaluationFromID: async function (exerciseID, sessionID) {
+    getEvaluationFromID: async function (exerciseID) {
         const response = await db.query(`
             SELECT poe.*, e.videoFile FROM [poe_evaluation] poe
             INNER JOIN [exercise] e ON poe.exerciseID = e.id
-            WHERE poe.exerciseID = '${exerciseID}'
-            AND e.physiotherapySessionId = '${sessionID}';
+            WHERE poe.exerciseID = '${exerciseID}';
         `)
         return response.recordset[0]
     },
@@ -29,24 +27,6 @@ export default {
             (id, exerciseId, posturalOrientation, score, scoreConfidence_0, scoreConfidence_1, scoreConfidence_2, repetition)
             OUTPUT Inserted.id, Inserted.posturalOrientation, Inserted.score, Inserted.scoreConfidence_0, Inserted.scoreConfidence_1, Inserted.scoreConfidence_2, Inserted.repetition
             VALUES(NEWID(), '${exerciseID}', 'kneeMedialToFootPosition', 1, 87.5, 0, 0, 0);
-        `)
-        return response.recordset
-    },
-
-    /**
-     * Update exercise with video and timestamp
-     * @param {Promise<Types.Exercise["id"]>} exerciseID
-     * @param {Promise<Types.Exercise["videoFile"]>} videoFile
-     * @returns {Promise<Types.POEEvaluation>}
-     */
-    updateExerciseVideo: async function (exerciseID, videoFile) {
-        const response = await db.query(`
-            UPDATE e SET 
-            videoFile = '${videoFile}',
-            endTimestamp = CURRENT_TIMESTAMP
-            OUTPUT Inserted.videoFile
-            FROM [exercise] e
-            WHERE e.id = '${exerciseID}';
         `)
         return response.recordset[0]
     },

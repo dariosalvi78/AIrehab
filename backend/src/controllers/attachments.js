@@ -14,15 +14,13 @@ export default {
      * Get video for one exercise in physiotherapy session
      * @param {Object} req - express request
      * @param {Object} req.params - exerciseID
-     * @param {Object} req.query videoFilename
      * @param {Object} res - express response
      * @returns {Promise<Types.Exercise>}
     */
     getExerciseFile: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let exerciseID = req.params.exerciseID, videoFile = req.query.videoFilename
+        let exerciseID = req.params.exerciseID
         try {
-            // TODO: add some validation
             const exercise = await exercises.getExerciseByID(exerciseID)
             if (!exercise.videoFile) return res.status(400).send('Video with given filename does not exist')
 
@@ -35,14 +33,14 @@ export default {
     },
 
     /**
-     * Send video for evaluation, updates exercise
+     * Upload exercise video for POE evaluation
      * @param {Object} req - express request
      * @param {Object} req.params exerciseID
      * @param {Object} req.body uploadedFile
      * @param {Object} res - express response
      * @returns {Promise<Types.Exercise["videoFile"]>} video file
      */
-    sendExerciseFile: async (req, res) => {
+    uploadExerciseFile: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let exerciseID = req.params.exerciseID
         try {
@@ -61,37 +59,30 @@ export default {
             const form = formidable()
             return new Promise(async (resolve, reject) => {
                 form.parse(req)
-                form.on('error', (err) => {
-                    // TODO: delete filename and timestamp if any
-
+                form.on('error', async (err) => {
+                    await exercises.updateExerciseVideo(exerciseID, { fileName: null, endTimestamp: null })
                     logger.error({ error: err }, 'Cannot save file: ')
                     res.sendStatus(500)
                     reject()
                     return
                 })
-                form.on('fileBegin', (formName, file) => {
+                form.on('fileBegin', async (formName, file) => {
                     if (!file) return res.sendStatus(500)
                     console.log(file.mimetype.slice(6))
                     filename = file.newFilename + '_' + Date.now() + '.' + file.mimetype.slice(6)
                     file.filepath = directory + '/exercise_' + filename
-                    // TODO: consider updating the filename and timestamp on the DB at this stage
                 })
                 form.on('end', async () => {
-                    const file_name = await poe.updateExerciseVideo(exerciseID, filename)
-                    if (file_name) {
-                        // TODO: get POE from algorithms in a separate call
-                        // TODO: save the POE results in the table in a separate call
-                        // poe.sendVideoForEvaluation()
-                        const poe_results = await poe.updateEvaluationResults(exerciseID)
-                        // TODO: send the POE evaluation back instead of the filename
-                        res.send(poe_results)
+                    const video = await exercises.updateExerciseVideo(exerciseID, { fileName: filename, endTimestamp: 'CURRENT_TIMESTAMP' })
+                    if (video) {
+                        res.send(video)
                         resolve()
                         return
                     }
                 })
             })
         } catch (err) {
-            logger.error({ error: err }, 'error saving POE: ')
+            logger.error({ error: err }, 'error uploading attachments: ')
             res.sendStatus(500)
             return
         }
