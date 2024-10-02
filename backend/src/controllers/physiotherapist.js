@@ -42,11 +42,17 @@ export default {
         try {
             let patient
             if (req.user.role == 'physiotherapist') {
+                const isAssignedTo = await physiotherapist.getOnePatientByID(req.params.patientID)
+                if (isAssignedTo.physiotherapistEmail !== req.user.email) {
+                    return res.sendStatus(403)
+                }
                 patient = await physiotherapist.getOnePatientByEmail(req.user.email, req.params.patientID)
             } else if (req.user.role == 'admin') {
                 patient = await physiotherapist.getOnePatientByID(req.params.patientID)
             }
-            if (!patient["sessionID"]) delete patient.sessionID
+            if (!patient) return res.sendStatus(404)
+            else if (!patient["sessionID"]) delete patient.sessionID
+
             return res.send(patient)
         } catch (err) {
             logger.error({ error: err }, 'error getting patient: ')
