@@ -1,11 +1,11 @@
 
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import sessions from "../DOM/physiotherapySessionCollection.js"
-import users from "../DOM/usersCollection.js"
 import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
 import config from '../utils/config.js'
 import fs from 'node:fs'
+import physiotherapistCollection from '../DOM/physiotherapistCollection.js'
 
 export default {
 
@@ -63,10 +63,14 @@ export default {
      * @returns {Promise<Types.PhysiotherapySession>} added session
      */
     addNewSession: async (req, res) => {
-        if (!req.user) return res.sendStatus(403)
+        if (!req.user || !req.query.patientID) return res.sendStatus(403)
         let patientID = req.query.patientID
 
         try {
+            if (req.user.role == 'physiotherapist') {
+                const isAssignedTo = await physiotherapistCollection.getOnePatientByEmail(req.user.email, patientID)
+                if (!isAssignedTo) return res.sendStatus(403)    
+            }
             const addedSession = await sessions.createSession(patientID)
             delete addedSession.patientId
 
