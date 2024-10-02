@@ -120,7 +120,8 @@ export default {
         let body = req.body
         try {
             let patient = await physiotherapist.getOnePatientByID(req.params.patientID)
-            if (patient.sessionID) {
+            if (patient.physiotherapistId !== body.physiotherapistID) return res.sendStatus(403)
+            else if (patient.sessionID) {
                 return res.status(409).send('Patient is part of a session')
             }
 
@@ -145,6 +146,9 @@ export default {
         if (!req.user) return res.sendStatus(403)
         let patient = req.body
         try {
+            const isAssignedTo = await physiotherapist.getOnePatientByID(req.params.patientID)
+            if (req.user.role == 'physiotherapist' && req.user.email !== isAssignedTo.physiotherapistEmail) return res.sendStatus(403)
+
             if (!patient.fullName || !patient.dateOfBirth) {
                 return res.status(400).send('Please enter required fields')
             }
