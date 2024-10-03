@@ -1,12 +1,11 @@
 
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import exercises from "../DOM/exercisesCollection.js"
-import physiotherapist from "../DOM/physiotherapistCollection.js"
+import sessions from '../DOM/physiotherapySessionCollection.js'
 import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
 import config from '../utils/config.js'
 import fs from 'node:fs'
-import path from 'node:path'
 
 export default {
 
@@ -24,6 +23,8 @@ export default {
             if (req.user.role == 'admin') {
                 results = await exercises.getExercises()
             } else if (req.user.role == 'physiotherapist' && sessionID) {
+                const isAssignedTo = await sessions.getSessionByID(sessionID)
+                if (!isAssignedTo) return res.sendStatus(403)
                 results = await exercises.getExercisesBySession(sessionID)
             }
             res.send(results)
@@ -43,12 +44,17 @@ export default {
      * @returns {Promise<Types.Exercise>}
     */
     getExercise: async (req, res) => {
-        if (!req.user) return res.sendStatus(403)
-        let exerciseID = req.params.exerciseID
+        if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
+        let results, exerciseID = req.params.exerciseID
         try {
-            if (!exerciseID) return res.sendStatus(400)
-            const exercise = await exercises.getExerciseByID(exerciseID)
-            return res.send(exercise)
+            if (req.user.role == 'admin') {
+                results = await exercises.getExerciseByID(exerciseID)
+            } else if (req.user.role == 'physiotherapist') {
+                results = await exercises.getOneExerciseByEmail(exerciseID, req.user.email)
+                if (results.physiotherapistEmail !== req.user.email) return res.sendStatus(403)
+                delete results.physiotherapistEmail
+            }
+            return res.send(results)
         } catch (err) {
             logger.error({ error: err }, 'error getting exercise: ')
             res.sendStatus(500)
