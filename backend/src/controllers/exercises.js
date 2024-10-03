@@ -73,9 +73,12 @@ export default {
         if (!req.user) return res.sendStatus(403)
         let exercise = req.body
         try {
-            if (!exercise || !exercise.sessionID) {
-                return res.status(400).send('Please enter required fields')
+            if (req.user.role == 'physiotherapist') {
+                const sessionAssignedTo = await sessions.getSessionByID(exercise.sessionID, req.user.email)
+                if (sessionAssignedTo.id !== exercise.sessionID) return res.sendStatus(403)
             }
+
+            if (!exercise || !exercise.sessionID) return res.status(400).send('Please enter required fields')
 
             const addedExercise = await exercises.createExercise(exercise.sessionID, exercise)
             delete addedExercise.type
