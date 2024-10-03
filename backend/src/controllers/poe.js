@@ -50,7 +50,7 @@ export default {
             // TODO: get POE from algorithms in a separate call
             // TODO: save the POE results in the table in a separate call
             // poe.sendVideoForEvaluation()
-            await new Promise(res => setTimeout(res, 10000))
+
             const poe_results = await poe.updateEvaluationResults(exerciseID)
             return res.send(poe_results)
         } catch (err) {
