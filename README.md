@@ -90,4 +90,12 @@ See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-
 
 ## Tests
 
+```bash
+npm run test
+```
 
+Or if you want to run tests during development
+
+```bash
+npm run test:watch
+```
