@@ -23,7 +23,7 @@ export default {
             if (req.user.role == 'admin') {
                 results = await exercises.getExercises()
             } else if (req.user.role == 'physiotherapist' && sessionID) {
-                const isAssignedTo = await sessions.getSessionByID(sessionID)
+                const isAssignedTo = await sessions.getSessionByID(sessionID, req.user.email)
                 if (!isAssignedTo) return res.sendStatus(403)
                 results = await exercises.getExercisesBySession(sessionID)
             }
