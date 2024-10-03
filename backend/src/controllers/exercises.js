@@ -110,6 +110,13 @@ export default {
         if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
         let videoName = req.body.videoFile, exerciseID = req.params.exerciseID, sessionID = req.query.sessionID
         try {
+            if (req.user.role == 'physiotherapist') {
+                const sessionAssignedTo = await sessions.getSessionByID(sessionID, req.user.email)
+                if (sessionAssignedTo.id !== sessionID) return res.sendStatus(403)
+            }
+
+            if (!req.body || !exerciseID || !sessionID) return res.sendStatus(400)
+
             let directory = config.uploads.base_path + '/session_' + sessionID
             let fullPath = directory + '/exercise_' + videoName
             if (fs.existsSync(fullPath)) {
