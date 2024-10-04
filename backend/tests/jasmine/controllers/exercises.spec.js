@@ -3,32 +3,13 @@ import exercisesCollection from '../../../src/DOM/exercisesCollection.js'
 import poeCollection from '../../../src/DOM/poeCollection.js'
 import exercises from '../../../src/controllers/exercises.js'
 import config from '../../../src/utils/config.js'
+import mock from '../../mock_data.js'
 
 beforeAll(function () {
-    this.physiotherapist = {
-        id: 1,
-        email: 'email@test.com',
-        hashedPassword: 'password',
-        role: 'physiotherapist',
-        createdTimestamp: new Date().toISOString()
-    }
-    this.patient = {
-        id: 2,
-        names: 'test name',
-        dateOfBirth: new Date().toISOString()
-    }
-    this.sessions = [
-        {
-            sessionID: 1,
-            sessionStartTimestamp: new Date().toISOString(),
-            patientId: this.patient.id,
-            numOfExercises: 1
-        }
-    ]
-    this.exercises = [
-        { id: 1, type: 'test', notes: 'exercise 1...', videoFile: 'filename.mp4' },
-        { id: 2, type: 'test2', notes: 'exercise 2...', videoFile: 'filename.mp4' }
-    ]
+    this.physiotherapist = mock.physiotherapist
+    this.patient = mock.patient
+    this.sessions = mock.sessions
+    this.exercises = mock.exercises
 })
 
 describe('getExercises access:', function () {

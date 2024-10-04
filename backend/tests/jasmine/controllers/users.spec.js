@@ -5,16 +5,11 @@ import logger from "../../../src/utils/logger.js"
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import physiotherapistCollection from '../../../src/DOM/physiotherapistCollection.js'
+import mock from '../../mock_data.js'
 
 beforeAll(async function () {
     await spyOnAllFunctions(logger)
-    this.physiotherapist = {
-        id: 1,
-        email: 'email@test.com',
-        hashedPassword: 'password',
-        role: 'physiotherapist',
-        createdTimestamp: new Date().toISOString()
-    }
+    this.physiotherapist = mock.physiotherapist
 })
 
 describe('addNewUser access:', function () {

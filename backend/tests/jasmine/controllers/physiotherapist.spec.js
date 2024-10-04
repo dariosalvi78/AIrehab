@@ -1,18 +1,10 @@
 import physiotherapist from '../../../src/controllers/physiotherapist.js'
 import physiotherapistCollection from '../../../src/DOM/physiotherapistCollection.js'
+import mock from '../../mock_data.js'
 
 beforeAll(function () {
-    this.physiotherapist = {
-        id: 1,
-        email: 'email@test.com',
-        hashedPassword: 'password',
-        role: 'physiotherapist',
-        createdTimestamp: new Date().toISOString()
-    }
-    this.patient = {
-        id: 2,
-        names: 'test name'
-    }
+    this.physiotherapist = mock.physiotherapist
+    this.patient = mock.patient
 })
 
 describe('addNewPatient access:', function () {

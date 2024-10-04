@@ -3,28 +3,12 @@ import physiotherapySession from '../../../src/controllers/physiotherapySession.
 import sessions from '../../../src/DOM/physiotherapySessionCollection.js'
 import exercisesCollection from '../../../src/DOM/exercisesCollection.js'
 import config from '../../../src/utils/config.js'
+import mock from '../../mock_data.js'
 
 beforeAll(function () {
-    this.physiotherapist = {
-        id: 1,
-        email: 'email@test.com',
-        hashedPassword: 'password',
-        role: 'physiotherapist',
-        createdTimestamp: new Date().toISOString()
-    }
-    this.patient = {
-        id: 2,
-        names: 'test name',
-        dateOfBirth: new Date().toISOString()
-    }
-    this.sessions = [
-        {
-            sessionID: 1,
-            sessionStartTimestamp: new Date().toISOString(),
-            patientId: this.patient.id,
-            numOfExercises: 1
-        }
-    ]
+    this.physiotherapist = mock.physiotherapist
+    this.patient = mock.patient
+    this.sessions = mock.sessions
 })
 
 describe('getSessions access:', function () {

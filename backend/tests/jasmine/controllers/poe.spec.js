@@ -1,26 +1,15 @@
+import sessions from '../../../src/DOM/physiotherapySessionCollection.js'
 import exercisesCollection from '../../../src/DOM/exercisesCollection.js'
 import poeCollection from '../../../src/DOM/poeCollection.js'
+import exercises from '../../../src/controllers/exercises.js'
+import config from '../../../src/utils/config.js'
 import poe from '../../../src/controllers/poe.js'
+import mock from '../../mock_data.js'
 
 beforeAll(function () {
-    this.physiotherapist = {
-        id: 1,
-        email: 'email@test.com',
-        hashedPassword: 'password',
-        role: 'physiotherapist',
-        createdTimestamp: new Date().toISOString()
-    }
-    this.exercises = [
-        { id: 1, type: 'test', notes: 'exercise 1...', videoFile: 'filename.mp4' },
-        { id: 2, type: 'test2', notes: 'exercise 2...', videoFile: 'filename.mp4' }
-    ]
-    this.poe = {
-        id: 1,
-        exerciseId: this.exercises[0].id,
-        patientId: 2,
-        score: 0,
-        posturalOrientation: 'kneeMedialToFootPosition'
-    }
+    this.physiotherapist = mock.physiotherapist
+    this.exercises = mock.exercises
+    this.poe = mock.poe
 })
 
 describe('getEvaluation access:', function () {
@@ -118,7 +107,6 @@ describe('sendEvaluation access:', function () {
     })
     it('cant send evaluation if no video exist', async function () {
         let exercise = this.exercises[0]
-        delete exercise.videoFile
         spyOn(exercisesCollection, 'getExerciseByID').and.returnValue(exercise)
         await poe.sendEvaluation({
             user: this.physiotherapist,
