@@ -5,7 +5,7 @@ import sessions from '../DOM/physiotherapySessionCollection.js'
 import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
 import config from '../utils/config.js'
-import fs from 'node:fs'
+import files from '../utils/fileHandler.js'
 
 export default {
 
@@ -117,15 +117,10 @@ export default {
 
             if (!req.body || !exerciseID || !sessionID) return res.sendStatus(400)
 
-            let directory = config.uploads.base_path + '/session_' + sessionID
-            let fullPath = directory + '/exercise_' + videoName
-            if (fs.existsSync(fullPath)) {
-                fs.unlink(fullPath , (err) => {
-                    if (err) logger.error({ error: err }, 'cannot remove video: ')
-                })
-            }
+            await files.deleteVideo(sessionID, videoName)
             await poe.deletePOEForExerciseByID(exerciseID)
             await exercises.deleteOneExercise(exerciseID)
+
             logger.info({ data: { exerciseID } }, 'Deleted exercise permanently')
             return res.sendStatus(204)
         } catch (err) {

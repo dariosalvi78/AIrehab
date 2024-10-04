@@ -6,6 +6,7 @@ import logger from "../utils/logger.js"
 import config from '../utils/config.js'
 import fs from 'node:fs'
 import physiotherapistCollection from '../DOM/physiotherapistCollection.js'
+import files from '../utils/fileHandler.js'
 
 export default {
 
@@ -102,11 +103,7 @@ export default {
                     return res.status(409).send('Session has ongoing exercises')
                 }
             }
-            let directory = config.uploads.base_path + '/session_' + sessionID
-            fs.rmdir(directory, (err) => {
-                if (err) logger.error({ error: err }, 'cannot remove folder: ')
-            })
-
+            await files.closeDirectory(sessionID)
             await sessions.deleteOneSession(sessionID)
             logger.info({ data: { sessionID } }, 'Deleted session permanently')
             return res.sendStatus(204)

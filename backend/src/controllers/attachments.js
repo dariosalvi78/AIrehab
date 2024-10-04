@@ -8,6 +8,7 @@ import { mkdir } from 'fs/promises'
 import fs from 'node:fs'
 import config from '../utils/config.js'
 import path from 'path'
+import files from '../utils/fileHandler.js'
 
 export default {
     /**
@@ -47,40 +48,11 @@ export default {
             const exercise = await exercises.getExerciseByID(exerciseID)
             if (!exercise) return res.status(404).send('Exercise does not exist')
 
-            let filename = undefined
-            let directory = config.uploads.base_path + '/session_' + exercise.physiotherapySessionId
-
-            if (!fs.existsSync(directory)) {
-                await mkdir(directory, { recursive: true })
-            }
-
             if (exercise.videoFile && exercise.endTimestamp) return res.status(400).send('Video has already been uploaded')
-
-            const form = formidable()
-            return new Promise(async (resolve, reject) => {
-                form.parse(req)
-                form.on('error', async (err) => {
-                    await exercises.updateExerciseVideo(exerciseID, { fileName: null, endTimestamp: null })
-                    logger.error({ error: err }, 'Cannot save file: ')
-                    res.sendStatus(500)
-                    reject()
-                    return
-                })
-                form.on('fileBegin', async (formName, file) => {
-                    if (!file) return res.sendStatus(500)
-                    console.log(file.mimetype.slice(6))
-                    filename = file.newFilename + '_' + Date.now() + '.' + file.mimetype.slice(6)
-                    file.filepath = directory + '/exercise_' + filename
-                })
-                form.on('end', async () => {
-                    const video = await exercises.updateExerciseVideo(exerciseID, { fileName: filename, endTimestamp: 'CURRENT_TIMESTAMP' })
-                    if (video) {
-                        res.send(video)
-                        resolve()
-                        return
-                    }
-                })
-            })
+                
+            let video = await files.saveVideo(exercise.physiotherapySessionId, exercise.id, req)
+            if (!video) return res.sendStatus(500)
+            return res.send(video)
         } catch (err) {
             logger.error({ error: err }, 'error uploading attachments: ')
             res.sendStatus(500)
