@@ -122,7 +122,12 @@ let API = {
   async uploadFile (uploadedFile, exerciseID) {
     let response = await axios.post(URL_PRE + '/attachments/' + exerciseID, uploadedFile, { headers: { 'Content-Type': 'multipart/form-data' } })
     return response.data
-  }
+  },
+
+  async sendEmail (email, subject, content) {
+    let response = await axios.post(URL_PRE + '/email/', { email, subject, content })
+    return response.data
+  },
 }
 
 export default API

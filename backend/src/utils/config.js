@@ -21,6 +21,11 @@ const config = {
     },
     uploads: {
         base_path: process.env.BASE_PATH_UPLOADS
+    },
+    mailer: {
+        host: process.env.MAIL_HOST,
+        port: process.env.MAIL_PORT,
+        from_address: process.env.MAIL_SENDER
     }
 }
 

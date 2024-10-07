@@ -167,5 +167,21 @@ export default {
             res.sendStatus(500)
             return
         }
+    },
+
+    sendEmail: async (req, res) => {
+        if (req.user.role !== 'admin') return res.sendStatus(403)
+        const { email, subject, content } = req.body
+        try {
+            const user = await users.getUserByEmail(email)
+            if (!user) return res.sendStatus(404)
+
+            await mailer.send(email, subject, content)
+            return res.sendStatus(200)
+        } catch (err) {
+            logger.error({ error: err }, 'error sending email: ')
+            res.sendStatus(500)
+            return
+        }
     }
 }

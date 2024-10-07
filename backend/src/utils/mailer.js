@@ -17,8 +17,8 @@ export default {
     await nodemailer.createTestAccount((err, account) => {
       if (err) logger.error(`failed to create test email: ${err}`)
       transport_config = {
-        host: config.mailer.host,
-        port: config.mailer.port,
+        host: 'smtp.ethereal.email',
+        port: 587,
         auth: {
           user: account.user,
           pass: account.pass
@@ -43,6 +43,23 @@ export default {
         Email: ${recipient}\n
         Password: ${password}
       `
+    }
+
+    await sendEmail(options)
+  },
+  /**
+   * Send custom email
+   * @param {String} recipient
+   * @param {String} subject
+   * @param {String} content
+   */
+  send: async (recipient, subject, content) => {
+
+    const options = {
+      from: config.mailer.from_address,
+      to: recipient,
+      subject: subject,
+      html: content
     }
 
     await sendEmail(options)
