@@ -5,6 +5,7 @@ import { signAccessToken } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"
 import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
+import mailer from '../utils/mailer.js'
 
 export default {
     /**
@@ -122,9 +123,7 @@ export default {
         }
 
         try {
-            // send email to email address with the provided password
-            // await sendPhysioEmailCreated(body.email, body.password);
-
+            await mailer.sendPhysiotherapistEmailCreated(body.email, body.password)
             let hash = bcrypt.hashSync(body.password, 8)
             const user = await users.createUser(body.email, hash, body.role)
             logger.info({ data: user }, 'new user created: ')

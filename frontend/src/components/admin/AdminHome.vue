@@ -20,6 +20,7 @@
       <q-card class="q-pl-mx" style="min-width: 350px">
         <q-card-section>
           <div class="text-h6">New Physiotherapist</div>
+          <div class="text-body2">Account details will be sent to the specified email</div>
         </q-card-section>
         <q-form class="q-px-lg">
           <q-input
@@ -101,28 +102,29 @@ export default {
   methods: {
      async addNewUser () {
       try {
+        const createdNotify = this.$q.notify({
+          group: false,
+          color: 'secondary',
+          position: 'top',
+          message: 'Sending email, please wait',
+          spinner: true
+        })
         let user = this.new
         let resp = await API.addUser(user.role, user.email, user.password)
         if (resp) {
-          this.$q.notify({
+          return createdNotify({
             type: 'positive',
-            position: 'top',
-            message: 'Physiotherapist created: ' + user.email,
+            color: 'positive',
+            message: 'Physiotherapist created: ' + resp.data.newUser.email,
+            spinner: false
           })
         }
       } catch (e) {
-        if (e.status === 409) {
-          return this.$q.notify({
-            color: 'negative',
-            position: 'top',
-            message: 'User registration failed: ' + e.response.data,
-            icon: 'report_problem'
-          })
-        }
-        this.$q.notify({
+        let errorMsg = e.status === 409 ? e.response.data : e
+        return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'User registration failed' + e,
+          message: 'User registration failed: ' + errorMsg,
           icon: 'report_problem'
         })
       }
