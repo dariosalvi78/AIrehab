@@ -24,17 +24,17 @@
             </q-file>
             <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
             </form>
-              <div class="col">
+              <div class="video-container col">
               <video v-if="isRecording" ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
                   <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
               </video>
             </div>
-            <div class="col" v-show="uploadedFile">
+            <div class="video-container col" v-show="uploadedFile">
               <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
             </div>
             <div class="q-mt-md text-body1" v-if="uploadedFile">Recorded: {{formatModifiedDate}}</div>
-            <q-btn :disabled="!uploadedFile" class="q-mt-md" label="Save video" color="secondary" size="md" icon-right="camera" @click="saveVideo" />
+            <q-btn :disabled="!uploadedFile" class="q-mt-md" label="Upload video" color="secondary" size="md" icon-right="camera" @click="saveVideo" />
           </q-card-section>
         </q-card>
       </div>
@@ -76,10 +76,12 @@
             <div class="text-body2">{{ poe.repetition }}</div>
           </q-card-section>
         </q-card>
-        <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
-          <source :src="getVideoPathForExercise" type="video/mp4">
-          Your browser does not support HTML5 video.
-        </video>
+        <div class="q-pa-lg video-container">
+          <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
+            <source :src="getVideoPathForExercise" type="video/mp4">
+            Your browser does not support HTML5 video.
+          </video>
+        </div>
       </div>
     </q-page>
   </q-page-container>
@@ -281,15 +283,23 @@ export default {
 .exercise-card {
   max-width: 350px;
 }
-video {
-  max-width: 100%;
-  height: 400px;
-  object-fit: cover;
-  margin-top: 1em;
+.video-container {
+  max-width: 60%;
+  margin: 0 auto;
+}
+.video-container video {
+  width: 100%;
+  height: auto;
 }
 .evaluation-card {
   margin: 0 auto;
   max-width: 400px;
   width: 100%;
+}
+
+@media only screen and (max-width: 550px) {
+  .video-container {
+    max-width: 100%;
+  }
 }
 </style>
