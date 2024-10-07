@@ -11,6 +11,7 @@ import { authenticateToken, createAdmin } from './utils/tokenAuth.js'
 import cookieParser from 'cookie-parser'
 import connection from './db/dbConnection.js'
 import db from './db/dbDriver.js'
+import mailer from './utils/mailer.js'
 
 
 (async () => {
@@ -24,6 +25,7 @@ import db from './db/dbDriver.js'
     app.use(cookieParser())
 
     await db.init(connection.msSQLConnection)
+    await mailer.init()
 
     if (config.admin) await createAdmin()
 
