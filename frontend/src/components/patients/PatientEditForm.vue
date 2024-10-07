@@ -114,6 +114,7 @@ import nicers from '../../utils/nicers'
 export default {
     name: 'PatientEditForm',
     props: { formMode: String, user: Object },
+    emits: ['addNewPatient', 'editPatient'],
     data () {
         return {
             new: {
@@ -154,7 +155,7 @@ export default {
                 injuries: this.new.injuries
             }
             if (this.mode == 'adminNew') userSubmitted.physiotherapistEmail = this.physiotherapistEmail
-            if (this.mode === 'new' || this.mode == 'adminNew') this.$emit('addNewUser', userSubmitted)
+            if (this.mode === 'new' || this.mode == 'adminNew') this.$emit('addNewPatient', userSubmitted)
             else if (this.mode === 'edit' || this.mode === 'adminEdit') this.$emit('editPatient', userSubmitted)
             this.$refs.qDialog.hide()
             this.resetForm()

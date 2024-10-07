@@ -14,50 +14,13 @@
       :user="{}"
       formMode="adminNew" 
       v-model="newPatientPrompt" 
-      @addNewUser="addNewPatient"
+      @addNewPatient="addNewPatient"
     />
-    <q-dialog v-model="newUserPrompt">
-      <q-card class="q-pl-mx" style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">New Physiotherapist</div>
-          <div class="text-body2">Account details will be sent to the specified email</div>
-        </q-card-section>
-        <q-form class="q-px-lg">
-          <q-input
-            class="q-my-lg"            
-            filled
-            v-model="this.new.email"
-            label="Email"
-            hint="e.g. user@email.com"
-          />
-          <q-input
-            class="q-my-lg"            
-            filled
-            v-model="this.new.password"
-            label="Password"
-            type="password"
-            hint="Password for physiotherapist"
-          />
-           <q-input
-            class="q-my-lg"            
-            filled
-            v-model="this.new.passwordConfirm"
-            label="Confirm password"
-            type="password"
-            hint="Must be the same password"
-          />
-          <!-- <q-option-group
-            :options="optionsRadio"
-            type="radio"
-            v-model="this.new.role"
-          /> -->
-        </q-form>
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn label="Submit" type="submit" color="primary" v-close-popup class="q-ml-sm" @click="addNewUser()"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <new-user-form 
+      role="physiotherapist" 
+      v-model="newUserPrompt" 
+      @newUser="addNewUser"
+    />
     <admin-user-table 
       :users="users" 
       @getUsers="getUsers()"
@@ -71,27 +34,20 @@
 
 <script>
 import API from '../../API.js'
+import NewUserForm from '../NewUserForm.vue'
 import PatientEditForm from '../patients/PatientEditForm.vue'
 import AdminSessionsTable from './AdminSessionsTable.vue'
 import AdminUserTable from './AdminUserTable.vue'
 
 export default {
-  components: { AdminUserTable, AdminSessionsTable, PatientEditForm },
+  components: { AdminUserTable, AdminSessionsTable, PatientEditForm, NewUserForm },
   name: 'AdminHome',
   data () {
     return {
       users: [],
       sessions: [],
       newUserPrompt: false,
-      newPatientPrompt: false,
-      new: {
-        role: 'physiotherapist',
-        email: undefined,
-        password: undefined
-      },
-      optionsRadio: [
-        { label: 'Physiotherapist', value: 'physiotherapist' },
-      ]
+      newPatientPrompt: false
     }
   },
   async created () {
@@ -100,19 +56,19 @@ export default {
     await this.getSessions()
   },
   methods: {
-     async addNewUser () {
+     async addNewUser (newUser) {
+      const createdNotify = this.$q.notify({
+        group: false,
+        color: 'secondary',
+        position: 'top',
+        message: 'Sending email, please wait',
+        spinner: true
+      })
       try {
-        const createdNotify = this.$q.notify({
-          group: false,
-          color: 'secondary',
-          position: 'top',
-          message: 'Sending email, please wait',
-          spinner: true
-        })
-        let user = this.new
+        let user = newUser
         let resp = await API.addUser(user.role, user.email, user.password)
         if (resp) {
-          return createdNotify({
+          createdNotify({
             type: 'positive',
             color: 'positive',
             message: 'Physiotherapist created: ' + resp.data.newUser.email,
@@ -121,11 +77,12 @@ export default {
         }
       } catch (e) {
         let errorMsg = e.status === 409 ? e.response.data : e
-        return this.$q.notify({
+        return createdNotify({
           color: 'negative',
           position: 'top',
           message: 'User registration failed: ' + errorMsg,
-          icon: 'report_problem'
+          icon: 'report_problem',
+          spinner: false
         })
       }
       await this.getUsers()

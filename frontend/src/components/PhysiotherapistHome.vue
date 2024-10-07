@@ -14,7 +14,7 @@
               :user="{}"
               formMode="new" 
               v-model="newUserPrompt" 
-              @addNewUser="addNewUser"
+              @addNewPatient="addNewUser"
             />
             <q-dialog v-model="exercisePrompt" persistent>
               <q-card class="q-pl-mx" style="min-width: 350px">
