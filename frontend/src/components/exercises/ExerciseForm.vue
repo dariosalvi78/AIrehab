@@ -2,7 +2,7 @@
   <q-dialog ref="qDialog">
     <q-card class="q-pl-mx" style="min-width: 350px">
       <q-card-section>
-        <div class="text-h6">Add exercise</div>
+        <div class="text-h6"> {{this.formMode == 'new' ? 'Add exercise' : 'Edit exercise'}}</div>
       </q-card-section>
       <q-form class="q-px-sm">
         <q-select
@@ -22,6 +22,14 @@
           label="Notes"
           type="textarea"
           hint="Optional. Notes for exercise"
+        />
+        <q-input
+          class="q-my-md"
+          filled
+          v-if="this.formMode == 'edit' && this.selectedExercise.videoFile"
+          v-model="this.selectedExercise.videoFile"
+          label="Uploaded video"
+          readonly
         />
     </q-form>
       <q-card-actions align="right" class="text-primary">
@@ -45,6 +53,7 @@ import { ref } from 'vue'
 
 export default {
     name: 'ExerciseForm',
+    props: { formMode: String, selectedExercise: Object },
     emits: ['newExercise'],
     data () {
       return {
@@ -59,12 +68,18 @@ export default {
         qDate: ref()
       }
    },
-   mounted () {
+   async updated () {
     this.resetForm()
+    if (this.formMode == 'edit' ) await this.populateEdit()
 
     exerciseEnums.types.map((type, i) => {
       this.exerciseTypes[i] = exerciseEnums.typeToAsc(type)
     })
+   },
+   watch: {
+    async selectedExercise () {
+        await this.populateEdit()
+      }
    },
    methods: {
     formSubmit () {
@@ -73,6 +88,7 @@ export default {
         notes: this.exercise.notes ? this.exercise.notes : '',
         // startTimestamp: this.exercise.startTimestamp ? this.exercise.startTimestamp : null,
       }
+      if (this.formMode == 'edit') submittedExercise["exerciseID"] = this.selectedExercise.id
       this.$emit('newExercise', submittedExercise)
       this.$refs.qDialog.hide()
       this.resetForm()
@@ -85,6 +101,12 @@ export default {
     },
     dateRestrictions (qDate) {
       return nicers.formDatetimeValidation(qDate, 'exercise')
+    },
+    populateEdit () {
+      if (this.selectedExercise) {
+        this.exercise.type = this.selectedExercise.type
+        this.exercise.notes = this.selectedExercise.notes
+      }
     }
    }
 }

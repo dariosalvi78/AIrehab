@@ -10,7 +10,8 @@
             <q-card class="q-ma-lg exercise-card">
               <q-card-section class="row">
                 <div class="col-11">
-                  <q-btn label="Go to exercise" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
+                  <q-btn class="q-mr-sm" label="Go to exercise" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
+                  <q-btn class="q-my-sm" label="Edit exercise" dense color="primary" size="sm" icon-right="edit" @click="$emit('openExerciseModal', exercise)"/>
                   <div class="text-h6">{{ exercise.type ? exercise.type : 'Exercise' }}
                     <q-icon v-if="exercise.videoFile" size="sm" name="video_file" />
                   </div>
@@ -50,7 +51,7 @@ import nicers from '../../utils/nicers'
 
 export default {
   name: 'ExercisesList',
-  props: { sessionID: String, newExerciseData: Object },
+  props: { sessionID: String, newExerciseData: Object, formMode: String },
   data () {
     return {
       exercises: [],
@@ -62,8 +63,10 @@ export default {
     await this.getExercises()
   },
   watch: {
-    async newExerciseData () {
-      await this.addNewExercise()
+    async newExerciseData (newData, data) {
+      if (this.formMode == 'new') await this.addNewExercise(newData)
+      else if (this.formMode == 'edit') await this.editExercise(newData)
+      return
     }
   },
   computed: {
@@ -94,12 +97,12 @@ export default {
       }
       this.isLoadingExercises = false
     },
-    async addNewExercise () {
+    async addNewExercise (newExercise) {
       try {
-        if (this.newExerciseData && this.sessionID) {
+        if (newExercise && this.sessionID) {
           this.$q.loading.show()
           await nicers.delay(500)
-          let exercise = this.newExerciseData
+          let exercise = newExercise
           const { startTimestamp, endTimestamp, type, notes, videoFile } = exercise
           let resp = await API.addExercise(this.sessionID, startTimestamp, endTimestamp, type, notes, videoFile)
           if (resp.data.exercise) {
@@ -144,6 +147,33 @@ export default {
         })
         return
       }
+    },
+    async editExercise (editData) {
+      try {
+        if (editData && this.sessionID) {
+          let exercise = editData
+          const { type, notes, videoFile } = exercise
+          await API.editExercise(exercise.exerciseID, type, notes, videoFile)
+          this.$q.notify({
+            type: 'positive',
+            position: 'top',
+            message: 'Updated exercise for current session',
+          })
+          await this.getExercises()
+        }
+      } catch (err) {
+        let errMsg = err
+        if (err.response && err.response.status == 400) errMsg = err.response.data
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Updating exercise failed: ' + errMsg,
+          icon: 'report_problem'
+        })
+      }
+      this.$q.loading.hide()
+      delete editData.exerciseID
+      return
     },
     navigateToExercise (exerciseID) {
       return this.$router.push(this.sessionID + '/exercise/' + exerciseID)
