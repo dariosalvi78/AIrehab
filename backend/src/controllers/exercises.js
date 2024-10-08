@@ -130,8 +130,15 @@ export default {
         }
     },
 
+    /**
+     * Edit one exercise in an ongoing physiotherapy session
+     * @param {Object} req - express request
+     * @param {Object} req.body new exercise data
+     * @param {Object} req.params exerciseID
+     * @param {Object} res - express response
+     */
     editExercise: async (req, res) => {
-        if (!req.user) return res.sendStatus(403)
+        if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
         let exercise = req.body, exerciseID = req.params.exerciseID
         try {
             if (!exercise) return res.status(400).send('Please enter required fields')
@@ -142,7 +149,7 @@ export default {
             return res.sendStatus(204)
         }
         catch (err) {
-            logger.error({ error: err }, 'something went wrong when creating exercise: ')
+            logger.error({ error: err }, 'something went wrong when editing exercise: ')
             res.sendStatus(500)
             return
         }

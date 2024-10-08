@@ -306,3 +306,68 @@ describe('deleteExercise access:', function () {
         })
     })
 })
+
+describe('editExercise access:', function () {
+    it('editing exercise requires authentication', async function () {
+        await exercises.editExercise({ user: undefined }, {
+            sendStatus(status) {
+                expect(status).toBe(403)
+            }
+        })
+    })
+    it('editing exercise requires params exercise id', async function () {
+        await exercises.editExercise({
+            user: this.physiotherapist,
+            params: { exerciseID: undefined }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(403)
+            }
+        })
+    })
+    it('editing exercise requires new data', async function () {
+        let therapist = this.physiotherapist, exercise = this.exercises[0]
+        spyOn(exercisesCollection, 'updateOneExercise')
+        await exercises.editExercise({
+            user: therapist,
+            params: { exerciseID: exercise.id },
+            body: undefined
+        }, {
+            status(status) {
+                expect(status).toBe(400)
+                return this
+            },
+            send(data) {
+                expect(data).toContain('Please enter required fields')
+                expect(exercisesCollection.updateOneExercise).not.toHaveBeenCalled()
+            }
+        })
+    })
+    it('generic error when editing exercise', async function () {
+        let therapist = this.physiotherapist, exercise = this.exercises[0]
+        spyOn(exercisesCollection, 'updateOneExercise')
+        await exercises.editExercise({
+            user: therapist,
+            params: { exerciseID: exercise.id }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(500)
+                expect(exercisesCollection.updateOneExercise).not.toHaveBeenCalled()
+            }
+        })
+    })
+    it('physiotherapist can edit own exercise', async function () {
+        let therapist = this.physiotherapist, exercise = this.exercises[0]
+        spyOn(exercisesCollection, 'updateOneExercise').and.returnValue({ type: exercise.type, notes: exercise.notes })
+        await exercises.editExercise({
+            user: therapist,
+            params: { exerciseID: exercise.id },
+            body: { type: exercise.type, notes: exercise.notes }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(204)
+                expect(exercisesCollection.updateOneExercise).toHaveBeenCalledWith(exercise.id, { type: exercise.type, notes: exercise.notes })
+            }
+        })
+    })
+})
