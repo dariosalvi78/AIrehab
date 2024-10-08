@@ -207,7 +207,12 @@ export default {
               position: 'top',
               message: 'Video has been saved for exercise',
             })
-            this.videoFile = results.videoFile
+            try {
+              this.videoFile = results.videoFile
+            } catch (err) {
+              // do not trigger the general catch below, because we want the sendPOE to be called in any case
+              console.error(err)
+            }
             let poe_evaluation = await API.sendPOE(results.videoFile, this.exerciseID)
             if (poe_evaluation) {
               this.$q.notify({
@@ -252,7 +257,7 @@ export default {
     },
      async getPOE() {
       try {
-        let resp = await API.getPOE(this.exerciseID, this.sessionID)
+        let resp = await API.getPOE(this.exerciseID)
         console.log(resp)
         if (resp) {
           this.videoFile = resp.videoFile
