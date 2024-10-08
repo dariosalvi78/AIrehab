@@ -252,7 +252,7 @@ export default {
     },
      async getPOE() {
       try {
-        let resp = await API.getPOE(this.exerciseID, this.sessionID)
+        let resp = await API.getPOE(this.exerciseID)
         console.log(resp)
         if (resp) {
           this.videoFile = resp.videoFile
