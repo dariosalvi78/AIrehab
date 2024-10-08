@@ -16,12 +16,14 @@
           hint="Optional. Type of exercise"
         />
         <q-input
+          ref="qInputNotes"
           class="q-my-md"
           filled
           v-model="this.exercise.notes"
           label="Notes"
           type="textarea"
           hint="Optional. Notes for exercise"
+          :rules="[notes => notes.length <= 200 || 'Limit reached']"
         />
         <q-input
           class="q-my-md"
@@ -83,9 +85,18 @@ export default {
    },
    methods: {
     formSubmit () {
+      this.$refs.qInputNotes.validate()
+      if (this.$refs.qInputNotes.hasError) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Please review fields and try again',
+          icon: 'report_problem'
+        })
+      }
       let submittedExercise  = {
         type: this.exercise.type ? exerciseEnums.typeToAsc(this.exercise.type) : '',
-        notes: this.exercise.notes ? this.exercise.notes : '',
+        notes: this.exercise.notes ? this.exercise.notes.trim() : '',
         // startTimestamp: this.exercise.startTimestamp ? this.exercise.startTimestamp : null,
       }
       if (this.formMode == 'edit') submittedExercise["exerciseID"] = this.selectedExercise.id
