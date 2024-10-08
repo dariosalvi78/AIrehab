@@ -4,6 +4,7 @@ import poeCollection from '../../../src/DOM/poeCollection.js'
 import exercises from '../../../src/controllers/exercises.js'
 import config from '../../../src/utils/config.js'
 import mock from '../../mock_data.js'
+import fileHandler from '../../../src/utils/fileHandler.js'
 
 beforeAll(function () {
     this.physiotherapist = mock.physiotherapist
@@ -268,6 +269,7 @@ describe('deleteExercise access:', function () {
     })
     it('admin can delete one exercise', async function () {
         let exercise = this.exercises[0]
+        spyOn(fileHandler, 'deleteVideo').and.returnValue(undefined)
         spyOn(poeCollection, 'deletePOEForExerciseByID')
         spyOn(exercisesCollection, 'deleteOneExercise')
         await exercises.deleteExercise({ 
@@ -286,6 +288,7 @@ describe('deleteExercise access:', function () {
     it('physiotherapist can delete one assigned exercise', async function () {
         let therapist = this.physiotherapist, exercise = this.exercises[0], _session = this.sessions[0]
         spyOn(sessions, 'getSessionByID').and.returnValue({ id: _session.sessionID })
+        spyOn(fileHandler, 'deleteVideo').and.returnValue(undefined)
         spyOn(poeCollection, 'deletePOEForExerciseByID')
         spyOn(exercisesCollection, 'deleteOneExercise')
         await exercises.deleteExercise({ 
