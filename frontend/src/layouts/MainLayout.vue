@@ -1,16 +1,21 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="mainLayout m-width">
-     <q-header v-show="isLoggedIn" elevated class="header m-width shadow-2 rounded-borders">
-        <q-toolbar>
-          <q-btn flat round dense icon="menu" />
-          <q-toolbar-title>Dashboard</q-toolbar-title>
-          <q-btn flat dense icon="logout" label="Logout" @click="logout()"/>
-        </q-toolbar>
-      </q-header>
+    <q-header v-show="isLoggedIn" elevated class="header m-width shadow-2 rounded-borders">
+      <q-toolbar>
+        <q-btn flat round dense icon="menu">
+          <q-menu>
+            <q-list dense style="min-width: 100px">
+              <q-item clickable>
+                <q-item-section>POE App v. {{appVersion}}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+        <q-toolbar-title>Dashboard</q-toolbar-title>
+        <q-btn flat dense icon="logout" label="Logout" @click="logout()"/>
+      </q-toolbar>
+    </q-header>
     <router-view />
-    <q-footer elevated class="m-width primary text-white flex flex-center">
-      <div>App v. {{appVersion}}</div>
-    </q-footer>
   </q-layout>
 </template>
 
