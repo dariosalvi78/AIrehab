@@ -8,7 +8,13 @@ export default {
      */
     getExercises: async function () {
         const response = await db.query(`
-            SELECT e.* FROM [exercise] e
+            SELECT e.*,
+                p.names AS patientName,
+                u.email AS assignedTo
+            FROM [exercise] e
+                INNER JOIN [physiotherapy_session] s ON e.physiotherapySessionId = s.id
+                LEFT JOIN [patient] p ON s.patientID = p.id
+                LEFT JOIN [user] u ON p.physiotherapistId = u.id
             ORDER BY e.startTimestamp DESC;
         `)
         return response.recordset

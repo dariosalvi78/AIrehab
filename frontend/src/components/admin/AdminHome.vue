@@ -1,6 +1,6 @@
 <template>
   <q-layout>
-    <q-card-actions class="q-pb-xl flex flex-center">
+    <q-card-actions class="q-pb-xl flex flex-center q-gutter-md">
       <q-btn padding="md" color="secondary" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
         <q-icon left name="person"/>
         <div>Add new Physiotherapist</div>
@@ -29,6 +29,10 @@
       :sessions="sessions" 
       @getSessions="getSessions()"
     />
+    <admin-exercises-table 
+      :exercises="exercises" 
+      @getExercises="getExercises()"
+    />
   </q-layout>
 </template>
 
@@ -36,16 +40,18 @@
 import API from '../../API.js'
 import NewUserForm from '../NewUserForm.vue'
 import PatientEditForm from '../patients/PatientEditForm.vue'
+import AdminExercisesTable from './AdminExercisesTable.vue'
 import AdminSessionsTable from './AdminSessionsTable.vue'
 import AdminUserTable from './AdminUserTable.vue'
 
 export default {
-  components: { AdminUserTable, AdminSessionsTable, PatientEditForm, NewUserForm },
+  components: { AdminUserTable, AdminSessionsTable, PatientEditForm, NewUserForm, AdminExercisesTable },
   name: 'AdminHome',
   data () {
     return {
       users: [],
       sessions: [],
+      exercises: [],
       newUserPrompt: false,
       newPatientPrompt: false
     }
@@ -54,6 +60,7 @@ export default {
     this.newUserPrompt = false
     await this.getUsers()
     await this.getSessions()
+    await this.getExercises()
   },
   methods: {
      async addNewUser (newUser) {
@@ -133,6 +140,19 @@ export default {
           color: 'negative',
           position: 'top',
           message: `Error retrieving sessions table: ${err}`,
+          icon: 'warning'
+        })
+      }
+    },
+    async getExercises () {
+      try {
+        let exercises = await API.getExercises()
+        this.exercises = exercises
+      } catch (err) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: `Error retrieving exercises table: ${err}`,
           icon: 'warning'
         })
       }
