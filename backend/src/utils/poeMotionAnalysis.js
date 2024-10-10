@@ -1,4 +1,5 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
+import poeCollection from '../DOM/poeCollection.js';
 
 
 export default {
@@ -46,7 +47,10 @@ export default {
      */
     async isEvaluationOngoing (userId) {
         if (!this.videoSentTimestamp) return false
-        if (new Date().getTime() - this.videoSentTimestamp.getTime() < 10000) return false
+        if (new Date().getTime() - this.videoSentTimestamp.getTime() > 10000) {
+            this.videoSentTimestamp = null
+            return false
+        }
         else return true
     },  
 

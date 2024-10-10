@@ -41,7 +41,7 @@
       <div v-else>
         <q-card v-if="!poe" flat class="q-pa-lg flex flex-center">
           <q-card-section>
-            <div class="text-h6 q-mb-md">Video is processing, please wait</div>
+            <div class="text-h6 q-mb-md">Loading POE Evaluation, please wait</div>
             <q-separator inset />
             <div class="q-mt-md flex flex-center">
               <q-spinner-dots
@@ -51,31 +51,33 @@
             </div>
           </q-card-section>
         </q-card>
-        <q-card v-else flat class="q-ma-lg evaluation-card">
-          <q-card-section>
-            <div class="text-h6">Video Evaluation</div>
-          </q-card-section>
-          <q-separator inset />
-          <q-card-section>
-            <div class="text-subtitle1">Score</div>
-            <div class="text-body2">
-              Score: {{ poe.score }}
-            </div>
-            <div class="text-body2">
-              Confidence: {{ poe.scoreConfidence_0 }}
-            </div>
-          </q-card-section>
-          <q-separator inset />
-          <q-card-section>
-            <div class="text-subtitle1">Postural orientation</div>
-            <div class="text-body2">{{ poe.posturalOrientation }}</div>
-          </q-card-section>
-          <q-separator inset />
-          <q-card-section>
-            <div class="text-subtitle1">Repetition</div>
-            <div class="text-body2">{{ poe.repetition }}</div>
-          </q-card-section>
-        </q-card>
+        <transition v-else appear enter-active-class="animated fadeIn">
+          <q-card flat class="q-ma-lg evaluation-card">
+            <q-card-section>
+              <div class="text-h6">Video Evaluation</div>
+            </q-card-section>
+            <q-separator inset />
+            <q-card-section>
+              <div class="text-subtitle1">Score</div>
+              <div class="text-body2">
+                Score: {{ poe.score }}
+              </div>
+              <div class="text-body2">
+                Confidence: {{ poe.scoreConfidence_0 }}
+              </div>
+            </q-card-section>
+            <q-separator inset />
+            <q-card-section>
+              <div class="text-subtitle1">Postural orientation</div>
+              <div class="text-body2">{{ poe.posturalOrientation }}</div>
+            </q-card-section>
+            <q-separator inset />
+            <q-card-section>
+              <div class="text-subtitle1">Repetition</div>
+              <div class="text-body2">{{ poe.repetition }}</div>
+            </q-card-section>
+          </q-card>
+        </transition>
         <div class="q-pa-lg video-container">
           <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
             <source :src="getVideoPathForExercise" type="video/mp4">
@@ -106,13 +108,14 @@ export default {
       hasPermissions: false,
       uploadedFile: undefined,
       videoFile: undefined,
-      poe: undefined
+      poe: undefined,
+      poe_interval: undefined
     }
   },
   async beforeMount () {
     await this.checkForVideoSupport()
-    await this.getPOE()
-    if (!this.videoFile) await this.getVideoExercise()
+    await this.getVideoExercise()
+    if (this.videoFile) await this.getPOE()
   },
   methods: {
     async checkForVideoSupport () {
@@ -218,11 +221,10 @@ export default {
               this.$q.notify({
                 type: 'info',
                 position: 'top',
-                message: 'Video evaluation complete, see results',
+                message: 'Video evaluation sent, processing has started',
                 icon: 'info'
               })
-              this.poe = poe_evaluation
-              console.log(this.poe)
+              await this.getPOE()
             }
           }
         } catch (err) {
@@ -257,12 +259,13 @@ export default {
     },
      async getPOE() {
       try {
-        let resp = await API.getPOE(this.exerciseID)
-        console.log(resp)
-        if (resp) {
-          this.videoFile = resp.videoFile
-          this.poe = resp
-        }
+        this.poe_interval = setInterval(async () => {
+          let resp = await API.getPOE(this.exerciseID)
+          if (resp) {
+            this.poe = resp
+            clearInterval(this.poe_interval)
+          }
+        }, 2000)
       } catch (err) {
         return this.$q.notify({
           type: 'negative',
@@ -280,6 +283,9 @@ export default {
     getVideoPathForExercise () {
       return `/api/attachments/${this.exerciseID}`
     }
+  },
+  unmounted () {
+    if (this.poe_interval) clearInterval(this.poe_interval)
   }
 }
 </script>
