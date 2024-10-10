@@ -23,7 +23,7 @@
           label="Notes"
           type="textarea"
           hint="Optional. Notes for exercise"
-          :rules="[notes => notes.length <= 200 || 'Limit reached']"
+          :rules="[notes => !notes ? true : notes.length <= 150 || 'Limit reached']"
         />
         <q-input
           class="q-my-md"
