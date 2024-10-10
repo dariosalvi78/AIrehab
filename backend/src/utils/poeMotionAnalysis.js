@@ -8,9 +8,9 @@ export default {
 
     /**
      * Creates a user on the AI POE server
-     * @param {string} userId - patient ID as we have it on the application server
-     * @param {number} length - length of subject in cm
-     * @param {number} weight - weight in kg
+     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
+     * @param {Types.Patient["height"]} length - length of subject in cm
+     * @param {Types.Patient["weight"]} weight - weight in kg
      */
     async createUser (userId, length, weight) {
         console.log('CREATED USER ON POEMA', userId)
@@ -18,8 +18,8 @@ export default {
     },
 
     /**
-     * Deletes use on the AI POE server
-     * @param {string} userId - patient ID as we have it on the application server
+     * Deletes user on the AI POE server
+     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
      */
     async deleteUser (userId) {
         console.log('DELETED USER ON POEMA', userId)
@@ -28,32 +28,32 @@ export default {
 
     /**
      * Uploads the video file to the AI POE server
-     * @param {string} userId - patient ID as we have it on the application server
-     * @param {string} videoPath - path of the file local on the server
-     * @param {string} exerciseType -  "singleLeggedSquatLeft" or "singleLeggedSquatRight", mapped to "L" or "R"
-     * @returns {Promise}
+     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
+     * @param {Types.Exercise["videoFile"]} videoPath - path of the file local on the server
+     * @param {Types.Exercise["type"]} exerciseType -  "singleLeggedSquatLeft" or "singleLeggedSquatRight", mapped to "L" or "R"
+     * @returns {Promise<Boolean>}
      */
     async uploadVideo (userId, videoPath, exerciseType) {
         console.log('UPLADED VIDEO ON POEMA', userId)
-        videoSentTimestamp = new Date()
+        this.videoSentTimestamp = new Date()
         return true;
     },
 
     /**
      * Tells if a video is being analyzed
-     * @param {string} userId - patient ID as we have it on the application server
-     * @returns {Promise<boolean>}
+     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
+     * @returns {Promise<Boolean>}
      */
     async isEvaluationOngoing (userId) {
-        if (!videoSentTimestamp) return false
-        if (Date.now().getTime() - videoSentTimestamp.getTime() < 30000) return false
+        if (!this.videoSentTimestamp) return false
+        if (new Date().getTime() - this.videoSentTimestamp.getTime() < 10000) return false
         else return true
-    },
+    },  
 
     /**
      * Retrieves the POE analysis for the latest uploaded video
-     * @param {string} userId - patient ID as we have it on the application server
-     * @returns {Promise<Array<POEEvaluation>}
+     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
+     * @returns {Promise<Array<Types.POEEvaluation>>}
      */
     async getLatestPOEAnalysis (userId) {
 
@@ -65,7 +65,7 @@ export default {
                     "femval": 0,
                     "trunk": 0,
                     "hip": 0,
-                    "kmfp": 0
+                    "kmfp": 1
                 },
                 "conf": {
                     "femval": [
@@ -84,7 +84,7 @@ export default {
                         0
                     ],
                     "kmfp": [
-                        0,
+                        88.5,
                         0,
                         0
                     ]
@@ -135,8 +135,8 @@ export default {
         for (let postOr in POEObj.combined.pred) {
             returnedValue.push(
                 {
-                    posturalOrientation: mapPosturalOrientation(postOr), //'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
-                    repetition: 0, // summative or "comined"
+                    posturalOrientation: this.mapPosturalOrientation(postOr), //'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
+                    repetition: 0, // summative or "combined"
                     score: POEObj.combined.pred[postOr], // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
                     confidence0: POEObj.combined.conf[postOr][0],
                     confidence1: POEObj.combined.conf[postOr][1],
@@ -162,15 +162,18 @@ export default {
         return returnedValue;
     },
 
+    /**
+     * @returns {Types.POEEvaluation["posturalOrientation"]}
+     */
     mapPosturalOrientation (orient) {
-        if (orient.toUpperCase() == 'femval') {
+        if (orient.toLowerCase() == 'femval') {
             return 'femoralValgus'
-        } else if (orient.toUpperCase() == 'trunk') {
+        } else if (orient.toLowerCase() == 'trunk') {
             return 'trunk'
-        } else if (orient.toUpperCase() == 'hip') {
+        } else if (orient.toLowerCase() == 'hip') {
             return 'hip'
-        } else if (orient.toUpperCase() == 'kmfp') {
+        } else if (orient.toLowerCase() == 'kmfp') {
             return 'kneeMedialToFootPosition'
-        } else return 'unkown'
+        } else return 'Unknown'
     }
 }

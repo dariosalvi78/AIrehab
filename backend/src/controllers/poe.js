@@ -24,27 +24,24 @@ export default {
         let exerciseID = req.params.exerciseID
         try {
             if (!exerciseID) return res.sendStatus(400)
-            let results = await poe.getEvaluationFromID(exerciseID)
-
+            const results = await poe.getEvaluationFromID(exerciseID)
             if (!results) {
-                // TODO: get user ID from the exercise ID
-                let userId = 'XXXXX'
-                // results are not available yet let's see if the evaluation is ongoing
-                let isOngoing = await poeMA.isEvaluationOngoing(userId)
+                const exercise = await exercises.getOneExerciseByEmail(exerciseID, req.user.email)
 
+                // results are not available yet let's see if the evaluation is ongoing
+                let isOngoing = await poeMA.isEvaluationOngoing(exercise.patientID)
                 if (isOngoing) {
                     res.sendStatus(102)
                     return
-                } else {
-                    let latestResults = await poeMA.getLatestPOEAnalysis(userId)
-                    if (latestResults) {
-                        res.send(latestResults)
-                        return
-                    } else {
-                        logger.error(null, 'No POE results available for user ' + userId)
-                    }
                 }
 
+                let latestResults = await poeMA.getLatestPOEAnalysis(exercise.patientID, exerciseID)
+                if (latestResults) {
+                    res.send(latestResults)
+                    return
+                } else {
+                    logger.error(null, 'No POE results available for user ' + exercise.patientID)
+                }
             } else {
                 res.send(results)
                 return
