@@ -56,13 +56,11 @@ export default {
      * @param {Types.Exercise["videoFile"]} filename
      */
     async deleteVideo(sessionID, filename) {
-        console.log('file', filename)
         try {
             const SESSION_DIR = config.uploads.base_path + '/session_' + sessionID
             let fullPath = SESSION_DIR + '/exercise_' + filename
 
             return new Promise(async (resolve, reject) => {
-                console.log(fullPath)
                 if (fs.existsSync(fullPath)) {
                     fs.unlink(fullPath, (err) => {
                         if (err) reject(err)

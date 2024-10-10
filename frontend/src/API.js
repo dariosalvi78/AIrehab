@@ -109,6 +109,11 @@ let API = {
     return response.data
   },
 
+  async editExercise (exerciseID, type, notes, videoFile) {
+    let response = await axios.put(URL_PRE + '/exercises/' + exerciseID, { type, notes, videoFile })
+    return response.data
+  },
+
   async getPOE (exerciseID) {
     let response = await axios.get(URL_PRE + '/poe/' + exerciseID, {})
     return response.data

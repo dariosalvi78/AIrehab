@@ -7,14 +7,15 @@
           :key="exercise.id"
         >
           <transition appear enter-active-class="animated fadeIn delay-1s">
-            <q-card class="q-ma-lg exercise-card">
+            <q-card class="q-ma-md exercise-card">
               <q-card-section class="row">
                 <div class="col-11">
-                  <q-btn label="Go to exercise" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
+                  <q-btn class="q-mr-sm" :label="!exercise.videoFile ? 'Go to exercise' : 'Go to Evaluation'" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
+                  <q-btn class="q-my-sm" label="Edit exercise" dense color="primary" size="sm" icon-right="edit" @click="$emit('openExerciseModal', exercise)"/>
                   <div class="text-h6">{{ exercise.type ? exercise.type : 'Exercise' }}
                     <q-icon v-if="exercise.videoFile" size="sm" name="video_file" />
                   </div>
-                  <div style="margin-left:2px;" class="text-capitalize">
+                  <div style="margin-left:-2px;" class="text-capitalize">
                     <q-icon style="bottom:2px;" size="sm" name="schedule" />
                     {{ exercise.startTimestamp }}
                     - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
@@ -24,8 +25,13 @@
                   <q-btn dense color="negative" size="sm" icon="close" @click="closeExercise(exercise)"/>
                 </div>
               </q-card-section>
+              <q-separator />
               <q-card-section>
-                <div class="text-body2 notes">{{ exercise.notes }}</div>
+                <div v-if="exercise.notes.length" class="q-pa-sm text-body2 notes">
+                  <q-scroll-area :visible="true" style="height: 130px;">
+                    {{ exercise.notes }}
+                  </q-scroll-area>
+                </div>
               </q-card-section>
             </q-card>
           </transition>
@@ -50,7 +56,7 @@ import nicers from '../../utils/nicers'
 
 export default {
   name: 'ExercisesList',
-  props: { sessionID: String, newExerciseData: Object },
+  props: { sessionID: String, newExerciseData: Object, formMode: String },
   data () {
     return {
       exercises: [],
@@ -62,8 +68,10 @@ export default {
     await this.getExercises()
   },
   watch: {
-    async newExerciseData () {
-      await this.addNewExercise()
+    async newExerciseData (newData, data) {
+      if (this.formMode == 'new') await this.addNewExercise(newData)
+      else if (this.formMode == 'edit') await this.editExercise(newData)
+      return
     }
   },
   computed: {
@@ -94,12 +102,12 @@ export default {
       }
       this.isLoadingExercises = false
     },
-    async addNewExercise () {
+    async addNewExercise (newExercise) {
       try {
-        if (this.newExerciseData && this.sessionID) {
+        if (newExercise && this.sessionID) {
           this.$q.loading.show()
           await nicers.delay(500)
-          let exercise = this.newExerciseData
+          let exercise = newExercise
           const { startTimestamp, endTimestamp, type, notes, videoFile } = exercise
           let resp = await API.addExercise(this.sessionID, startTimestamp, endTimestamp, type, notes, videoFile)
           if (resp.data.exercise) {
@@ -145,6 +153,33 @@ export default {
         return
       }
     },
+    async editExercise (editData) {
+      try {
+        if (editData && this.sessionID) {
+          let exercise = editData
+          const { type, notes, videoFile } = exercise
+          await API.editExercise(exercise.exerciseID, type, notes, videoFile)
+          this.$q.notify({
+            type: 'positive',
+            position: 'top',
+            message: 'Updated exercise for current session',
+          })
+          await this.getExercises()
+        }
+      } catch (err) {
+        let errMsg = err
+        if (err.response && err.response.status == 400) errMsg = err.response.data
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Updating exercise failed: ' + errMsg,
+          icon: 'report_problem'
+        })
+      }
+      this.$q.loading.hide()
+      delete editData.exerciseID
+      return
+    },
     navigateToExercise (exerciseID) {
       return this.$router.push(this.sessionID + '/exercise/' + exerciseID)
     },
@@ -153,6 +188,9 @@ export default {
 </script>
 
 <style scoped>
+.exercise-card {
+  max-height: 300px;
+}
 .notes {
   white-space: break-spaces;
 }

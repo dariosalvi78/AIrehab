@@ -129,7 +129,7 @@ describe('uploadExerciseFile access:', function () {
         let exercise = this.exercises[0]
         let video = { videoFile: 'newvideo.mp4', endTimestamp: 'randomtimestamp' }
         spyOn(exercisesCollection, 'getExerciseByID').and.returnValue(exercise)
-        spyOn(fileHandler, 'save').and.returnValue(video)
+        spyOn(fileHandler, 'saveVideo').and.returnValue(video)
         await attachments.uploadExerciseFile({ 
             user: { role: 'admin' },
             params: { exerciseID: exercise.id }
@@ -137,7 +137,7 @@ describe('uploadExerciseFile access:', function () {
             send(data) {
                 expect(data).toBeDefined()
                 expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(exercise.id)
-                expect(fileHandler.save).toHaveBeenCalled()
+                expect(fileHandler.saveVideo).toHaveBeenCalled()
             }
         })
     })
@@ -145,7 +145,7 @@ describe('uploadExerciseFile access:', function () {
         let exercise = this.exercises[0]
         let video = { videoFile: 'newvideo.mp4', endTimestamp: 'randomtimestamp' }
         spyOn(exercisesCollection, 'getExerciseByID').and.returnValue(exercise)
-        spyOn(fileHandler, 'save').and.returnValue(video)
+        spyOn(fileHandler, 'saveVideo').and.returnValue(video)
         await attachments.uploadExerciseFile({ 
             user: this.physiotherapist,
             params: { exerciseID: exercise.id }
@@ -153,7 +153,7 @@ describe('uploadExerciseFile access:', function () {
             send(data) {
                 expect(data).toBeDefined()
                 expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(exercise.id)
-                expect(fileHandler.save).toHaveBeenCalled()
+                expect(fileHandler.saveVideo).toHaveBeenCalled()
             }
         })
     })

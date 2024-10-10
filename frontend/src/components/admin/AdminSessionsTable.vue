@@ -1,10 +1,10 @@
   <template>
   <div>
     <div v-if="!isLoadingSessions" class="q-pl-lg fit row wrap justify-left">
-      <q-chip :ripple="false" outline size="md" class="col-auto" icon="person">
+      <q-chip :ripple="false" outline size="md" class="col-auto" icon="workspaces">
         Physiotherapy sessions: {{this.rows.length}}
       </q-chip>
-       <q-chip :ripple="false" outline size="md" class="col-auto" icon="group">
+       <q-chip :ripple="false" outline size="md" class="col-auto" icon="accessibility">
         Exercises: {{this.exercisesTotal}}
       </q-chip>
     </div>

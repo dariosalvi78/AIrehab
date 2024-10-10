@@ -4,6 +4,7 @@ import poeCollection from '../../../src/DOM/poeCollection.js'
 import exercises from '../../../src/controllers/exercises.js'
 import config from '../../../src/utils/config.js'
 import mock from '../../mock_data.js'
+import fileHandler from '../../../src/utils/fileHandler.js'
 
 beforeAll(function () {
     this.physiotherapist = mock.physiotherapist
@@ -268,6 +269,7 @@ describe('deleteExercise access:', function () {
     })
     it('admin can delete one exercise', async function () {
         let exercise = this.exercises[0]
+        spyOn(fileHandler, 'deleteVideo').and.returnValue(undefined)
         spyOn(poeCollection, 'deletePOEForExerciseByID')
         spyOn(exercisesCollection, 'deleteOneExercise')
         await exercises.deleteExercise({ 
@@ -286,6 +288,7 @@ describe('deleteExercise access:', function () {
     it('physiotherapist can delete one assigned exercise', async function () {
         let therapist = this.physiotherapist, exercise = this.exercises[0], _session = this.sessions[0]
         spyOn(sessions, 'getSessionByID').and.returnValue({ id: _session.sessionID })
+        spyOn(fileHandler, 'deleteVideo').and.returnValue(undefined)
         spyOn(poeCollection, 'deletePOEForExerciseByID')
         spyOn(exercisesCollection, 'deleteOneExercise')
         await exercises.deleteExercise({ 
@@ -299,6 +302,71 @@ describe('deleteExercise access:', function () {
                 expect(sessions.getSessionByID).toHaveBeenCalledWith(_session.sessionID, therapist.email)
                 expect(poeCollection.deletePOEForExerciseByID).toHaveBeenCalledWith(exercise.id)
                 expect(exercisesCollection.deleteOneExercise).toHaveBeenCalledWith(exercise.id)
+            }
+        })
+    })
+})
+
+describe('editExercise access:', function () {
+    it('editing exercise requires authentication', async function () {
+        await exercises.editExercise({ user: undefined }, {
+            sendStatus(status) {
+                expect(status).toBe(403)
+            }
+        })
+    })
+    it('editing exercise requires params exercise id', async function () {
+        await exercises.editExercise({
+            user: this.physiotherapist,
+            params: { exerciseID: undefined }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(403)
+            }
+        })
+    })
+    it('editing exercise requires new data', async function () {
+        let therapist = this.physiotherapist, exercise = this.exercises[0]
+        spyOn(exercisesCollection, 'updateOneExercise')
+        await exercises.editExercise({
+            user: therapist,
+            params: { exerciseID: exercise.id },
+            body: undefined
+        }, {
+            status(status) {
+                expect(status).toBe(400)
+                return this
+            },
+            send(data) {
+                expect(data).toContain('Please enter required fields')
+                expect(exercisesCollection.updateOneExercise).not.toHaveBeenCalled()
+            }
+        })
+    })
+    it('generic error when editing exercise', async function () {
+        let therapist = this.physiotherapist, exercise = this.exercises[0]
+        spyOn(exercisesCollection, 'updateOneExercise')
+        await exercises.editExercise({
+            user: therapist,
+            params: { exerciseID: exercise.id }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(500)
+                expect(exercisesCollection.updateOneExercise).not.toHaveBeenCalled()
+            }
+        })
+    })
+    it('physiotherapist can edit own exercise', async function () {
+        let therapist = this.physiotherapist, exercise = this.exercises[0]
+        spyOn(exercisesCollection, 'updateOneExercise').and.returnValue({ type: exercise.type, notes: exercise.notes })
+        await exercises.editExercise({
+            user: therapist,
+            params: { exerciseID: exercise.id },
+            body: { type: exercise.type, notes: exercise.notes }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(204)
+                expect(exercisesCollection.updateOneExercise).toHaveBeenCalledWith(exercise.id, { type: exercise.type, notes: exercise.notes })
             }
         })
     })

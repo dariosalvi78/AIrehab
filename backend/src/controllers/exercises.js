@@ -117,7 +117,7 @@ export default {
 
             if (!req.body || !exerciseID || !sessionID) return res.sendStatus(400)
 
-            await files.deleteVideo(sessionID, videoName)
+            if (videoName) await files.deleteVideo(sessionID, videoName)
             await poe.deletePOEForExerciseByID(exerciseID)
             await exercises.deleteOneExercise(exerciseID)
 
@@ -125,6 +125,31 @@ export default {
             return res.sendStatus(204)
         } catch (err) {
             logger.error({ error: err }, 'error deleting exercise: ')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    /**
+     * Edit one exercise in an ongoing physiotherapy session
+     * @param {Object} req - express request
+     * @param {Object} req.body new exercise data
+     * @param {Object} req.params exerciseID
+     * @param {Object} res - express response
+     */
+    editExercise: async (req, res) => {
+        if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
+        let exercise = req.body, exerciseID = req.params.exerciseID
+        try {
+            if (!exercise) return res.status(400).send('Please enter required fields')
+
+            const updatedExercise = await exercises.updateOneExercise(exerciseID, exercise)
+
+            logger.info({ data: updatedExercise }, `updated exercise : ${exerciseID}`)
+            return res.sendStatus(204)
+        }
+        catch (err) {
+            logger.error({ error: err }, 'something went wrong when editing exercise: ')
             res.sendStatus(500)
             return
         }

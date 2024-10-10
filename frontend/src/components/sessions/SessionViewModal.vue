@@ -1,8 +1,8 @@
 <template>
-  <q-page-container class="q-pa-lg">
+  <q-page-container class="q-py-md">
     <q-page v-if="session">
-      <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />        
-       <q-card flat class="q-py-lg">
+      <q-btn round dense class="q-ml-md" color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />        
+       <q-card flat class="q-py-lg q-mt-sm">
         <q-card-section>
           <div class="text-h6">
             Session for {{session.patientName}}
@@ -16,16 +16,23 @@
           </div>
           <div>
             <q-btn dense class="q-mr-md" label="Close session" color="negative" size="sm" icon="close" @click="closeSession"/>
-            <q-btn dense class="q-my-md" color="secondary" size="sm" label="Start new exercise" icon-right="chevron_right" @click="newExercisePrompt = !newExercisePrompt" />
+            <q-btn dense class="q-my-md" color="secondary" size="sm" label="Start new exercise" icon-right="chevron_right" @click="openExerciseModal('new')" />
           </div>
         </q-card-section>
         <q-separator inset />
       </q-card>
       <exercise-form 
-        v-model="newExercisePrompt"
+        :formMode="this.exerciseForm"
+        :selectedExercise="this.selectedExercise"
+        v-model="exerciseModalPrompt"
         @newExercise="(data) => (newExercise = data)"
       />
-      <exercises-list :sessionID="sessionID" :newExerciseData="newExercise"/>
+      <exercises-list 
+        :formMode="this.exerciseForm" 
+        :sessionID="sessionID" 
+        :newExerciseData="newExercise" 
+        @openExerciseModal="e => openExerciseModal('edit', e)" 
+      />
     </q-page>
     <div v-else-if="isloadingSession" class="q-ma-md flex flex-center">
       <q-spinner-dots
@@ -55,8 +62,10 @@ export default {
     return {
       session: undefined,
       endDate: undefined,
-      newExercisePrompt: undefined,
+      exerciseModalPrompt: undefined,
       isloadingSession: true,
+      exerciseForm: 'new',
+      selectedExercise: undefined,
       newExercise: {}
     }
   },
@@ -122,6 +131,11 @@ export default {
       this.$q.loading.hide()
       return
     },
+    openExerciseModal (formMode, editData) {
+      if (formMode == 'edit') this.selectedExercise = editData
+      this.exerciseModalPrompt = !this.exerciseModalPrompt
+      this.exerciseForm = formMode
+    },
     selectDate (date) {
       return this.formatDate(date) >= this.date.from
     },
@@ -130,7 +144,7 @@ export default {
     },
     resetForm () {
       this.session = undefined
-      this.newExercisePrompt = undefined
+      this.exerciseModalPrompt = undefined
       this.newExercise = {}
     }
   }
