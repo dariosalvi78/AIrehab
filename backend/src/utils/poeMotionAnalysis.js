@@ -1,6 +1,10 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import poeCollection from '../DOM/poeCollection.js';
+import axios from 'axios'
+import logger from './logger.js';
+import config from './config.js';
 
+const POE_SERVER_URL = `http://${config.poe.base_url}:${config.poe.port}` 
 
 export default {
 
@@ -13,18 +17,36 @@ export default {
      * @param {Types.Patient["height"]} length - length of subject in cm
      * @param {Types.Patient["weight"]} weight - weight in kg
      */
-    async createUser (userId, length, weight) {
-        console.log('CREATED USER ON POEMA', userId)
-        return true;
+    async createUser(userId, length, weight) {
+        try {
+            const form = new FormData()
+            form.append('id', userId)
+            form.append('length', length)
+            form.append('weight', weight)
+            let resp = await axios.post(`${POE_SERVER_URL}/create_user`, form, 
+                { headers: { "Content-Type": 'multipart/form-data' } 
+            })
+            logger.debug({ patientID: userId }, 'POE MA user created')
+            return resp.data
+        } catch (err) {
+            logger.error({ error: err }, 'Cant create user on POEMA')
+            return
+        }
     },
 
     /**
      * Deletes user on the AI POE server
      * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
      */
-    async deleteUser (userId) {
-        console.log('DELETED USER ON POEMA', userId)
-        return true;
+    async deleteUser(userId) {
+        try {
+            let resp = await axios.delete(`${POE_SERVER_URL}/delete_user/${userId}`)
+            logger.debug({ patientID: userId }, 'Deleted POE MA user')
+            return resp.status
+        } catch (err) {
+            logger.error({ error: err }, 'Cant delete user on POEMA')
+            return
+        }
     },
 
     /**
