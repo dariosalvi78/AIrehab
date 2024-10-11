@@ -87,7 +87,7 @@
                 class="flex flex-center"
               />
             </q-tab-panel>
-            <q-tab-panel name="view">
+            <q-tab-panel name="view" class="q-px-sm">
               <patients-list 
                 :selectedPatient="selectedPatient" 
                 @openView="openPatientView"

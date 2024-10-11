@@ -1,10 +1,12 @@
 <template>
 <div>
-  <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="$emit('panelFormGoBack')" />        
-  <q-btn v-if="!selectedPatient.sessionID" size="sm" label="Start physiotherapy session" type="submit" color="secondary" class="q-ml-md" v-close-popup  @click="startNewSession(selectedPatient)"/>
-  <q-btn v-else icon-right="open_in_new" size="sm" label="Go to ongoing session" type="submit" color="secondary" class="q-ml-md" v-close-popup  @click="navigateToSession(selectedPatient.sessionID)"/>
-  <q-btn icon-right="person" size="sm" label="Edit patient" type="submit" color="primary" class="q-ml-sm" v-close-popup  @click="openUserEditPrompt = !openUserEditPrompt"/>
-  <q-card flat class="q-px-md patient-view-card">
+  <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="$emit('panelFormGoBack')" />
+  <div class="q-my-md flex justify-center">
+    <q-btn v-if="!selectedPatient.sessionID" size="sm" label="Start physiotherapy session" type="submit" color="secondary" v-close-popup  @click="startNewSession(selectedPatient)"/>
+    <q-btn v-else icon-right="open_in_new" size="sm" label="Go to ongoing session" type="submit" color="secondary" v-close-popup  @click="navigateToSession(selectedPatient.sessionID)"/>
+    <q-btn icon-right="person" size="sm" label="Edit patient" type="submit" color="primary" class="q-ml-sm" v-close-popup  @click="openUserEditPrompt = !openUserEditPrompt"/>
+  </div>
+  <q-card flat class="q-px-sm patient-view-card">
     <q-card-section>
         <div class="text-h6">{{selectedPatient.names}}</div>
         <div class="text-body2">
@@ -30,7 +32,13 @@
     <q-separator inset />
     <q-card-section>
       <div class="text-subtitle1">Description</div>
-      <div style="whiteSpace: break-spaces" class="text-body2">{{ selectedPatient.injuries }}</div>
+      <div style="whiteSpace: break-spaces" class="text-body2">
+        <div class="q-py-sm text-body2">
+          <q-scroll-area :visible="true" style="height: 160px;">
+            {{ selectedPatient.injuries }}
+          </q-scroll-area>
+        </div>
+      </div>
     </q-card-section>
   </q-card>
     <patient-edit-form :user="selectedPatient" formMode="edit" v-model="openUserEditPrompt" @editPatient="editPatient" />
