@@ -1,0 +1,59 @@
+version: '3.5'
+
+name: ai_rehab_backend
+
+networks:
+  default:
+    name: ai_rehab_network
+
+volumes:
+  poe_db_data:
+
+services:
+  poe_db:
+    image: mcr.microsoft.com/mssql/server:2022-preview-ubuntu-22.04
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+      - MSSQL_PID=Developer
+      - MSSQL_BACKUP_DIR=/var/opt/mssql/backups
+    ports:
+      - 1433:1433
+    restart: always
+    volumes:
+      - poe_db_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q 'SELECT 1' || exit 1"]
+      interval: 5s
+      retries: 10
+      start_period: 5s
+      timeout: 3s
+    container_name: poe_db
+  poe_db.init:
+    image: mcr.microsoft.com/mssql/server:2022-preview-ubuntu-22.04
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+    depends_on:
+      poe_db:
+        condition: service_healthy
+    command: >
+      bash -c '
+      /opt/mssql-tools/bin/sqlcmd -S poe_db -U sa -P ${DB_PASSWORD} -d master -i docker-entrypoint-initdb.d/init.sql;
+      echo "Init script done";
+      '
+    container_name: poe_db_init
+  poe_server:
+    build: .
+    depends_on:
+      poe_db:
+        condition: service_healthy
+    links:
+      - poe_db
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+      - ../datamodel/:/usr/src/datamodel
+    command: "npm run node:start"
+    ports:
+      - 8080:8080
+    container_name: poe_server

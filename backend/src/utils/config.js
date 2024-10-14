@@ -1,7 +1,7 @@
 
 const config = {
     db: {
-        host: process.env.HOSTNAME,
+        host: process.env.DB_HOSTNAME,
         port: process.env.PORT,
         name: process.env.DB_NAME,
         user: process.env.DB_USER,

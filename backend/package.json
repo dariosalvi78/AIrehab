@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --env-file ./config/.env ./src/app.js",
+    "node:start": "nodemon --env-file ./config/.env ./src/app.js",
+    "dev": "docker compose --env-file ./config/.env up",
     "test": "jasmine --config=./tests/jasmine.json",
     "test:watch": "nodemon  --exec jasmine \"--config=./tests/jasmine.json\""
   },
