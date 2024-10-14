@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --env-file ./config/.env ./src/app.js",
-    "test": "jasmine --config= ./tests/jasmine.json ./tests/jasmine/controllers/*.spec.js",
-    "test:watch": "nodemon  --exec jasmine \"tests/jasmine/controllers/*.spec.js\""
+    "test": "jasmine --config=./tests/jasmine.json",
+    "test:watch": "nodemon  --exec jasmine \"--config=./tests/jasmine.json\""
   },
   "author": "Dario Salvi and Elliott Hellstrand",
   "license": "ISC",
