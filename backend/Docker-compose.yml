@@ -17,6 +17,8 @@ services:
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
       - MSSQL_PID=Developer
       - MSSQL_BACKUP_DIR=/var/opt/mssql/backups
+      - MSSQL_LCID=1033
+      - TZ=Etc/GMT+2
     ports:
       - 1433:1433
     restart: always
