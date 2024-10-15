@@ -157,7 +157,14 @@ export default {
      async addNewUser (newUser) {
       try {
         const { fullName, dateOfBirth, height, weight, injuries } = newUser
-        await API.addPatient(fullName, dateOfBirth, height, weight, injuries)
+        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, injuries)
+        if (resp.data) {
+          this.$q.notify({
+            type: 'positive',
+            position: 'top',
+            message: 'Added new patient',
+          })
+        }
       } catch (e) {
         let errorMsg = e
         if (e.status === 409 || e.status === 400) errorMsg = e.response.data

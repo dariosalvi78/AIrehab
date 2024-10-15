@@ -16,12 +16,12 @@
     </q-card-section>
     <q-separator inset />
     <q-card-section>
-        <div class="text-subtitle1">Height and weight</div>
+        <div class="text-subtitle1">Measurements</div>
         <div class="text-body2">
-        {{ selectedPatient.height }} cm
+        {{ selectedPatient.height ? selectedPatient.height + ' cm' : 'Height not specified' }}
         </div>
         <div class="text-body2">
-        {{ selectedPatient.weight }} kg
+        {{ selectedPatient.weight ? selectedPatient.weight + ' kg' : 'Weight not specified' }}
         </div>
     </q-card-section>
     <q-separator inset />
@@ -35,7 +35,7 @@
       <div style="whiteSpace: break-spaces" class="text-body2">
         <div class="q-py-sm text-body2">
           <q-scroll-area :visible="true" style="height: 160px;">
-            {{ selectedPatient.injuries }}
+            {{ selectedPatient.injuries ? selectedPatient.injuries : '...' }}
           </q-scroll-area>
         </div>
       </div>

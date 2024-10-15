@@ -70,20 +70,24 @@
               </template>
             </q-input>
             <q-input
+                ref="qHeight"
                 class="q-my-md"            
                 filled
                 v-model="this.new.height"
                 label="Height (cm)"
                 type="number"
                 hint="Optional. Patient height"
+                :rules="[height => !height ? true : height <= 200 && height >= 0 || 'Enter valid height in cm']"
             />
             <q-input
+                ref="qWeight"
                 class="q-my-md"            
                 filled
                 v-model="this.new.weight"
                 label="Weight (kg)"
                 type="number"
                 hint="Optional. Patient weight"
+                :rules="[weight => !weight ? true : weight <= 200 && weight >= 0 || 'Enter valid weight in kg']"
             />
             <q-input
                 class="q-my-md"            
@@ -92,6 +96,7 @@
                 label="Notes"
                 type="textarea"
                 hint="Optional. List of injuries"
+                :rules="[injuries => !injuries ? true : injuries.length <= 150 || 'Limit reached']"
             />
         </q-form>
         <q-card-actions align="right" class="text-primary">
@@ -139,7 +144,10 @@ export default {
     },
     methods: {
         formSubmit () {
-            if (this.$refs.qDate.hasError) {
+            this.$refs.qDate.validate()
+            this.$refs.qWeight.validate()
+            this.$refs.qHeight.validate()
+            if (this.$refs.qDate.hasError || this.$refs.qWeight.hasError || this.$refs.qHeight.hasError) {
                 return this.$q.notify({
                     color: 'negative',
                     position: 'top',
@@ -150,9 +158,9 @@ export default {
             let userSubmitted = {
                 fullName: this.new.fullName,
                 dateOfBirth: this.new.dateOfBirth, 
-                height: +this.new.height,
-                weight: +this.new.weight,
-                injuries: this.new.injuries
+                height: this.new.height ? +this.new.height : null,
+                weight: this.new.weight ? +this.new.weight : null,
+                injuries: this.new.injuries ? this.new.injuries : ''
             }
             if (this.mode == 'adminNew') userSubmitted.physiotherapistEmail = this.physiotherapistEmail
             if (this.mode === 'new' || this.mode == 'adminNew') this.$emit('addNewPatient', userSubmitted)
@@ -166,8 +174,8 @@ export default {
             if (this.mode == 'edit' || this.mode == 'adminEdit' && this.user) {
                 this.new.fullName = this.mode == 'edit' ? this.user.names : this.user.email
                 this.new.dateOfBirth = new Date(this.user.dateofbirth).toLocaleDateString()
-                this.new.height = this.user.height
-                this.new.weight = this.user.weight
+                this.new.height = +this.user.height
+                this.new.weight = +this.user.weight
                 this.new.injuries = this.user.injuries
             }
         },
