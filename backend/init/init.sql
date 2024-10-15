@@ -1,7 +1,4 @@
 
--- CREATE DATABASE AIREHAB COLLATE SQL_Latin1_General_CP1_CI_AS;
--- GO
-
 USE master
 GO
 
@@ -11,30 +8,34 @@ BEGIN
 END;
 GO
 
+-- Create a user for the database with login information: 
+
+IF NOT EXISTS(SELECT name FROM master.sys.server_principals WHERE name = 'airehab')
+BEGIN
+    CREATE LOGIN airehab
+    WITH PASSWORD = 'MyPassword_1234';
+END
+GO
+
 USE AIREHAB
 GO
 
--- Create a user for the database with login information: 
-
-CREATE LOGIN airehab
-WITH PASSWORD = 'MyPassword_1234';
+IF NOT EXISTS(SELECT 1 FROM master.sys.database_principals WHERE name = 'airehab')
+BEGIN
+    CREATE USER airehab FOR LOGIN airehab WITH DEFAULT_SCHEMA=airehab;
+    -- Give permissions to user:
+    ALTER ROLE db_ddladmin ADD MEMBER airehab;
+    ALTER ROLE db_datareader ADD MEMBER airehab;
+    ALTER ROLE db_datawriter ADD MEMBER airehab;
+END
 GO
-
-CREATE USER airehab FOR LOGIN airehab WITH DEFAULT_SCHEMA=airehab
-GO
-
 
 -- Create a schema inside the database:
 
-CREATE SCHEMA airehab AUTHORIZATION airehab
-GO
-
-
--- Give permissions to user:
-
-EXEC sp_addrolemember 'db_ddladmin', 'airehab';
-EXEC sp_addrolemember 'db_datareader', 'airehab';
-EXEC sp_addrolemember 'db_datawriter', 'airehab';
+IF (NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'airehab')) 
+BEGIN
+    EXEC ('CREATE SCHEMA [airehab] AUTHORIZATION [airehab]')
+END
 GO
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[user]') AND type in (N'U'))
@@ -61,12 +62,10 @@ BEGIN
         weight decimal,
         injuries text,
         createdTimestamp datetime
-    );
+    )
+    ALTER TABLE patient ADD CONSTRAINT patient_physiotherapist_id_fk FOREIGN KEY (physiotherapistId) REFERENCES [user] (id);
 END
 GO
-
-ALTER TABLE patient ADD CONSTRAINT patient_physiotherapist_id_fk FOREIGN KEY (physiotherapistId) REFERENCES [user] (id);
-
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[physiotherapy_session]') AND type in (N'U'))
 BEGIN
@@ -75,11 +74,10 @@ BEGIN
         patientId uniqueidentifier NOT NULL,
         startTimestamp datetime NOT NULL,
         endTimestamp datetime
-    );
+    )
+    ALTER TABLE physiotherapy_session ADD CONSTRAINT physiotherapy_session_patient_id_fk FOREIGN KEY (patientId) REFERENCES patient (id);
 END
 GO
-
-ALTER TABLE physiotherapy_session ADD CONSTRAINT physiotherapy_session_patient_id_fk FOREIGN KEY (patientId) REFERENCES patient (id);
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[exercise]') AND type in (N'U'))
 BEGIN
@@ -91,10 +89,9 @@ BEGIN
         type varchar(50),
         videoFile varchar(100),
         notes text
-    );
+    )
+    ALTER TABLE exercise ADD CONSTRAINT exercise_physiotherapy_session_id_fk FOREIGN KEY (physiotherapySessionId) REFERENCES physiotherapy_session (id);
 END
-
-ALTER TABLE exercise ADD CONSTRAINT exercise_physiotherapy_session_id_fk FOREIGN KEY (physiotherapySessionId) REFERENCES physiotherapy_session (id);
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[poe_evaluation]') AND type in (N'U'))
 BEGIN
@@ -107,7 +104,6 @@ BEGIN
         scoreConfidence_1 decimal,
         scoreConfidence_2 decimal,
         repetition int
-    );
+    )
+    ALTER TABLE poe_evaluation ADD CONSTRAINT poe_evaluation_exercise_id_fk FOREIGN KEY (exerciseId) REFERENCES exercise (id);
 END
-
-ALTER TABLE poe_evaluation ADD CONSTRAINT poe_evaluation_exercise_id_fk FOREIGN KEY (exerciseId) REFERENCES exercise (id);
