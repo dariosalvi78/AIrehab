@@ -114,7 +114,7 @@ export default {
             INSERT INTO [patient] 
             (id, names, dateofbirth, physiotherapistId, height, weight, injuries, createdTimestamp)
             OUTPUT Inserted.id, Inserted.physiotherapistId, Inserted.createdTimestamp
-            VALUES(NEWID(), '${patient.fullName}', '${patient.dateOfBirth}', '${therapistId}', '${patient.height}', '${patient.weight}', '${patient.injuries}', CURRENT_TIMESTAMP);
+            VALUES(NEWID(), '${patient.fullName}', '${patient.dateOfBirth}', '${therapistId}', ${patient.height}, ${patient.weight}, '${patient.injuries}', CURRENT_TIMESTAMP);
         `)
         return response.recordset[0]
     },
@@ -144,8 +144,8 @@ export default {
             UPDATE p SET 
             names = '${patient.fullName}', 
             dateofbirth = '${patient.dateOfBirth}', 
-            height = '${patient.height}',
-            weight = '${patient.weight}',
+            height = ${patient.height},
+            weight = ${patient.weight},
             injuries = '${patient.injuries}'
             FROM [patient] p
             WHERE p.id = '${patientID}';
