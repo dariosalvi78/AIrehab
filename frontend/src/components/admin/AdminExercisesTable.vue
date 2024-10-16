@@ -26,13 +26,22 @@
         <q-tr :props="props">
           <q-td auto-width>
             <q-btn-dropdown :ripple="false" rounded flat size="sm" menu-anchor="center right" menu-self="center left">
-              <q-item clickable v-close-popup @click="onRowClick(props.row)">
+              <q-item clickable v-close-popup @click="onRowClick('exercise', props.row)">
                 <q-item-section avatar>
                   <q-avatar icon="book" size="lg"/>
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>Exercise</q-item-label>
                   <q-item-label caption>Read notes</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="onRowClick('delete', props.row)">
+                <q-item-section avatar>
+                  <q-avatar icon="close" size="lg"/>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Delete</q-item-label>
+                  <q-item-label caption>Permanently delete {{props.row.type}}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-btn-dropdown>
@@ -77,6 +86,23 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="openExerciseDeletePrompt">
+      <q-card class="q-pl-mx" style="min-width: 350px">
+        <q-card-section>
+          <div class="text-body1">Delete exercise - {{selectedExercise.type}}</div>
+          <div class="text-body2">
+            <div><b>- Physiotherapist:</b> {{selectedExercise.assignedTo}}</div>
+            <div><b>- Patient:</b> {{selectedExercise.patientName}}</div>
+            <div><b>- Date:</b> {{`${selectedExercise.startTimestamp} -  ${selectedExercise.endTimestamp ? selectedExercise.endTimestamp : 'Ongoing'}`}}</div>
+            <div><b>- Video:</b> {{selectedExercise.videoFile ? 'Uploaded' : 'No video uploaded'}}</div>
+          </div>
+        </q-card-section>
+        <q-card-actions align="center">
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn label="Delete" type="submit" color="negative" v-close-popup class="q-ml-sm" @click="closeExercise"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <div v-if="isLoadingExercises" class="q-ma-md flex flex-center">
       <q-separator inset />
         <q-spinner-dots
@@ -88,6 +114,7 @@
 </template>
 
 <script>
+import API from '../../API.js'
 import nicers from '../../utils/nicers.js'
 
 export default {
@@ -105,6 +132,7 @@ export default {
       rows: [],
       isLoadingExercises: true,
       openExerciseInfoPrompt: false,
+      openExerciseDeletePrompt: false,
       selectedExercise: {}
     }
   },
@@ -126,9 +154,35 @@ export default {
     }
   },
   methods: {
-    async onRowClick (row) {
+    async onRowClick (prompt, row) {
       this.selectedExercise = row
-      this.openExerciseInfoPrompt = !this.openExerciseInfoPrompt
+      if (prompt == 'exercise') {
+        this.openExerciseInfoPrompt = !this.openExerciseInfoPrompt
+      } else if (prompt == 'delete') {
+        this.openExerciseDeletePrompt = !this.openExerciseDeletePrompt
+      }
+      else return
+    },
+    async closeExercise () {
+      let deletedExercise = this.selectedExercise
+      try {
+        await API.deleteExercise(deletedExercise.id, deletedExercise.physiotherapySessionId, deletedExercise.videoFile)
+        this.$q.notify({
+          color: 'info',
+          position: 'top',
+          message: 'Deleted selected exercise',
+          icon: 'info'
+        })
+        this.$emit('getExercises')
+      } catch (err) {
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: `Cannot delete selected exercise: ${err}`,
+          icon: 'warning'
+        })
+        return
+      }
     },
     formatDateLastLogin (date) {
       return nicers.formattedDayOfMonth(date)
@@ -137,6 +191,8 @@ export default {
       this.rows = []
       this.selectedExercise = {}
       this.isLoadingExercises = true
+      this.openExerciseInfoPrompt = false
+      this.openExerciseDeletePrompt = false
     }
   }
 }
