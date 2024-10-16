@@ -19,7 +19,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^1.10.0",
+    "@quasar/app-vite": "^2.0.0-beta.22",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47"
   },
