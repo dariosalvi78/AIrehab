@@ -15,12 +15,14 @@
                     hint="e.g. user@email.com"
                 />
                 <q-input
+                    ref="qPass"
                     class="q-my-lg"            
                     filled
                     v-model="this.password"
                     label="Password"
                     type="password"
-                    hint="Password for physiotherapist"
+                    :hint="'Password for physiotherapist ' + getPwdFeedback"
+                    :rules="[(pwd) => !checkPwdStrength || checkPwdStrength]"
                 />
                 <q-input
                     ref="qConfirmPass"
@@ -30,7 +32,7 @@
                     label="Confirm password"
                     type="password"
                     hint="Must be the same password"
-                    :rules="[(pass) => pass === this.password || 'Please enter the same password']"
+                    :rules="[(pwd) => pwd === this.password || 'Please enter the same password']"
                 />
                 <!-- <q-option-group
                     :options="optionsRadio"
@@ -47,6 +49,8 @@
 </template>
 
 <script>
+import password_strength from 'zxcvbn'
+
 export default {
     name: 'NewUserForm',
     props: { role: String },
@@ -55,15 +59,41 @@ export default {
         return {
             email: undefined,
             password: undefined,
-            passwordConfirm: undefined
+            passwordConfirm: undefined,
+            pwd_score: undefined
         }
     },
     updated () {
         this.resetForm()
     },
+    computed: {
+        checkPwdStrength () {
+            if (this.password) {
+                let checkStrength = password_strength(this.password)
+                this.pwd_score = checkStrength.score
+                if (checkStrength.feedback.warning) {
+                    for(let pwd in checkStrength.feedback.suggestions) {
+                        return `
+                            ${checkStrength.feedback.warning}
+                            ${checkStrength.feedback.suggestions[pwd]}
+                            `
+                    }
+                }
+               
+            }
+        },
+        getPwdFeedback () {
+            let pwdHint = ''
+            if (this.pwd_score >= 2 && this.pwd_score < 4) pwdHint = '· Good password'
+            else if (this.pwd_score >= 4) pwdHint = '· Very good password!' 
+            return pwdHint
+        }
+    },
     methods: {
         async formSubmit () {
-            if (this.$refs.qConfirmPass.hasError) {
+            this.$refs.qPass.validate()
+            this.$refs.qConfirmPass.validate()
+            if (this.$refs.qPass.hasError || this.$refs.qConfirmPass.hasError) {
                 return this.$q.notify({
                     color: 'negative',
                     position: 'top',
@@ -83,6 +113,7 @@ export default {
             this.email = undefined
             this.password = undefined
             this.passwordConfirm = undefined
+            this.pwd_score = undefined
         }
     }
 }
