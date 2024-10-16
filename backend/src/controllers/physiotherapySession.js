@@ -3,10 +3,9 @@ import * as Types from '../../../datamodel/modeljdocs.mjs'
 import sessions from "../DOM/physiotherapySessionCollection.js"
 import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
-import config from '../utils/config.js'
-import fs from 'node:fs'
-import physiotherapistCollection from '../DOM/physiotherapistCollection.js'
+import physiotherapist from '../DOM/physiotherapistCollection.js'
 import files from '../utils/fileHandler.js'
+import config from '../utils/config.js'
 
 export default {
 
@@ -18,14 +17,15 @@ export default {
      */
     getSessions: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let results
+        let physiotherapy_sessions
         try {
             if (req.user.role == 'admin') {
-                results = await sessions.getSessions()
+                physiotherapy_sessions = await sessions.getSessions()
             } else if (req.user.role == 'physiotherapist') {
-                results = await sessions.getSessionsByEmail(req.user.email)
+                let results = await sessions.getSessionsByEmail(req.user.email, req.query.pagination)
+                physiotherapy_sessions = { sessions: results[0], maxPageNo: results[results.length - 1][0].maxPage }
             }
-            res.send(results)
+            res.send(physiotherapy_sessions)
             return
         } catch (err) {
             logger.error({ error: err }, 'error getting sessions: ')
@@ -69,7 +69,7 @@ export default {
 
         try {
             if (req.user.role == 'physiotherapist') {
-                const isAssignedTo = await physiotherapistCollection.getOnePatientByEmail(req.user.email, patientID)
+                const isAssignedTo = await physiotherapist.getOnePatientByEmail(req.user.email, patientID)
                 if (!isAssignedTo) return res.sendStatus(403)    
             }
             const addedSession = await sessions.createSession(patientID)

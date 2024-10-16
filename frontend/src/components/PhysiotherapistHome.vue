@@ -42,9 +42,9 @@
           </div>
           <q-separator inset />
           <q-tab-panels v-show="users.length >= 1 && pagination.maxPageNo >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
-            <q-tab-panel id="panel" name="main">
-              <div class="q-pa-md flex justify-center">
-                <div style="max-width: 90%; width: 300px;">
+            <q-tab-panel id="panel" name="main" class="q-px-none">
+              <div class="q-py-md flex justify-center">
+                <div style="width: 400px;">
                   <q-btn style="marginLeft:2px;" color="grey-8" flat fab-mini :ripple="false" 
                     :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
                     v-touch-repeat.mouse="handleSortOrder"

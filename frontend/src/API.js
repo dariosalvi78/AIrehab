@@ -69,8 +69,8 @@ let API = {
     return response.data
   },
 
-  async getSessions () {
-    let response = await axios.get(URL_PRE + '/sessions', {})
+  async getSessions (pagination) {
+    let response = await axios.get(URL_PRE + '/sessions', { params: { pagination: pagination } })
     return response.data
   },
 

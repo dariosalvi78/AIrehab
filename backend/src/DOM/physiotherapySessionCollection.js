@@ -26,29 +26,42 @@ export default {
 
     /**
      * Get all ongoing physiotherapy sessions assigned to a physiotherapist
-     * @param {Types.User["email"]} therapistEmail 
+     * @param {Types.User["email"]} therapistEmail
+     * @param {Object} pagination limit, pageNo, sortOrder
      * @returns {Promise<Array.<Types.PhysiotherapySession>>}
     */
-    getSessionsByEmail: async function (therapistEmail) {
+    getSessionsByEmail: async function (therapistEmail, pagination) {
         const response = await db.query(`
-            SELECT s.id,
-                s.startTimestamp, 
-                s.endTimestamp, 
-                CAST(p.names AS NVARCHAR(100)) names, 
-                COUNT(e.id) AS numOfExercises 
-            FROM [physiotherapy_session] s
-                INNER JOIN [patient] p ON p.id = s.patientId
-                INNER JOIN [user] u ON p.physiotherapistId = u.id
-                LEFT JOIN [exercise] e ON s.id = e.physiotherapySessionId
-            WHERE u.email = '${therapistEmail}'
-            GROUP BY 
-                s.id, 
-                s.startTimestamp, 
-                s.endTimestamp, 
-                CAST(p.names AS NVARCHAR(100))
-            ORDER BY s.startTimestamp DESC;
+            DECLARE @pageNo AS INT
+            DECLARE @maxPage AS FLOAT
+            SET @pageNo=${pagination.pageNo}
+            SELECT @maxPage = COUNT(s.id) FROM [physiotherapy_session] s 
+            SET @maxPage = CEILING(@maxPage/${pagination.limit})
+            WHILE @maxPage >= @pageNo
+            BEGIN
+                SELECT s.id,
+                    s.startTimestamp, 
+                    s.endTimestamp, 
+                    CAST(p.names AS NVARCHAR(100)) names, 
+                    COUNT(e.id) AS numOfExercises 
+                FROM [physiotherapy_session] s
+                    INNER JOIN [patient] p ON p.id = s.patientId
+                    INNER JOIN [user] u ON p.physiotherapistId = u.id
+                    LEFT JOIN [exercise] e ON s.id = e.physiotherapySessionId
+                WHERE u.email = '${therapistEmail}'
+                GROUP BY 
+                    s.id, 
+                    s.startTimestamp, 
+                    s.endTimestamp, 
+                    CAST(p.names AS NVARCHAR(100))
+                ORDER BY s.startTimestamp ${pagination.sortOrder}
+                OFFSET (@pageNo-1) * ${pagination.limit} ROWS
+                FETCH NEXT ${pagination.limit} ROWS ONLY
+                SET @pageNo = @pageNo + 1
+            END
+            SELECT @maxPage AS maxPage
         `)
-        return response.recordset
+        return response.recordsets
     },
 
     /**
