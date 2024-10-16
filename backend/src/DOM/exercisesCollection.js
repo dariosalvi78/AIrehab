@@ -27,7 +27,8 @@ export default {
     */
     getExerciseByID: async function (exerciseID) {
         const response = await db.query(`
-            SELECT TOP 1 e.* FROM [exercise] e
+            SELECT TOP 1 e.*, s.patientId AS patientID FROM [exercise] e
+            INNER JOIN [physiotherapy_session] s ON e.physiotherapySessionId = s.id
             WHERE e.id = '${exerciseID}';
         `)
         return response.recordset[0]
@@ -41,7 +42,7 @@ export default {
      */
      getOneExerciseByEmail: async function (exerciseID, therapistEmail) {
         const response = await db.query(`
-            SELECT TOP 1 e.*, u.email AS physiotherapistEmail FROM [exercise] e
+            SELECT TOP 1 e.*, u.email AS physiotherapistEmail, p.id AS patientID FROM [exercise] e
             INNER JOIN [physiotherapy_session] s ON e.physiotherapySessionId = s.id
             LEFT JOIN [patient] p ON s.patientId = p.id
             LEFT JOIN [user] u ON p.physiotherapistId = u.id
