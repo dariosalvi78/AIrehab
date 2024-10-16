@@ -36,14 +36,16 @@ describe('getSessions access:', function () {
 
     it('physiotherapist can only get own physiotherapy sessions', async function () {
         let therapist = this.physiotherapist
-        spyOn(sessions, 'getSessionsByEmail').and.returnValue(this.sessions)
+        spyOn(sessions, 'getSessionsByEmail').and.returnValue([this.sessions, [{ maxPage: 1 }] ])
         await physiotherapySession.getSessions({
-            user: therapist
+            user: therapist,
+            query: { pagination: {} }
         }, {
             send(data) {
                 expect(data).toBeDefined()
-                expect(data instanceof Array).toBeTrue()
-                expect(sessions.getSessionsByEmail).toHaveBeenCalledWith(therapist.email)
+                expect(data instanceof Object).toBeTrue()
+                expect(data.maxPageNo).toEqual(1)
+                expect(sessions.getSessionsByEmail).toHaveBeenCalledWith(therapist.email, { })
             }
         })
     })

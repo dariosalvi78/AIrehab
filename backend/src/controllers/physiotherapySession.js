@@ -12,6 +12,7 @@ export default {
     /**
      * Get all ongoing physiotherapy sessions
      * @param {Object} req - express request
+     * @param {Object} req.query pagination params: limit, pageNo, sortOrder
      * @param {Object} res - express response
      * @returns {Promise<Array<Types.PhysiotherapySession>>}
      */
