@@ -37,20 +37,20 @@
               </q-card>
             </q-dialog>
           </q-card-actions>
-          <div class="q-pa-md q-gutter-sm flex flex-center">
-            <div class="text-h6">Patients list</div>
-          </div>
-          <q-separator inset />
           <q-tab-panels v-show="users.length >= 1 && pagination.maxPageNo >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
             <q-tab-panel id="panel" name="main" class="q-px-none">
               <div class="q-py-md flex justify-center">
                 <div style="width: 400px;">
-                  <q-btn style="marginLeft:2px;" color="grey-8" flat fab-mini :ripple="false" 
-                    :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
-                    v-touch-repeat.mouse="handleSortOrder"
-                  >
-                  <q-icon name="calendar_month" />
-                  </q-btn>
+                  <div style="display: flex;">
+                    <q-btn style="marginLeft:2px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
+                      :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
+                      v-touch-repeat.mouse="handleSortOrder"
+                    >
+                    <q-icon name="calendar_month" />
+                    </q-btn>
+                    <div class="list-line" />
+                    <div class="text-subtitle2 line-desc q-mr-sm">Patients list</div>
+                  </div>
                   <q-intersection
                     v-for="user in users"
                     :key="user.id"
@@ -106,9 +106,6 @@
         </div>
         <div v-if="panel == 'main'">
           <q-separator inset />
-          <div class="q-pa-md q-gutter-sm flex flex-center">
-            <div class="text-h6">Ongoing sessions</div>
-          </div>
           <sessions-list :selectedPatient="selectedPatient" />
         </div>
       </q-page-container>

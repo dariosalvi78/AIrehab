@@ -3,12 +3,16 @@
     <div v-if="sessions.length >= 1 && pagination.maxPageNo >= 1">
       <div class="q-py-md flex justify-center">
         <div style="width: 400px;">
-          <q-btn style="marginLeft:2px;" color="grey-8" flat fab-mini :ripple="false" 
-            :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
-            v-touch-repeat.mouse="handleSortOrder"
-          >
-            <q-icon name="calendar_month" />
-          </q-btn>
+          <div style="display: flex;">
+            <q-btn style="marginLeft:2px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
+              :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
+              v-touch-repeat.mouse="handleSortOrder"
+            >
+              <q-icon name="calendar_month" />
+            </q-btn>
+            <div class="list-line" />
+            <div class="text-subtitle2 line-desc q-mr-sm">Physiotherapy sessions</div>
+          </div>
           <q-intersection
             v-for="session in sessions"
             :key="session.id"

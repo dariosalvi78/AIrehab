@@ -5,7 +5,7 @@
        <q-card flat class="q-py-lg q-mt-sm">
         <q-card-section>
           <div class="text-h6">
-            Session for {{session.patientName}}
+            Physiotherapy session for {{session.patientName}}
           </div>
           <div class="text-subtitle-1">
             <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>

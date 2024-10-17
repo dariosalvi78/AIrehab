@@ -1,1 +1,12 @@
 /* app global css */
+
+.list-line {
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    height: 1px;
+    width: 100%;
+    margin-top: 20px;
+}
+.line-desc {
+    padding: 10px;
+    min-width: fit-content;
+}
