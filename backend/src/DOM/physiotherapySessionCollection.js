@@ -35,7 +35,10 @@ export default {
             DECLARE @pageNo AS INT
             DECLARE @maxPage AS FLOAT
             SET @pageNo=${pagination.pageNo}
-            SELECT @maxPage = COUNT(s.id) FROM [physiotherapy_session] s 
+            SELECT @maxPage = COUNT(s.id) FROM [physiotherapy_session] s
+                INNER JOIN [patient] p ON s.patientId = p.id
+                INNER JOIN [user] u ON p.physiotherapistId = u.id
+                WHERE u.email = '${therapistEmail}'
             SET @maxPage = CEILING(@maxPage/${pagination.limit})
             WHILE @maxPage >= @pageNo
             BEGIN
