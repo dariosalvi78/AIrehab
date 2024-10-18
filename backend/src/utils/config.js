@@ -2,12 +2,16 @@
 const config = {
     db: {
         host: process.env.DB_HOSTNAME,
-        port: process.env.PORT,
+        port: process.env.DB_PORT,
         name: process.env.DB_NAME,
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD
     },
+    server: {
+        port: process.env.SERVER_PORT,
+    },
     environment: process.env.ENVIRONMENT,
+    domain: process.env.DOMAIN_NAME,
     admin: {
         username: process.env.ADMIN_USERNAME,
         password: process.env.ADMIN_PASSWORD

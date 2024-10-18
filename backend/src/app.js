@@ -18,8 +18,8 @@ import mailer from './utils/mailer.js'
 
     console.log('Starting express app')
 
-    const port = config.db.port
-    const hostname = config.db.host
+    const port = config.server.port
+    const hostname = config.domain
     const app = express()
     app.use(helmet())
     app.use(cookieParser())

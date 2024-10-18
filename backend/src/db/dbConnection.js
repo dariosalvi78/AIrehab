@@ -1,6 +1,6 @@
 import config from '../utils/config.js'
 
-const mssql_port = 1433
+const mssql_port = parseInt(config.db.port)
 
 export default {
 
