@@ -22,7 +22,7 @@
                     label="Password"
                     type="password"
                     :hint="'Password for physiotherapist ' + getPwdFeedback"
-                    :rules="[(pwd) => !checkPwdStrength || checkPwdStrength]"
+                    :rules="[(pwd) => !getPwdStrength || getPwdStrength]"
                 />
                 <q-input
                     ref="qConfirmPass"
@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import password_strength from 'zxcvbn'
+import pwd from '../utils/passwordValidation.js'
 
 export default {
     name: 'NewUserForm',
@@ -59,34 +59,18 @@ export default {
         return {
             email: undefined,
             password: undefined,
-            passwordConfirm: undefined,
-            pwd_score: undefined
+            passwordConfirm: undefined
         }
     },
     updated () {
         this.resetForm()
     },
     computed: {
-        checkPwdStrength () {
-            if (this.password) {
-                let checkStrength = password_strength(this.password)
-                this.pwd_score = checkStrength.score
-                if (checkStrength.feedback.warning) {
-                    for(let pwd in checkStrength.feedback.suggestions) {
-                        return `
-                            ${checkStrength.feedback.warning}
-                            ${checkStrength.feedback.suggestions[pwd]}
-                            `
-                    }
-                }
-               
-            }
+        getPwdStrength () {
+            return pwd.checkPwdStrength(this.password)
         },
         getPwdFeedback () {
-            let pwdHint = ''
-            if (this.pwd_score >= 2 && this.pwd_score < 4) pwdHint = '· Good password'
-            else if (this.pwd_score >= 4) pwdHint = '· Very good password!' 
-            return pwdHint
+            return pwd.getPwdFeedback(this.password)
         }
     },
     methods: {
@@ -113,7 +97,6 @@ export default {
             this.email = undefined
             this.password = undefined
             this.passwordConfirm = undefined
-            this.pwd_score = undefined
         }
     }
 }
