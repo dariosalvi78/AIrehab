@@ -86,12 +86,22 @@ export default {
   updated () { },
   methods: {
     async getSessions () {
-      let resp = await API.getSessions(this.pagination)
-      if (resp) {
-        this.sessions = resp.sessions
-        this.pagination.maxPageNo = resp.maxPageNo
-        this.isLoadingSessions = false
+      try {
+        let resp = await API.getSessions(this.pagination)
+        if (resp) {
+          this.sessions = resp.sessions
+          this.pagination.maxPageNo = resp.maxPageNo
+          this.isLoadingSessions = false
+        }     
+      } catch (err) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Something went wrong when retrieving sessions: ' + err,
+          icon: 'warning'
+        })
       }
+   
     },
     async handlePageSession (no) {
       this.pagination.pageNo = no

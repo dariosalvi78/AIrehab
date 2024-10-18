@@ -59,7 +59,11 @@
                   >
                   <q-item clickable v-ripple @click="(e) => openPatientView(user)">
                     <q-item-section avatar>
-                      <q-avatar color="primary" text-color="white" icon="person" />        
+                      <q-avatar color="primary" text-color="white" icon="person">
+                        <q-badge v-if="user.isPartOfSession" floating color="teal" rounded>
+                          <q-icon name="accessibility" style="width:7px;height:15px;"/>
+                        </q-badge>
+                      </q-avatar> 
                     </q-item-section>
 
                     <q-item-section>
@@ -176,11 +180,20 @@ export default {
       this.resetForm()
     },
     async getPatients () {
-      let res = await API.getPatients(this.pagination)
-      if (res) {
-        this.users = res.patients
-        this.pagination.maxPageNo = res.maxPageNo
-        this.isLoadingPatients = false
+      try {
+        let res = await API.getPatients(this.pagination)
+        if (res) {
+          this.users = res.patients
+          this.pagination.maxPageNo = res.maxPageNo
+          this.isLoadingPatients = false
+        }
+      } catch (err) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Something went wrong when retrieving patients: ' + err,
+          icon: 'warning'
+        })
       }
     },
     async openExercisePrompt () {

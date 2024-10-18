@@ -30,9 +30,19 @@ export default {
             SET @maxPage = CEILING(@maxPage/${pagination.limit})
             WHILE @maxPage >= @pageNo
             BEGIN
-                SELECT p.names, p.id as patientID, p.createdTimestamp FROM [user] u
-                INNER JOIN [patient] p ON u.id = p.physiotherapistId
+                SELECT 
+                    CAST(p.names AS NVARCHAR(100)) as names,  
+                    p.id as patientID, 
+                    p.createdTimestamp,
+                    CASE WHEN COUNT(s.id) >= 1 THEN 1 ELSE 0 END AS isPartOfSession
+                FROM [user] u
+                    INNER JOIN [patient] p ON u.id = p.physiotherapistId
+                    LEFT JOIN [physiotherapy_session] s ON p.id = s.patientId
                 WHERE u.email = '${therapistEmail}'
+                GROUP BY 
+                    CAST(p.names AS NVARCHAR(100)), 
+                    p.id, 
+                    p.createdTimestamp
                 ORDER BY p.createdTimestamp ${pagination.sortOrder}
                 OFFSET (@pageNo-1) * ${pagination.limit} ROWS
                 FETCH NEXT ${pagination.limit} ROWS ONLY
