@@ -14,6 +14,10 @@ const signAccessToken = async (user) => {
     return jwt.sign({ user }, config.JWT.SECRET_KEY, { expiresIn: config.JWT.EXPIRE })
 }
 
+const signResetPwdToken = async (email) => {
+    return jwt.sign({ email }, config.JWT.SECRET_KEY, { expiresIn: '1h' })
+}
+
 /**
  * Middleware method for authenticating user,
  * use for routes that require authorization
@@ -38,6 +42,27 @@ const authenticateToken = async (req, res, next) => {
 }
 
 /**
+ * Verify reset password token
+ * @returns {Types.User} 
+ */
+const authenticateResetPWDToken = async (resetToken) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const token = resetToken
+            jwt.verify(token, config.JWT.SECRET_KEY, (err, data) => {
+                if (err) {
+                    return reject({reason: err.message, expiredAt: err.expiredAt})
+                }
+                resolve(data)
+            })
+        } catch (err) {
+            console.error('cant authenticate reset password token: ', err)
+            return reject(err)
+        }
+    })
+}
+
+/**
  * Creates admin user if not in DB
  */
 const createAdmin = async () => {
@@ -57,6 +82,8 @@ const createAdmin = async () => {
 
 export {
     signAccessToken,
+    signResetPwdToken,
     authenticateToken,
+    authenticateResetPWDToken,
     createAdmin
 }

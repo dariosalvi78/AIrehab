@@ -133,6 +133,16 @@ let API = {
     let response = await axios.post(URL_PRE + '/email/', { email, subject, content })
     return response.data
   },
+
+  async sendPasswordResetEmail (email) {
+    let response = await axios.post(URL_PRE + '/email/resetpassword', { email })
+    return response.data
+  },
+
+  async passwordReset (newPassword, token) {
+    let response = await axios.post(URL_PRE + '/resetpassword', { newPassword, token })
+    return response.data
+  }
 }
 
 export default API

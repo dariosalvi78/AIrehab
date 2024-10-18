@@ -8,6 +8,10 @@ const routes = [
     component: () => import('components/LoginPage.vue')
   },
   {
+    path: '/resetpassword',
+    component: () => import('components/PasswordResetPage.vue')
+  },
+  {
     path: '/admin',
     component: () => import('layouts/MainLayout.vue'),
     children: [

@@ -62,6 +62,19 @@ export default {
         `)
     },
 
+    /**
+     * Update user with new password with userID
+     * @param {Types.User["id"]} userID 
+     * @returns {Promise<void>}
+     */
+    updateUserNewLogin: async function (userID, newHashedPassword) {
+        await db.query(`
+            UPDATE [user]
+            SET [user].hashedpassword = '${newHashedPassword}'
+            WHERE [user].id = '${userID}';
+        `)
+    },
+
     /**@typedef {Types.User["email"]} email*/
 
     /**

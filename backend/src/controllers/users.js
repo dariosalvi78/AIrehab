@@ -1,7 +1,7 @@
 
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import bcrypt from 'bcrypt'
-import { signAccessToken } from "../utils/tokenAuth.js"
+import { signAccessToken, signResetPwdToken, authenticateResetPWDToken } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"
 import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
@@ -180,6 +180,46 @@ export default {
             return res.sendStatus(200)
         } catch (err) {
             logger.error({ error: err }, 'error sending email: ')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    sendPasswordResetEmail: async (req, res) => {
+        let email = req.body.email
+        try {
+            const user = await users.getUserByEmail(email)
+            if (!user) return res.sendStatus(204)
+
+            const token = await signResetPwdToken(email) 
+
+            await mailer.sendPhysiotherapistPasswordReset(email, token)
+            logger.debug({ data: { email: email }}, 'user requested new password')
+            return res.sendStatus(204)
+        } catch (err) {
+            logger.error({ error: err }, 'error sending reset password email: ')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    resetPassword: async (req, res) => {
+        let newPassword = req.body.newPassword, token = req.body.token
+        try {
+            const data_decoded = await authenticateResetPWDToken(token)
+
+            const user = await users.getUserByEmail(data_decoded.email)
+            const newHashedPWD = bcrypt.hashSync(newPassword, 8)
+            await users.updateUserNewLogin(user.id, newHashedPWD)
+
+            logger.info({ data: user.email }, 'user updated password: ')
+            return res.sendStatus(200)
+        } catch (err) {
+            if ((err.expiredAt * 1000) >= new Date().getTime()) {
+                res.clearCookie('token')
+                return res.sendStatus(401)
+            }
+            logger.error({ error: err }, 'error updating password: ')
             res.sendStatus(500)
             return
         }

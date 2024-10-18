@@ -40,9 +40,9 @@
                   />
                 </template>
               </q-input>
-              <!-- <div class="flex row justify-end">
+              <div class="flex row justify-end">
                 <q-btn class="q-pr-none" flat size="sm" label="Forgot password" @click="resetPassword()" />
-              </div> -->
+              </div>
               </form>
             </q-card-section>
             <q-card-actions class="flex flex-center">
@@ -85,10 +85,25 @@ export default {
         })
       }
     },
-
-    // TODO: add user sign-up and reset pwd
-    newUser () { },
-    resetPassword () { }
+    async resetPassword () {
+      try {
+      if (!this.email) {
+        return this.$q.notify({
+          color: 'negative',
+          message: 'Please enter email address',
+          icon: 'report_problem'
+        })
+      } 
+      await API.sendPasswordResetEmail(this.email.toLowerCase())
+      this.$q.notify({
+        color: 'secondary',
+        message: 'Password reset link has been sent, check your inbox',
+        icon: 'info'
+      })   
+      } catch (err) {
+        return
+      }
+    }
   }
 }
 </script>

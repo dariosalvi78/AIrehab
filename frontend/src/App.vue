@@ -17,7 +17,7 @@ export default {
   beforeMount () {
     console.debug(`[Quasar app: ${this.$q.version}]`)
 
-    if (!Cookies.get('token')) {
+    if (!Cookies.get('token') && !window.location.href.includes('resetpassword')) {
       this.$router.push('login')
     }
 

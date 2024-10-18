@@ -53,4 +53,6 @@ export default async (app, isAuth) => {
     app.post(`${API_PREFIX}/attachments/:exerciseID`, isAuth, attachments.uploadExerciseFile)
 
     app.post(`${API_PREFIX}/email/`, isAuth, users.sendEmail)
+    app.post(`${API_PREFIX}/email/resetpassword`, users.sendPasswordResetEmail)
+    app.post(`${API_PREFIX}/resetpassword`, users.resetPassword)
 }
