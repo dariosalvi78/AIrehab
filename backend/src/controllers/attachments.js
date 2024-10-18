@@ -55,6 +55,7 @@ export default {
             return res.send(video)
         } catch (err) {
             logger.error({ error: err }, 'error uploading attachments: ')
+            if (err.httpCode == 413) return res.status(err.httpCode).send('File is too large, 80 MB limit on uploads')
             res.sendStatus(500)
             return
         }

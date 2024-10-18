@@ -106,7 +106,7 @@ export default {
     updateExerciseVideo: async function (exerciseID, video) {
         const response = await db.query(`
             UPDATE e SET 
-            videoFile = '${video.fileName}',
+            videoFile = ${video.fileName},
             endTimestamp = ${video.endTimestamp}
             OUTPUT Inserted.videoFile, Inserted.endTimestamp
             FROM [exercise] e

@@ -1,6 +1,6 @@
 
 import * as Types from '../../../datamodel/modeljdocs.mjs'
-import { mkdir } from 'fs/promises'
+import { mkdir, rm } from 'fs/promises'
 import fs from 'node:fs'
 import logger from './logger.js'
 import config from '../utils/config.js'
@@ -18,32 +18,37 @@ export default {
     async saveVideo(sessionID, exerciseID, req) {
         try {
             let filename = undefined
-            const SESSION_DIR = config.uploads.base_path + '/session_' + sessionID
+            const SESSION_DIR = config.uploads.base_path + 'session_' + sessionID
 
             if (!fs.existsSync(SESSION_DIR)) {
                 await mkdir(SESSION_DIR, { recursive: true })
             }
-
-            const form = formidable()
+            let fileSizeLimit = 80 * 1024 * 1024 // 80 MB limit
+            const form = formidable({ maxFieldsSize: fileSizeLimit, maxFileSize: fileSizeLimit })
             return new Promise(async (resolve, reject) => {
-                form.parse(req)
-                form.on('error', async (err) => {
-                    await exercises.updateExerciseVideo(exerciseID, { fileName: null, endTimestamp: null })
-                    logger.error({ error: err }, 'Cannot save file: ')
-                    reject(err)
-                    return
-                })
-                form.on('fileBegin', async (formName, file) => {
-                    if (!file) throw new Error('Error on saving file')
-                    filename = file.newFilename + '_' + Date.now() + '.' + file.mimetype.slice(6)
-                    file.filepath = SESSION_DIR + '/exercise_' + filename
-                })
-                form.on('end', async () => {
-                    const exercise_with_video = await exercises.updateExerciseVideo(exerciseID, { fileName: filename, endTimestamp: 'CURRENT_TIMESTAMP' })
-                    if (exercise_with_video) {
-                        resolve(exercise_with_video)
-                        return
+                form.parse(req, async (err, fields, files) => {
+                    if (err) {
+                        await exercises.updateExerciseVideo(exerciseID, { fileName: null, endTimestamp: null })
+                        return reject({ exerciseID, ...err })
                     }
+
+                    if (!files) throw new Error('Error on saving file')
+                    let file = files.uploaded_file[0]
+                    filename = file.newFilename + '_' + Date.now() + '.' + file.mimetype.slice(6)
+                    const exercise_file_path = SESSION_DIR + '/exercise_' + filename
+
+                    fs.copyFile(file.filepath, exercise_file_path, async (err) => {
+                        if (err) return reject({ exerciseID, error: err.message })
+
+                        logger.info({ exerciseID, file: filename }, 'File uploaded')
+                        await rm(file.filepath, { recursive: true }) // remove copy from /temp folder
+
+                        const exercise_with_video = await exercises.updateExerciseVideo(exerciseID, { fileName: `'${filename}'`, endTimestamp: 'CURRENT_TIMESTAMP' })
+                        if (exercise_with_video) {
+                            resolve(exercise_with_video)
+                            return
+                        }
+                    })
                 })
             })
         } catch (err) {

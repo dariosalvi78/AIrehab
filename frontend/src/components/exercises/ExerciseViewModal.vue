@@ -17,7 +17,7 @@
             <q-btn label="Stop recording" color="secondary" size="md" icon-right="camera" @click="stopVideoCapture" />
           </q-card-section>
           <q-card-section class="column items-center q-pa-sm">
-            <q-file ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" v-model="uploadedFile" label="Upload video" @change.capture="uploadedRecordedVideo">
+            <q-file class="q-mb-sm" ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" v-model="uploadedFile" label="Upload video" @change.capture="uploadedRecordedVideo">
               <template v-slot:prepend>
                 <q-icon name="camera" />
               </template>
@@ -33,8 +33,11 @@
             <div class="video-container col" v-show="uploadedFile">
               <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
             </div>
-            <div class="q-mt-md text-body1" v-if="uploadedFile">Recorded: {{formatModifiedDate}}</div>
-            <q-btn :disabled="!uploadedFile" class="q-mt-md" label="Upload video" color="secondary" size="md" icon-right="camera" @click="saveVideo" />
+            <div class="q-mt-md text-body1" v-if="uploadedFile">
+              Recorded: {{formatModifiedDate}}<br/>
+              Size: {{getUploadedFileSize}}
+            </div>
+            <q-btn :disabled="!uploadedFile" class="q-mt-md" label="Save video" color="secondary" size="md" icon-right="camera" @click="saveVideo" />
           </q-card-section>
         </q-card>
       </div>
@@ -178,17 +181,6 @@ export default {
     uploadedRecordedVideo(e) {
       const output = this.$refs.uploadedVideoPreview
       const file = e.target.files[0]
-      if (file.size > 20000000) {
-        this.$refs.uploader.removeFile(file)
-        this.$refs.uploader.nativeEl.value = ''
-        this.uploadedFile = undefined
-        return this.$q.notify({
-          type: 'negative',
-          position: 'top',
-          message: 'Cannot save videos larger than 20 MB',
-          icon: 'warning'
-        })
-      }
       this.uploadedFile = file
       output.style.display = 'block'
       output.src = URL.createObjectURL(file)
@@ -229,13 +221,18 @@ export default {
           }
         } catch (err) {
           let errMsg = err
-          if (err.response.status == 400 || err.response.status == 404) errMsg = err.response.data
+          if (err.response.status == 400 || err.response.status == 404 || err.response.status === 413) errMsg = err.response.data
           this.$q.notify({
             type: 'negative',
             position: 'top',
             message: 'Video cannot be saved: ' + errMsg,
             icon: 'warning'
           })
+          if (err.response.status == 413) {
+            this.$refs.uploader.removeFile(this.uploadedFile)
+            this.$refs.uploader.nativeEl.value = ''
+            this.uploadedFile = undefined
+          }
         }
         this.$q.loading.hide()
         return
@@ -282,6 +279,10 @@ export default {
     },
     getVideoPathForExercise () {
       return `/api/attachments/${this.exerciseID}`
+    },
+    getUploadedFileSize () {
+      let formatFileSize = this.uploadedFile.size
+      return (formatFileSize / Math.pow(1024, 2)).toFixed(1) + ' MB'
     }
   },
   unmounted () {
