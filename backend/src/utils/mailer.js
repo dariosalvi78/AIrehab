@@ -39,9 +39,23 @@ export default {
       to: recipient,
       subject: 'Account created',
       html: `
-        Account created details\n
-        Email: ${recipient}\n
+        Account created details<br/>
+        Email: ${recipient}<br/>
         Password: ${password}
+      `
+    }
+
+    await sendEmail(options)
+  },
+  sendPhysiotherapistPasswordReset: async (recipient, token) => {
+
+    const options = {
+      from: config.mailer.from_address,
+      to: recipient,
+      subject: 'Password reset',
+      html: `
+        You have requested a new password<br/>
+        Proceed to this <a href="http://${config.domain}:9000/resetpassword?token=${token}&email=${recipient}">link</a>
       `
     }
 
