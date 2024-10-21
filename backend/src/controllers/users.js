@@ -209,19 +209,21 @@ export default {
             const data_decoded = await authenticateResetPWDToken(token)
 
             const user = await users.getUserByEmail(data_decoded.email)
+            const isSamePWD = await bcrypt.compare(newPassword, user.hashedPassword)
+            if (isSamePWD) return res.status(400).send('New password cannot match old password')
+
             const newHashedPWD = bcrypt.hashSync(newPassword, 8)
             await users.updateUserNewLogin(user.id, newHashedPWD)
 
             logger.info({ data: user.email }, 'user updated password: ')
             return res.sendStatus(200)
         } catch (err) {
+            logger.error({ error: err }, 'error updating password: ')
             if ((err.expiredAt * 1000) >= new Date().getTime()) {
                 res.clearCookie('token')
                 return res.sendStatus(401)
             }
-            logger.error({ error: err }, 'error updating password: ')
-            res.sendStatus(500)
-            return
+            return res.sendStatus(500)
         }
     }
 }

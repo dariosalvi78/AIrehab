@@ -97,21 +97,25 @@ export default {
         this.$q.loading.show()
         await API.passwordReset(this.password, this.token)
         await nicers.delay(200)
-        this.$q.loading.hide()
         this.$q.notify({
+          type: 'positive',
           color: 'positive',
           position: 'top',
           message: 'Your password has been updated',
         })
         this.$router.push('login')
       } catch (err) {
-        return this.$q.notify({
+        let errMsg = err
+        if (err.response.status == 400) errMsg = err.response.data
+        this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Cannot reset password ' + err,
+          message: 'Cannot reset password: ' + errMsg,
           icon: 'report_problem'
         })
       }
+      this.$q.loading.hide()
+      return
     },
     resetForm () {
       this.email = undefined
