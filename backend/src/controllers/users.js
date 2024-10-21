@@ -35,7 +35,11 @@ export default {
 
                 logger.debug({ data: user }, 'user logged in')
                 const token = await signAccessToken(user)
-                res.cookie('token', token, { sameSite: 'lax', secure: true })
+                res.cookie('token', token, { 
+                    sameSite: 'lax', 
+                    secure: true, 
+                    httpOnly: true 
+                })
                 return res.send({ user })
             } else {
                 res.sendStatus(404)

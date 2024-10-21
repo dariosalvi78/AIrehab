@@ -21,7 +21,7 @@
 
 <script>
 import API from '../API'
-import { Cookies } from 'quasar'
+import store from '../utils/storage.js';
 
 export default {
   name: 'MainLayout',
@@ -33,12 +33,13 @@ export default {
   methods: {
     async logout () {
       await API.logout()
+      store.removeLoginStatus()
       this.$router.push('login')
     },
   },
   computed: {
     isLoggedIn () {
-      return this.$route.path !== '/login' && Cookies.get('token')
+      return this.$route.path !== '/login' && store.getLoginStatus()
     }
   }
 }

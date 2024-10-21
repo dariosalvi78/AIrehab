@@ -57,6 +57,7 @@
 
 <script>
 import API from '../API.js'
+import store from '../utils/storage.js';
 
 export default {
   name: 'LoginPage',
@@ -72,7 +73,7 @@ export default {
     async login () {
       try {
         const data = await API.login(this.email.toLowerCase(), this.password)
-        console.log('user:', data)
+        store.setLoginStatus(true)
         if (data.user) {
           if (data.user.role == 'admin') this.$router.push('admin')
           else if (data.user.role == 'physiotherapist') this.$router.push('physiotherapist')

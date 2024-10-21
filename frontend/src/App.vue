@@ -6,7 +6,7 @@
 import axios from 'axios';
 import API from './API.js';
 import MainLayout from './layouts/MainLayout.vue';
-import { Cookies } from 'quasar';
+import store from './utils/storage.js';
 
 export default {
   components: { MainLayout },
@@ -17,7 +17,7 @@ export default {
   beforeMount () {
     console.debug(`[Quasar app: ${this.$q.version}]`)
 
-    if (!Cookies.get('token') && !window.location.href.includes('resetpassword')) {
+    if (!store.getLoginStatus() && !window.location.href.includes('resetpassword')) {
       this.$router.push('login')
     }
 
@@ -26,6 +26,7 @@ export default {
     }, async (err) => {
       if (err.response.status === 401 && !err.config.url.includes('login')) {
         await API.logout()
+        store.removeLoginStatus()
         this.$router.push('login')
         this.$q.notify({
           color: 'secondary',
