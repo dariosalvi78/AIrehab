@@ -51,7 +51,7 @@ export default {
                 results = await exercises.getExerciseByID(exerciseID)
             } else if (req.user.role == 'physiotherapist') {
                 results = await exercises.getOneExerciseByEmail(exerciseID, req.user.email)
-                if (results.physiotherapistEmail !== req.user.email) return res.sendStatus(403)
+                if (!results) return res.status(404).send('Exercise does not exist')
                 delete results.physiotherapistEmail
             }
             return res.send(results)

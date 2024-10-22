@@ -22,10 +22,15 @@ export default {
         if (!req.user) return res.sendStatus(403)
         let exerciseID = req.params.exerciseID
         try {
-            const exercise = await exercises.getExerciseByID(exerciseID)
-            if (!exercise.videoFile) return res.status(400).send('Video with given filename does not exist')
+            const exercise = await exercises.getOneExerciseByEmail(exerciseID, req.user.email)
+            if (!exercise) return res.status(404).send('Exercise does not exist')
+            if (!exercise.videoFile) {
+                return res.status(400).send('Video with given filename does not exist')
+            }
 
-            res.sendFile(path.join(import.meta.dirname, '../../' + config.uploads.base_path + '/session_' + exercise.physiotherapySessionId + '/exercise_' + exercise.videoFile))
+            res.sendFile(path.join(import.meta.dirname,
+                '../../' + config.uploads.base_path + '/session_' + exercise.physiotherapySessionId + '/exercise_' + exercise.videoFile
+            ))
         } catch (err) {
             logger.error({ error: err }, 'error getting file: ')
             res.sendStatus(500)

@@ -249,10 +249,15 @@ export default {
           this.videoFile = resp.videoFile
         }
       } catch (err) {
+        let errMsg = err
+        if (err.response.status == 404) {
+          errMsg = err.response.data
+          this.$router.push('/physiotherapist')
+        }
         return this.$q.notify({
           type: 'negative',
           position: 'top',
-          message: 'Cannot get exercise: ' + err,
+          message: 'Cannot get exercise: ' + errMsg,
           icon: 'warning'
         })
       }
