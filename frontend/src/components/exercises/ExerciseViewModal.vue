@@ -82,8 +82,7 @@
           </q-card>
         </transition>
         <div class="q-pa-lg video-container">
-          <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
-            <source :src="getVideoPathForExercise" type="video/mp4">
+          <video ref="videoPreview" id="videoPreview" autoplay playsinline webkit-playsinline controls>
             Your browser does not support HTML5 video.
           </video>
         </div>
@@ -118,7 +117,10 @@ export default {
   async beforeMount () {
     await this.checkForVideoSupport()
     await this.getVideoExercise()
-    if (this.videoFile) await this.getPOE()
+    if (this.videoFile) {
+      await this.getVideoPathForExercise()
+      await this.getPOE()
+    }
   },
   methods: {
     async checkForVideoSupport () {
@@ -217,6 +219,7 @@ export default {
                 icon: 'info'
               })
               await this.getPOE()
+              await this.getVideoPathForExercise()
             }
           }
         } catch (err) {
@@ -271,14 +274,16 @@ export default {
           icon: 'warning'
         })
       }
+    },
+    async getVideoPathForExercise () {
+      let blob = await API.getUploadFile(this.exerciseID)
+      let videoURL = URL.createObjectURL(blob)
+      this.$refs.videoPreview.src = videoURL
     }
   },
   computed: {
     formatModifiedDate () {
       return nicers.formattedDayOfMonth(this.uploadedFile.lastModified)
-    },
-    getVideoPathForExercise () {
-      return `/api/attachments/${this.exerciseID}`
     },
     getUploadedFileSize () {
       let formatFileSize = this.uploadedFile.size

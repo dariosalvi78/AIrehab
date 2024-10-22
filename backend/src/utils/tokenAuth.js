@@ -23,10 +23,13 @@ const signResetPwdToken = async (email) => {
  * use for routes that require authorization
  */
 const authenticateToken = async (req, res, next) => {
+    const headers = req.headers
+    const token = req.cookies.token
     try {
-        const token = req.cookies.token
-        if (!token) return res.sendStatus(401)
-
+        if (!token || !headers["x-poe-api"]) {
+            logger.debug({ data: headers }, 'blocking unauthorized request')
+            return res.sendStatus(401)
+        }
         jwt.verify(token, config.JWT.SECRET_KEY, (err, data) => {
             if (err) {
                 res.clearCookie('token')
@@ -36,7 +39,7 @@ const authenticateToken = async (req, res, next) => {
             next()
         })
     } catch (err) {
-        console.error('cant authenticate token: ', err)
+        logger.error({ error: err }, 'cant authenticate token: ')
         return res.sendStatus(500)
     }
 }
