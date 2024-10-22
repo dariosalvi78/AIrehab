@@ -95,7 +95,7 @@ export default {
         })
       }
       let submittedExercise  = {
-        type: this.exercise.type ? exerciseEnums.typeToAsc(this.exercise.type) : '',
+        type: this.exercise.type ? exerciseEnums.typeToDesc(this.exercise.type) : '',
         notes: this.exercise.notes ? this.exercise.notes.trim() : '',
         // startTimestamp: this.exercise.startTimestamp ? this.exercise.startTimestamp : null,
       }
