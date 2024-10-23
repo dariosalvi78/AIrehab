@@ -184,10 +184,10 @@ describe('deleteSession access:', function () {
         })
     })
     it('cannot delete physiotherapy session with exercises', async function () {
-        let sessionID = this.sessions[0].sessionID
-        spyOn(exercisesCollection, 'getExercisesBySession').and.returnValue([{id: 1}])
+        let therapist = this.physiotherapist, sessionID = this.sessions[0].sessionID
+        spyOn(exercisesCollection, 'getExercisesInSessionByEmail').and.returnValue([{id: 1}])
         await physiotherapySession.deleteSession({ 
-            user: this.physiotherapist,
+            user: therapist,
             params: { sessionID }
         }, {
             status(status) {
@@ -196,21 +196,21 @@ describe('deleteSession access:', function () {
             },
             send(data) {
                 expect(data).toBeDefined()
-                expect(exercisesCollection.getExercisesBySession).toHaveBeenCalledWith(sessionID)
+                expect(exercisesCollection.getExercisesInSessionByEmail).toHaveBeenCalledWith(sessionID, therapist.email)
             }
         })
     })
     it('physiotherapist can delete physiotherapy session', async function () {
-        let sessionID = this.sessions[0].sessionID
-        spyOn(exercisesCollection, 'getExercisesBySession').and.returnValue([])
+        let therapist = this.physiotherapist, sessionID = this.sessions[0].sessionID
+        spyOn(exercisesCollection, 'getExercisesInSessionByEmail').and.returnValue([])
         spyOn(sessions, 'deleteOneSession')
         await physiotherapySession.deleteSession({ 
-            user: this.physiotherapist,
+            user: therapist,
             params: { sessionID }
         }, {
             sendStatus(status) {
                 expect(status).toBe(204)
-                expect(exercisesCollection.getExercisesBySession).toHaveBeenCalledWith(sessionID)
+                expect(exercisesCollection.getExercisesInSessionByEmail).toHaveBeenCalledWith(sessionID, therapist.email)
                 expect(sessions.deleteOneSession).toHaveBeenCalledTimes(1)
             }
         })

@@ -26,10 +26,10 @@ describe('getExerciseFile access:', function () {
     })
     
     it('cant get non existing video from exercise', async function () {
-        let exercise = this.exercises[0]
-        spyOn(exercisesCollection, 'getExerciseByID').and.returnValue(exercise)
+        let therapist = this.physiotherapist, exercise = this.exercises[0]
+        spyOn(exercisesCollection, 'getOneExerciseByEmail').and.returnValue({})
         await attachments.getExerciseFile({ 
-            user: { role: 'admin' },
+            user: therapist,
             params: { exerciseID: exercise.id }
         }, {
             status(status) {
@@ -38,20 +38,37 @@ describe('getExerciseFile access:', function () {
             },
             send(data) {
                 expect(data).toContain('Video with given filename does not exist')
-                expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(exercise.id)
+                expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(exercise.id, therapist.email)
             }
         })
     })
-    it('admin can get exercise file', async function () {
-        let exercise = this.exercises[1]
-        spyOn(exercisesCollection, 'getExerciseByID').and.returnValue(exercise)
+    it('cant get video from non-assigned exercise', async function () {
+        let therapist = this.physiotherapist, exercise = this.exercises[0]
+        spyOn(exercisesCollection, 'getOneExerciseByEmail').and.returnValue(undefined)
         await attachments.getExerciseFile({ 
-            user: { role: 'admin' },
+            user: therapist,
+            params: { exerciseID: exercise.id }
+        }, {
+            status(status) {
+                expect(status).toBe(404)
+                return this
+            },
+            send(data) {
+                expect(data).toContain('Exercise does not exist')
+                expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(exercise.id, therapist.email)
+            }
+        })
+    })
+    it('admin can get exercise file assigned to physiotherapist', async function () {
+        let therapist = this.physiotherapist, exercise = this.exercises[1]
+        spyOn(exercisesCollection, 'getOneExerciseByEmail').and.returnValue(exercise)
+        await attachments.getExerciseFile({ 
+            user: { role: 'admin', email: therapist.email },
             params: { exerciseID: exercise.id }
         }, {
             sendFile (file) {
                 expect(file).toBeDefined()
-                expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(exercise.id)
+                expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(exercise.id, therapist.email)
             },
             status (status) {
                 console.log(status)
@@ -62,15 +79,15 @@ describe('getExerciseFile access:', function () {
         })
     })
     it('physiotherapist can get exercise file', async function () {
-        let exercise = this.exercises[1]
-        spyOn(exercisesCollection, 'getExerciseByID').and.returnValue(exercise)
+        let therapist = this.physiotherapist, exercise = this.exercises[1]
+        spyOn(exercisesCollection, 'getOneExerciseByEmail').and.returnValue(exercise)
         await attachments.getExerciseFile({ 
-            user: this.physiotherapist,
+            user: therapist,
             params: { exerciseID: exercise.id }
         }, {
             sendFile (file) {
                 expect(file).toBeDefined()
-                expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(exercise.id)
+                expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(exercise.id, therapist.email)
             },
             status (status) {
                 console.log(status)

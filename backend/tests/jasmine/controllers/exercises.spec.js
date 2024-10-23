@@ -64,17 +64,17 @@ describe('getExercises access:', function () {
     })
     it('physiotherapist can get all own exercises', async function () {
         let therapist = this.physiotherapist, sessionID = this.sessions[0].sessionID
-        spyOn(exercisesCollection, 'getExercisesBySession').and.returnValue(this.exercises)
+        spyOn(exercisesCollection, 'getExercisesBySession').and.returnValue([this.exercises, [{ maxPageNo: 1, numOfExercises: 1 }]])
         spyOn(sessions, 'getSessionByID').and.returnValue(this.sessions[0])
         await exercises.getExercises({
             user: therapist,
-            query: { sessionID }
+            query: { sessionID, pagination: {} }
         }, {
             send(data) {
                 expect(data).toBeDefined()
-                expect(data).toBeInstanceOf(Array)
+                expect(data).toBeInstanceOf(Object)
                 expect(sessions.getSessionByID).toHaveBeenCalledWith(sessionID, therapist.email)
-                expect(exercisesCollection.getExercisesBySession).toHaveBeenCalledWith(sessionID)
+                expect(exercisesCollection.getExercisesBySession).toHaveBeenCalled()
             }
         })
     })
@@ -115,17 +115,18 @@ describe('getExercise access:', function () {
     it('physiotherapist cannot get one non assigned exercise', async function () {
         let therapist = this.physiotherapist, _exercise = this.exercises[0]
         _exercise.physiotherapistEmail = 'different@email.com'
-        spyOn(exercisesCollection, 'getOneExerciseByEmail').and.returnValue(_exercise)
+        spyOn(exercisesCollection, 'getOneExerciseByEmail').and.returnValue(undefined)
         await exercises.getExercise({
             user: therapist,
             params: { exerciseID: _exercise.id }
         }, {
-            sendStatus(status) {
-                expect(status).toBe(403)
-                expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(_exercise.id, therapist.email)
+            status(status) {
+                expect(status).toBe(404)
+                return this
             },
             send(data) {
-                expect(data).not.toBeDefined()
+                expect(data).toBeDefined()
+                expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(_exercise.id, therapist.email)
             }
         })
     })
