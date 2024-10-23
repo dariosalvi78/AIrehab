@@ -25,7 +25,13 @@ export default {
             } else if (req.user.role == 'physiotherapist' && sessionID) {
                 const isAssignedTo = await sessions.getSessionByID(sessionID, req.user.email)
                 if (!isAssignedTo) return res.sendStatus(403)
-                results = await exercises.getExercisesBySession(sessionID)
+
+                let exercise = await exercises.getExercisesBySession(sessionID, req.query.pagination)
+                results = {
+                    exercises: exercise[0],
+                    maxPageNo: exercise[exercise.length - 1][0].maxPage,
+                    numOfExercises: exercise[exercise.length - 1][0].numOfExercises
+                }
             }
             res.send(results)
             return
@@ -35,7 +41,7 @@ export default {
             return
         }
     },
-    
+
     /**
      * Get one exercise in physiotherapy session
      * @param {Object} req - express request
@@ -130,6 +136,7 @@ export default {
         }
     },
 
+    // TODO: ADD ADMIN EDIT
     /**
      * Edit one exercise in an ongoing physiotherapy session
      * @param {Object} req - express request

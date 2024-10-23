@@ -40,7 +40,7 @@ export default {
      * @param {Types.User["email"]} therapistEmail 
      * @returns {Promise<Types.Exercise>}
      */
-     getOneExerciseByEmail: async function (exerciseID, therapistEmail) {
+    getOneExerciseByEmail: async function (exerciseID, therapistEmail) {
         const response = await db.query(`
             SELECT TOP 1 e.*, u.email AS physiotherapistEmail, p.id AS patientID FROM [exercise] e
             INNER JOIN [physiotherapy_session] s ON e.physiotherapySessionId = s.id
@@ -54,18 +54,33 @@ export default {
 
     /**
      * Get all exercises for a specific session and physiotherapist
-     * @param {Types.PhysiotherapySession["id"]} sessionID 
+     * @param {Types.PhysiotherapySession["id"]} sessionID
+     * @param {Object} pagination limit, pageNo, sortOrder
      * @returns {Promise<Array.<Types.Exercise>>}
      */
-    getExercisesBySession: async function (sessionID) {
+    getExercisesBySession: async function (sessionID, pagination) {
         const response = await db.query(`
-            SELECT e.* FROM [exercise] e
-            INNER JOIN [physiotherapy_session] s ON e.physiotherapySessionId = s.id
-            INNER JOIN [patient] p ON p.id = s.patientId
-            WHERE s.id = '${sessionID}'
-            ORDER BY e.startTimestamp DESC;
+            DECLARE @pageNo AS INT
+            DECLARE @maxPage AS FLOAT
+            DECLARE @numOfExercises AS FLOAT
+            SET @pageNo=${pagination.pageNo}
+            SELECT @numOfExercises = COUNT(e.id) FROM [exercise] e 
+                WHERE e.physiotherapySessionId = '${sessionID}'
+            SET @maxPage = CEILING(@numOfExercises/${pagination.limit})
+            WHILE @maxPage >= @pageNo
+            BEGIN
+                SELECT e.* FROM [exercise] e
+                    INNER JOIN [physiotherapy_session] s ON e.physiotherapySessionId = s.id
+                    INNER JOIN [patient] p ON p.id = s.patientId
+                WHERE s.id = '${sessionID}'
+                ORDER BY e.startTimestamp ${pagination.sortOrder}
+                OFFSET (@pageNo-1) * ${pagination.limit} ROWS
+                FETCH NEXT ${pagination.limit} ROWS ONLY
+                SET @pageNo = @pageNo + 1
+            END
+            SELECT @maxPage AS maxPage, @numOfExercises AS numOfExercises
         `)
-        return response.recordset
+        return response.recordsets
     },
 
     /**

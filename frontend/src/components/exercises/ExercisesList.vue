@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="text-h5 q-ml-md">Exercises {{getCountExercises}}</div>
-      <div v-if="exercises.length >= 1">
+    <div ref="exercises" class="text-h5 q-ml-md">Exercises {{getCountExercises}}</div>
+      <div v-if="exercises.length >= 1 && pagination.maxPageNo >= 1">
         <div 
           v-for="exercise in exercises" 
           :key="exercise.id"
@@ -36,6 +36,18 @@
             </q-card>
           </transition>
         </div>
+        <q-pagination
+          v-if="pagination.maxPageNo >= 1"
+          v-model="pagination.pageNo"
+          :max="pagination.maxPageNo"
+          :min="1"
+          flat
+          @update:model-value="(e) => handlePageExercise(e)"
+          direction-links
+          color="grey"
+          active-color="primary"
+          class="q-mb-md flex flex-center"
+        />
       </div>
       <div v-else-if="isLoadingExercises" class="q-ma-md flex flex-center">
         <q-spinner-dots
@@ -43,8 +55,10 @@
           size="3em"
         />
       </div>
-      <div v-else class="flex flex-center column">
-        <div class="text-h6 q-pa-md">No exercises in session</div>
+      <div v-else-if="pagination.maxPageNo <= 0" class="flex flex-center column">
+        <div class="text-h6 q-pa-md">
+          No exercises in session
+        </div>
       </div>
   </div>
 </template>
@@ -60,7 +74,14 @@ export default {
   data () {
     return {
       exercises: [],
-      isLoadingExercises: true
+      isLoadingExercises: true,
+      pagination: {
+        limit: 3,
+        pageNo: 1,
+        sortOrder: 'DESC',
+        maxPageNo: 1
+      },
+      numOfExercises: undefined
     }
   },
   async mounted () {
@@ -76,20 +97,22 @@ export default {
   },
   computed: {
     getCountExercises () {
-      return this.exercises.length >= 1 ? `(${this.exercises.length})` : ''
+      return this.numOfExercises >= 1 ? `(${this.numOfExercises})` : ''
     }
   },
   methods: {
     async getExercises () {
       try {
         if (this.sessionID) {
-          let resp = await API.getExercises(this.sessionID)
-          resp.map((exercise) => {
+          let resp = await API.getExercises(this.sessionID, this.pagination)
+          resp.exercises.map((exercise) => {
             exercise.type = exerciseEnum.typeToAsc(exercise.type)
             exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
             exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
           })
-          this.exercises = resp
+          this.exercises = resp.exercises
+          this.pagination.maxPageNo = resp.maxPageNo
+          this.numOfExercises = resp.numOfExercises
         }
       } catch (err) {
         this.session = undefined  
@@ -182,6 +205,11 @@ export default {
     },
     navigateToExercise (exerciseID) {
       return this.$router.push(this.sessionID + '/exercise/' + exerciseID)
+    },
+    async handlePageExercise (no) {
+      this.pagination.pageNo = no
+      await this.getExercises()  
+      window.scrollTo(0, this.$refs.exercises.offsetTop)
     },
   }
 }

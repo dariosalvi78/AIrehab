@@ -100,8 +100,8 @@ let API = {
     return response.data
   },
 
-  async getExercises (sessionID) {
-    let response = await axios.get('/exercises', { params: { sessionID } })
+  async getExercises (sessionID, pagination) {
+    let response = await axios.get('/exercises', { params: { sessionID, pagination: pagination } })
     return response.data
   },
 
