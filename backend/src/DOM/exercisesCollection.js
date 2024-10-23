@@ -52,8 +52,27 @@ export default {
         return response.recordset[0]
     },
 
+     /**
+     * Get all exercises in session assigned to a physiotherapist
+     * @param {Types.User["email"]} therapistEmail 
+     * @param {Types.PhysiotherapySession["id"]} sessionID 
+     * @returns {Promise<Array.<Types.Exercise>>}
+     */
+    getExercisesInSessionByEmail: async function (sessionID, therapistEmail) {
+        const response = await db.query(`
+            SELECT e.* FROM [exercise] e
+            INNER JOIN [physiotherapy_session] s ON e.physiotherapySessionId = s.id
+            LEFT JOIN [patient] p ON s.patientId = p.id
+            LEFT JOIN [user] u ON p.physiotherapistId = u.id
+            WHERE s.id = '${sessionID}'
+            AND u.email = '${therapistEmail}'
+            ORDER BY e.startTimestamp DESC;
+        `)
+        return response.recordset
+    },
+
     /**
-     * Get all exercises for a specific session and physiotherapist
+     * Get all exercises for a specific session
      * @param {Types.PhysiotherapySession["id"]} sessionID
      * @param {Object} pagination limit, pageNo, sortOrder
      * @returns {Promise<Array.<Types.Exercise>>}
