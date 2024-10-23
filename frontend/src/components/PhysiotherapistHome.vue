@@ -42,11 +42,17 @@
               <div class="q-py-md flex justify-center">
                 <div style="width: 400px;">
                   <div style="display: flex;">
-                    <q-btn style="marginLeft:2px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
-                      :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
-                      v-touch-repeat.mouse="handleSortOrder"
+                    <q-btn style="marginLeft:2px;paddingRight:0px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
+                      :icon="pagination.date.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
+                      v-touch-repeat.mouse="() => handleSortOrder('date')"
                     >
                     <q-icon name="calendar_month" />
+                    </q-btn>
+                    <q-btn style="paddingLeft:0px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
+                      :icon="pagination.name.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
+                      v-touch-repeat.mouse="() => handleSortOrder('name')"
+                    >
+                    <q-icon name="abc" size="md" style="height:24px;"/>
                     </q-btn>
                     <div class="list-line" />
                     <div class="text-subtitle2 line-desc q-mr-sm">Patients list</div>
@@ -144,8 +150,14 @@ export default {
       pagination: {
         limit: 5,
         pageNo: 1,
-        sortOrder: 'DESC',
-        maxPageNo: 1
+        maxPageNo: 1,
+        type: 'date',
+        date: {
+          sortOrder: 'DESC'
+        },
+        name: {
+          sortOrder: 'DESC'
+        }
       }
     }
   },
@@ -225,10 +237,11 @@ export default {
       this.pagination.pageNo = no
       await this.getPatients()  
     },
-    async handleSortOrder () {
-      this.pagination.sortOrder == 'DESC' 
-        ? this.pagination.sortOrder = 'ASC' 
-        : this.pagination.sortOrder = 'DESC'
+    async handleSortOrder (selectedType) {
+      this.pagination.type = selectedType
+      this.pagination[selectedType].sortOrder == 'DESC' 
+        ? this.pagination[selectedType].sortOrder = 'ASC' 
+        : this.pagination[selectedType].sortOrder = 'DESC'
 
       await this.getPatients()
     }

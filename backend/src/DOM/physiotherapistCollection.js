@@ -43,7 +43,12 @@ export default {
                     CAST(p.names AS NVARCHAR(100)), 
                     p.id, 
                     p.createdTimestamp
-                ORDER BY p.createdTimestamp ${pagination.sortOrder}
+                ORDER BY
+                    ${
+                        pagination.type == 'date' 
+                        ? `p.createdTimestamp ${pagination.date.sortOrder}` 
+                        : `CAST(p.names AS NVARCHAR(100)) ${pagination.name.sortOrder}`
+                    }
                 OFFSET (@pageNo-1) * ${pagination.limit} ROWS
                 FETCH NEXT ${pagination.limit} ROWS ONLY
                 SET @pageNo = @pageNo + 1
