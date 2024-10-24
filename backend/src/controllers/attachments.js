@@ -61,6 +61,7 @@ export default {
         } catch (err) {
             logger.error({ error: err }, 'error uploading attachments: ')
             if (err.httpCode == 413) return res.status(err.httpCode).send('File is too large, 80 MB limit on uploads')
+            else if (err.httpCode == 400) return res.status(err.httpCode).send(err.error)
             res.sendStatus(500)
             return
         }

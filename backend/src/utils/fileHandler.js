@@ -2,6 +2,7 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import { mkdir, rm } from 'fs/promises'
 import fs from 'node:fs'
+import { fileTypeFromFile } from 'file-type'
 import logger from './logger.js'
 import config from '../utils/config.js'
 import formidable from 'formidable'
@@ -34,7 +35,11 @@ export default {
 
                     if (!files) throw new Error('Error on saving file')
                     let file = files.uploaded_file[0]
-                    filename = file.newFilename + '_' + Date.now() + '.' + file.mimetype.slice(6)
+
+                    let fileType = await fileTypeFromFile(file.filepath)
+                    if (fileType.mime !== file.mimetype) return reject({ exerciseID, httpCode: 400, error: 'Could not parse uploaded file type' })
+
+                    filename = file.newFilename + '_' + Date.now() + '.' + fileType.ext
                     const exercise_file_path = SESSION_DIR + '/exercise_' + filename
 
                     fs.copyFile(file.filepath, exercise_file_path, async (err) => {
