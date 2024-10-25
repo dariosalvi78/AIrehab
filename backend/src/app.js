@@ -13,7 +13,6 @@ import connection from './db/dbConnection.js'
 import db from './db/dbDriver.js'
 import mailer from './utils/mailer.js'
 
-
 (async () => {
 
     console.log('Starting express app')
@@ -33,13 +32,14 @@ import mailer from './utils/mailer.js'
     app.use(express.json({ limit: '20mb' }))
     app.use(express.text({ limit: '20mb' }))
 
-    // // Allow CORS policy
-    // app.use(function (req, res, next) {
-    //     res.header('Access-Control-Allow-Origin', '*') // allows cross origin requests
-    //     res.header('Vary', 'Cookie') // tells caches that cookies matters when caching
-    //     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-    //     next()
-    // })
+    // CORS & access control policy
+    app.use(function (req, res, next) {
+        res.header('Access-Control-Allow-Origin', '*')
+        res.header('Vary', 'Cookie') // cache any cookies
+        res.header('Access-Control-Allow-Methods', 'PUT, PATCH, DELETE, GET, POST')
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+        next()
+    })
 
     await setRoutes(app, authenticateToken)
 
