@@ -231,11 +231,9 @@ export default {
             message: 'Video cannot be saved: ' + errMsg,
             icon: 'warning'
           })
-          if (err.response.status == 413) {
-            this.$refs.uploader.removeFile(this.uploadedFile)
-            this.$refs.uploader.nativeEl.value = ''
-            this.uploadedFile = undefined
-          }
+          this.$refs.uploader.removeFile(this.uploadedFile)
+          this.$refs.uploader.nativeEl.value = ''
+          this.uploadedFile = undefined
         }
         this.$q.loading.hide()
         return

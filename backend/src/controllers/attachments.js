@@ -1,11 +1,7 @@
 
 import * as Types from '../../../datamodel/modeljdocs.mjs'
-import poe from "../DOM/poeCollection.js"
 import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
-import formidable from 'formidable'
-import { mkdir } from 'fs/promises'
-import fs from 'node:fs'
 import config from '../utils/config.js'
 import path from 'path'
 import files from '../utils/fileHandler.js'
@@ -28,7 +24,7 @@ export default {
                 return res.status(400).send('Video with given filename does not exist')
             }
 
-            res.sendFile(path.join(import.meta.dirname,
+            return res.sendFile(path.join(import.meta.dirname,
                 '../../' + config.uploads.base_path + '/session_' + exercise.physiotherapySessionId + '/exercise_' + exercise.videoFile
             ))
         } catch (err) {
@@ -60,8 +56,7 @@ export default {
             return res.send(video)
         } catch (err) {
             logger.error({ error: err }, 'error uploading attachments: ')
-            if (err.httpCode == 413) return res.status(err.httpCode).send('File is too large, 80 MB limit on uploads')
-            else if (err.httpCode == 400) return res.status(err.httpCode).send(err.error)
+            if (err.httpCode) return res.status(err.httpCode).send(err.reason)
             res.sendStatus(500)
             return
         }

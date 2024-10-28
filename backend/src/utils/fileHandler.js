@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import { fileTypeFromFile } from 'file-type'
 import logger from './logger.js'
 import config from '../utils/config.js'
-import formidable from 'formidable'
+import formidable, { errors as formidableErrors } from 'formidable'
 import exercises from '../DOM/exercisesCollection.js'
 
 export default {
@@ -24,20 +24,27 @@ export default {
             if (!fs.existsSync(SESSION_DIR)) {
                 await mkdir(SESSION_DIR, { recursive: true })
             }
-            let fileSizeLimit = 80 * 1024 * 1024 // 80 MB limit
-            const form = formidable({ maxFieldsSize: fileSizeLimit, maxFileSize: fileSizeLimit })
+            let maxSizeInMB = 80, fileSizeLimit = (maxSizeInMB * 1024 * 1024)
+            const form = formidable({ maxFieldsSize: fileSizeLimit, maxFileSize: fileSizeLimit, maxFiles: 1, allowEmptyFiles: false })
             return new Promise(async (resolve, reject) => {
                 form.parse(req, async (err, fields, files) => {
                     if (err) {
                         await exercises.updateExerciseVideo(exerciseID, { fileName: null, endTimestamp: null })
-                        return reject({ exerciseID, ...err })
+                        await new Promise(res => setTimeout(res, 2000))
+                        return reject({
+                            exerciseID,
+                            reason: err.httpCode == 413
+                                ? `File is too large, ${maxSizeInMB} MB limit on uploads`
+                                : 'Uploaded file could not be saved',
+                            ...err
+                        })
                     }
 
                     if (!files) throw new Error('Error on saving file')
                     let file = files.uploaded_file[0]
 
                     let fileType = await fileTypeFromFile(file.filepath)
-                    if (fileType.mime !== file.mimetype) return reject({ exerciseID, httpCode: 400, error: 'Could not parse uploaded file type' })
+                    if (fileType.mime !== file.mimetype) return reject({ exerciseID, httpCode: 400, reason: 'Could not parse uploaded file type' })
 
                     filename = file.newFilename + '_' + Date.now() + '.' + fileType.ext
                     const exercise_file_path = SESSION_DIR + '/exercise_' + filename
@@ -58,6 +65,7 @@ export default {
             })
         } catch (err) {
             logger.error({ error: err }, 'cannot save file')
+            return
         }
     },
     /**
