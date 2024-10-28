@@ -14,17 +14,29 @@ export default {
 
   init: async () => {
     logger.debug('Setting up mailer')
-    await nodemailer.createTestAccount((err, account) => {
-      if (err) logger.error(`failed to create test email: ${err}`)
+    if (config.environment === 'dev') {
+      await nodemailer.createTestAccount((err, account) => {
+        if (err) logger.error(`failed to create test email: ${err}`)
+        transport_config = {
+          host: config.mailer.host,
+          port: config.mailer.port,
+          auth: {
+            user: account.user,
+            pass: account.pass
+          }
+        }
+      })
+    } else {
       transport_config = {
-        host: 'smtp.ethereal.email',
-        port: 587,
+        host: config.mailer.host, // mail server host
+        port: config.mailer.port, // 587 if "secure" false 
+        secure: false, // TLS, false will default to starttls
         auth: {
-          user: account.user,
-          pass: account.pass
+          user: config.mailer.smtp_user,
+          pass: config.mailer.smtp_password
         }
       }
-    })
+    }
   },
 
   /**
@@ -47,7 +59,7 @@ export default {
 
     await sendEmail(options)
   },
-  sendPhysiotherapistPasswordReset: async (recipient, token) => {
+  sendPhysiotherapistPasswordReset: async (recipient, resetToken) => {
 
     const options = {
       from: config.mailer.from_address,
@@ -55,7 +67,7 @@ export default {
       subject: 'Password reset',
       html: `
         You have requested a new password<br/>
-        Proceed to this <a href="http://${config.domain}:9000/resetpassword?token=${token}&email=${recipient}">link</a>
+        Proceed to this <a href="http://${config.domain}:9000/resetpassword?token=${resetToken}&email=${recipient}">link</a>
       `
     }
 
