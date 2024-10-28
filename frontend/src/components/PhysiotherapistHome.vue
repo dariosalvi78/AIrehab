@@ -1,14 +1,10 @@
 <template>
    <q-layout>
     <q-page-container>
-      <q-card-actions class="q-ma-md flex flex-center">      
-        <q-btn class="action-button" padding="md" color="accent" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+      <q-card-actions class="flex flex-center">      
+        <q-btn class="prompt-button" padding="md" color="accent" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
           <q-icon left name="group_add"/>
           <div>Add new Patient</div>
-        </q-btn>
-        <q-btn class="action-button" padding="md" color="teal" @click="() => openExercisePrompt()">
-          <q-icon left name="accessibility" />
-          <div>Exercises</div>
         </q-btn>
         <patient-edit-form
           :user="{}"
@@ -16,26 +12,6 @@
           v-model="newUserPrompt" 
           @addNewPatient="addNewUser"
         />
-        <q-dialog v-model="exercisePrompt" persistent>
-          <q-card class="q-pl-mx" style="min-width: 350px">
-            <q-card-section>
-              <div class="text-h6">Create new exercises</div>
-            </q-card-section>
-            <q-form class="q-px-lg">
-              <q-input
-                class="q-py-md"
-                filled
-                v-model="this.new.email"
-                label="Name"
-                hint="Name of the exercise session"
-              />
-            </q-form>
-            <q-card-actions align="right" class="text-primary">
-              <q-btn flat label="Cancel" v-close-popup />
-              <q-btn label="Submit" type="submit" color="primary" v-close-popup class="q-ml-sm" @click="addNewUser()"/>
-            </q-card-actions>
-          </q-card>
-        </q-dialog>
       </q-card-actions>
       <q-tab-panels v-show="users.length >= 1 && pagination.maxPageNo >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
         <q-tab-panel id="panel" name="main" class="q-px-none">
@@ -62,7 +38,7 @@
           <patient-view-modal 
             :selectedPatient="selectedPatient" 
             @openView="openPatientView"
-            @panelFormGoBack="this.$refs.panelForm.goTo('main')"
+            @panelFormGoBack="openHomePage"
           />
         </q-tab-panel>
       </q-tab-panels>
@@ -96,14 +72,6 @@ export default {
   data () {
     return {
       newUserPrompt: false,
-      exercisePrompt: false,
-      new: {
-        fullName: undefined,
-        dateOfBirth: undefined,
-        height: undefined,
-        weight: undefined,
-        injuries: undefined
-      },
       panel: undefined,
       users: [],
       selectedPatient: undefined,
@@ -169,27 +137,18 @@ export default {
         })
       }
     },
-    async openExercisePrompt () {
-      if (!this.users || this.users.length <= 0) {
-        this.$q.notify({
-          color: 'warning',
-          position: 'top',
-          message: 'Please add patient before creating a new exercise',
-          icon: 'info'
-        })
-        return
-      }
-      this.exercisePrompt = !this.exercisePrompt
-    },
     async openPatientView (selectedUser) {
       let resp = await API.getPatient(selectedUser.patientID)
       this.selectedPatient = resp
       this.$refs.panelForm.goTo('view')
     },
+    async openHomePage () {
+      await this.getPatients()
+      this.$refs.panelForm.goTo('main')
+    },
     resetForm () {
       this.newUserPrompt = false
-      this.exercisePrompt = false
-      this.new = { }
+      this.selectedPatient = undefined
     },
     async handlePagePatient (no) {
       this.pagination.pageNo = no
@@ -217,8 +176,9 @@ export default {
 }
 
 @media only screen and (max-width: 450px) {
-  .action-button {
+  .prompt-button {
     padding: 5px !important;
+    width: 90%
   }
 }
 
