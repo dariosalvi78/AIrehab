@@ -15,16 +15,20 @@ beforeAll(async function () {
 describe('addNewUser access:', function () {
 
     it('creating user requires authentication', async function () {
+        spyOn(usersCollection, 'getUserByEmail')
         await users.addNewUser({ user: {} }, {
             sendStatus(status) {
                 expect(status).toBe(403)
+                expect(usersCollection.getUserByEmail).not.toHaveBeenCalled()
             }
         })
     })
     it('cant create user as physiotherapist', async function () {
+        spyOn(usersCollection, 'getUserByEmail')
         await users.addNewUser({ user: { role: 'physiotherapist' }, body: {} }, {
             sendStatus(status) {
                 expect(status).toBe(403)
+                expect(usersCollection.getUserByEmail).not.toHaveBeenCalled()
             }
         })
     })
@@ -91,17 +95,44 @@ describe('addNewUser access:', function () {
 describe('login access:', function () {
 
     it('wrong credentials', async function () {
+        spyOn(usersCollection, 'getUserByEmail')
         await users.login({ body: {} }, {
-            sendStatus(status) {
-                expect(status).toBe(401)
+            status(status) {
+                expect(status).toBe(400)
+                return this
+            },
+            send(data) {
+                expect(data).toBe('Please enter email and password')
+                expect(usersCollection.getUserByEmail).not.toHaveBeenCalled()
             }
         })
     })
     it('user does not exist', async function () {
         spyOn(usersCollection, 'getUserByEmail').and.returnValue(null)
+        spyOn(usersCollection, 'updateUserLoginTimestamp')
         await users.login({ body: { email: 'email@test.com', password: 'password' } }, {
-            sendStatus(status) {
+            status(status) {
                 expect(status).toBe(404)
+                return this
+            },
+            send(data) {
+                expect(data).toContain('Wrong credentials')
+                expect(usersCollection.updateUserLoginTimestamp).not.toHaveBeenCalled()
+            }
+        })
+    })
+    it('user does exist, but wrong password', async function () {
+        spyOn(bcrypt, 'compareSync').and.returnValue(false)
+        spyOn(usersCollection, 'updateUserLoginTimestamp')
+        spyOn(usersCollection, 'getUserByEmail').and.returnValue({ email: 'test@email.com', password: 'notmatch123.' })
+        await users.login({ body: { email: 'email@test.com', password: 'password' } }, {
+            status(status) {
+                expect(status).toBe(404)
+                return this
+            },
+            send(data) {
+                expect(data).toContain('Wrong credentials')
+                expect(usersCollection.updateUserLoginTimestamp).not.toHaveBeenCalled()
             }
         })
     })

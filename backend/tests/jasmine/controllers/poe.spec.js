@@ -60,7 +60,7 @@ describe('getPOEEvaluation access:', function () {
             params: { exerciseID: exercise.id }
         }, {
             sendStatus(status) {
-                expect(status).toBe(102)
+                expect(status).toBe(204)
                 expect(poeCollection.getEvaluationFromID).toHaveBeenCalledWith(exercise.id)
                 expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(exercise.id, physiotherapist.email)
                 expect(poeMotionAnalysis.isEvaluationOngoing).toHaveBeenCalledWith(patient.id)
@@ -72,7 +72,8 @@ describe('getPOEEvaluation access:', function () {
         spyOn(poeCollection, 'getEvaluationFromID').and.returnValue(undefined)
         spyOn(exercisesCollection, 'getOneExerciseByEmail').and.returnValue({ patientID: patient.id , ...exercise})
         spyOn(poeMotionAnalysis, 'isEvaluationOngoing').and.returnValue(false)
-        spyOn(poeMotionAnalysis, 'getLatestPOEAnalysis').and.returnValue([this.poe])
+        spyOn(poeMotionAnalysis, 'getLatestPOEAnalysis').and.returnValue([{ score: 1 }, { score: 0 }, { score: 2 }, this.poe])
+        spyOn(poeCollection, 'updateEvaluationResults').and.returnValue(this.poe)
         await poe.getPOEEvaluation({
             user: physiotherapist,
             params: { exerciseID: exercise.id }
@@ -83,6 +84,7 @@ describe('getPOEEvaluation access:', function () {
                 expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(exercise.id, physiotherapist.email)
                 expect(poeMotionAnalysis.isEvaluationOngoing).toHaveBeenCalledWith(patient.id)
                 expect(poeMotionAnalysis.getLatestPOEAnalysis).toHaveBeenCalled()
+                expect(poeCollection.updateEvaluationResults).toHaveBeenCalled()
             }
         })
     })

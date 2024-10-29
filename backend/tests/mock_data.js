@@ -41,9 +41,9 @@ const mock = {
         patientId: 2,
         score: 0,
         posturalOrientation: 'kneeMedialToFootPosition',
-        scoreConfidence_0: 88.5,
-        scoreConfidence_1: 0,
-        scoreConfidence_2: 0,
+        confidence0: 88.5,
+        confidence1: 0,
+        confidence2: 0,
         repetition: 0
     }
 }
