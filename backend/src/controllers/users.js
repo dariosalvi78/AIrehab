@@ -17,13 +17,13 @@ export default {
     */
     login: async (req, res) => {
         if (!req.body.email || !req.body.password) {
-            res.sendStatus(401)
+            res.status(400).send('Please enter email and password')
             return
         }
         try {
             const user = await users.getUserByEmail(req.body.email)
 
-            if (!user) return res.sendStatus(404)
+            if (!user) return res.status(404).send('Wrong credentials')
 
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
@@ -42,11 +42,11 @@ export default {
                 })
                 return res.send({ user })
             } else {
-                res.sendStatus(404)
+                res.status(404).send('Wrong credentials')
                 return
             }
         } catch (err) {
-            logger.error({ error: err }, 'error logging out user: ')
+            logger.error({ error: err }, 'error user login: ')
             res.sendStatus(500)
             return
         }

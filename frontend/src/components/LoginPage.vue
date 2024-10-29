@@ -3,7 +3,7 @@
     <q-page-container>
       <q-page class="flex flex-center">
         <q-form ref="loginForm" class="loginForm">
-          <q-card flat class="q-pa-sm">
+          <q-card flat class="q-py-sm">
             <q-card-section>
               <div class="text-h4">AI Rehab Sign-in</div>
             </q-card-section>
@@ -64,8 +64,8 @@ export default {
   data () {
     return {
         // TODO: add email form validation
-        email: undefined,
-        password: undefined,
+        email: "",
+        password: "",
         showPassword: false
     }
   },
@@ -73,15 +73,17 @@ export default {
     async login () {
       try {
         const data = await API.login(this.email.toLowerCase(), this.password)
-        store.setLoginStatus(true)
         if (data.user) {
+          store.setLoginStatus(true)
           if (data.user.role == 'admin') this.$router.push('admin')
           else if (data.user.role == 'physiotherapist') this.$router.push('physiotherapist')
         }
       } catch (err) {
+        let errMsg = err
+        if (err.response.status === 400 || err.response.status === 404) errMsg = err.response.data
         this.$q.notify({
           color: 'negative',
-          message: 'Login failed: ' + err.message,
+          message: 'Login failed: ' + errMsg,
           icon: 'report_problem'
         })
       }
@@ -95,12 +97,25 @@ export default {
           icon: 'report_problem'
         })
       } 
-      await API.sendPasswordResetEmail(this.email.toLowerCase())
-      this.$q.notify({
-        color: 'secondary',
-        message: 'Password reset link has been sent, check your inbox',
-        icon: 'info'
-      })   
+      this.$q.dialog({
+        color: 'primary',
+        title: 'Password reset',
+        message: `
+          Password reset link will be sent to <b>${this.email}</b>.<br/> 
+          Follow the instructions in the email.
+        `,
+        ok: { color: 'primary', label: 'Send' },
+        persistent: true,
+        cancel: true,
+        html: true
+      }).onOk(async () => {
+        await API.sendPasswordResetEmail(this.email.toLowerCase())
+        return this.$q.notify({
+          color: 'secondary',
+          message: 'Password reset link has been sent, check your inbox',
+          icon: 'info'
+        })   
+      })
       } catch (err) {
         return
       }
