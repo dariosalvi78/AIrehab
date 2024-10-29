@@ -31,13 +31,23 @@ export default {
                 // results are not available yet let's see if the evaluation is ongoing
                 let isOngoing = await poeMA.isEvaluationOngoing(exercise.patientID)
                 if (isOngoing) {
-                    res.sendStatus(102)
+                    res.sendStatus(204)
                     return
                 }
 
                 let latestResults = await poeMA.getLatestPOEAnalysis(exercise.patientID, exerciseID)
                 if (latestResults) {
-                    res.send(latestResults)
+                    let evaluation = latestResults[3]
+                    let poe_results = await poe.updateEvaluationResults(
+                        exerciseID,
+                        evaluation.posturalOrientation,
+                        evaluation.score,
+                        evaluation.confidence0,
+                        evaluation.confidence1,
+                        evaluation.confidence2,
+                        evaluation.repetition
+                    )
+                    res.send(poe_results)
                     return
                 } else {
                     logger.error(null, 'No POE results available for user ' + exercise.patientID)

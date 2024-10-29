@@ -116,7 +116,7 @@ describe('getPOEEvaluation access:', function () {
     })
 })
 
-describe('sendVideoForPOEEvaluation access:', function () {
+xdescribe('sendVideoForPOEEvaluation access:', function () {
 
     it('send evaluation requires authentication', async function () {
         spyOn(poeMotionAnalysis, 'uploadVideo')

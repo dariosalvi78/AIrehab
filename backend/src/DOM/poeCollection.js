@@ -21,12 +21,12 @@ export default {
      * @param {Promise<Types.Exercise["id"]>} exerciseID
      * @returns {Promise<Types.POEEvaluation>} mock results, update later
      */
-    updateEvaluationResults: async function (exerciseID) {
+    updateEvaluationResults: async function (exerciseID, posturalOrientation, score, scoreConfidence_0, scoreConfidence_1, scoreConfidence_2, repetition) {
         const response = await db.query(`
             INSERT INTO [poe_evaluation] 
             (id, exerciseId, posturalOrientation, score, scoreConfidence_0, scoreConfidence_1, scoreConfidence_2, repetition)
             OUTPUT Inserted.id, Inserted.posturalOrientation, Inserted.score, Inserted.scoreConfidence_0, Inserted.scoreConfidence_1, Inserted.scoreConfidence_2, Inserted.repetition
-            VALUES(NEWID(), '${exerciseID}', 'kneeMedialToFootPosition', 1, 87.5, 0, 0, 0);
+            VALUES(NEWID(), '${exerciseID}', '${posturalOrientation}', ${score}, ${scoreConfidence_0}, ${scoreConfidence_1}, ${scoreConfidence_2}, ${repetition});
         `)
         return response.recordset[0]
     },
