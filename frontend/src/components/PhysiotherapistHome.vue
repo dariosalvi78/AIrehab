@@ -52,7 +52,7 @@
         No patients found
       </div>
       <div v-if="panel == 'main'">
-        <q-separator inset />
+        <q-separator />
         <sessions-list :selectedPatient="selectedPatient" />
       </div>
     </q-page-container>

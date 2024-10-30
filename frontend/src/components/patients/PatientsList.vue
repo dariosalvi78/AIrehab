@@ -1,6 +1,6 @@
 <template>
   <div class="q-py-md flex justify-center" id="patients">
-    <div style="width: 400px;">
+    <div style="width: 450px;">
       <div style="display: flex;">
         <q-btn style="marginLeft:2px;paddingRight:0px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
           :icon="pagination.date.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 

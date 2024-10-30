@@ -2,7 +2,7 @@
   <div>
     <div v-if="sessions.length >= 1 && pagination.maxPageNo >= 1">
       <div class="q-py-md flex justify-center">
-        <div style="width: 400px;">
+        <div style="width: 450px;">
           <div style="display: flex;">
             <q-btn style="marginLeft:2px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
               :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 

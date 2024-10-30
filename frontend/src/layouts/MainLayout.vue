@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="mainLayout m-width">
-    <q-header v-show="isLoggedIn" elevated class="header m-width shadow-2 rounded-borders">
+    <q-header v-show="isLoggedIn" elevated class="header m-width shadow-2">
       <q-toolbar>
         <q-btn flat round dense icon="menu">
           <q-menu>
@@ -48,14 +48,14 @@ export default {
 <style scoped>
 .m-width {
   max-width: 800px;
-  width: 95%;
+  width: 100%;
   margin: 0 auto;
 }
 .mainLayout {
   background-color: #fff;
 }
 .header {
-  margin: 1em auto 1em auto;
+  margin: auto auto 1em auto;
   position: sticky;
   position: -webkit-sticky;
 }

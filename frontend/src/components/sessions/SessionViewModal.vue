@@ -19,7 +19,7 @@
             <q-btn dense class="q-my-md" color="secondary" size="sm" label="Start new exercise" icon-right="chevron_right" @click="openExerciseModal('new')" />
           </div>
         </q-card-section>
-        <q-separator inset />
+        <q-separator />
       </q-card>
       <exercise-form 
         :formMode="this.exerciseForm"
