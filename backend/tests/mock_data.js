@@ -45,6 +45,13 @@ const mock = {
         confidence1: 0,
         confidence2: 0,
         repetition: 0
+    },
+    db: {
+        server: "poe_test_db",
+        database: undefined,
+        user: "airehab",
+        password: "MyPassword_1234",
+        port: 1433
     }
 }
 
