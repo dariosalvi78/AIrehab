@@ -89,6 +89,10 @@ See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-
 
 
 ## Tests
+- You will need to create a test database in order to run tests locally. You can use the following command below, or configure your own connection config to match the one in /tests
+`docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=TestPassword_1234" -e "MSSQL_PID=Developer" -p 1433:1433  --name poe_test_db --hostname msql -d mcr.microsoft.com/mssql/server:2022-preview-ubuntu-22.04`.
+
+Once DB is running, start the tests using
 
 ```bash
 npm run test
