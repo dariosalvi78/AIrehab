@@ -9,7 +9,10 @@ const mock = {
     patient: {
         id: 2,
         names: "test name",
-        dateOfBirth: "177718530000"
+        dateOfBirth: "177718530000",
+        height: 170,
+        weight: 75,
+        injuries: "description of injuries..."
     },
     sessions: [
         {
