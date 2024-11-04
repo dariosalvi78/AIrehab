@@ -10,7 +10,7 @@ beforeAll(function () {
     this.physiotherapist = mock.physiotherapist
     this.patient = mock.patient
     this.sessions = mock.sessions
-    this.exercises = mock.exercises
+    this.exercises = JSON.parse(JSON.stringify(mock.exercises))
 })
 
 describe('getExercises access:', function () {

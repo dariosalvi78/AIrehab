@@ -9,7 +9,7 @@ import mock from '../../mock_data.js'
 
 beforeAll(async function () {
     await spyOnAllFunctions(logger)
-    this.physiotherapist = mock.physiotherapist
+    this.physiotherapist = JSON.parse(JSON.stringify(mock.physiotherapist))
 })
 
 describe('addNewUser access:', function () {

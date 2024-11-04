@@ -10,7 +10,7 @@ import poeMotionAnalysis from '../../../src/utils/poeMotionAnalysis.js'
 beforeAll(function () {
     this.physiotherapist = mock.physiotherapist
     this.patient = mock.patient
-    this.exercises = mock.exercises
+    this.exercises = JSON.parse(JSON.stringify(mock.exercises))
     this.poe = mock.poe
 })
 
