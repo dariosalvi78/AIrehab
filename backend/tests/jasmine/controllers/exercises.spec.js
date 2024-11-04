@@ -2,7 +2,6 @@ import sessions from '../../../src/DOM/physiotherapySessionCollection.js'
 import exercisesCollection from '../../../src/DOM/exercisesCollection.js'
 import poeCollection from '../../../src/DOM/poeCollection.js'
 import exercises from '../../../src/controllers/exercises.js'
-import config from '../../../src/utils/config.js'
 import mock from '../../mock_data.js'
 import fileHandler from '../../../src/utils/fileHandler.js'
 

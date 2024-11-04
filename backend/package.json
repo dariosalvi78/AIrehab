@@ -7,8 +7,8 @@
   "scripts": {
     "node:start": "nodemon -L --env-file ./config/.env ./src/app.js",
     "dev": "docker compose --env-file ./config/.env up",
-    "test": "jasmine --config=./tests/jasmine.json",
-    "test:watch": "nodemon  --exec jasmine \"--config=./tests/jasmine.json\""
+    "test": "node ./tests/jasmine.js",
+    "test:watch": "nodemon  \"./tests/jasmine.js\""
   },
   "author": "Dario Salvi and Elliott Hellstrand",
   "license": "ISC",

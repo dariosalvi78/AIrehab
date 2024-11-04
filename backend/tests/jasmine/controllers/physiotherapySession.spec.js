@@ -2,7 +2,6 @@ import physiotherapistCollection from '../../../src/DOM/physiotherapistCollectio
 import physiotherapySession from '../../../src/controllers/physiotherapySession.js'
 import sessions from '../../../src/DOM/physiotherapySessionCollection.js'
 import exercisesCollection from '../../../src/DOM/exercisesCollection.js'
-import config from '../../../src/utils/config.js'
 import mock from '../../mock_data.js'
 
 beforeAll(function () {

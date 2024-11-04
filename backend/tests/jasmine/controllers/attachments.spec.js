@@ -1,11 +1,9 @@
 import exercisesCollection from '../../../src/DOM/exercisesCollection.js'
-import config from '../../../src/utils/config.js'
 import attachments from '../../../src/controllers/attachments.js'
 import fileHandler from '../../../src/utils/fileHandler.js'
 import mock from '../../mock_data.js'
 
 beforeAll(function () {
-    config.uploads.base_path = '../backend/tests/tests_uploads/'
     this.physiotherapist = mock.physiotherapist
     this.patient = mock.patient
     this.sessions = mock.sessions
