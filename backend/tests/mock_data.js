@@ -27,6 +27,7 @@ const mock = {
             id: 1,
             type: "test",
             notes: "exercise 1... (no video)",
+            videoFile: null,
             physiotherapySessionId: 1
         },
         {
@@ -35,6 +36,14 @@ const mock = {
             notes: "exercise 2... (with video)",
             videoFile: "filename.mp4",
             physiotherapySessionId: 2,
+            endTimestamp: "177718530000"
+        },
+        {
+            id: 3,
+            type: "singleLeggedSquatLeft",
+            notes: "exercise 3...",
+            videoFile: null,
+            physiotherapySessionId: 1,
             endTimestamp: "177718530000"
         }
     ],
