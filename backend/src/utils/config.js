@@ -29,7 +29,9 @@ const config = {
     mailer: {
         host: process.env.MAIL_HOST,
         port: process.env.MAIL_PORT,
-        from_address: process.env.MAIL_SENDER
+        from_address: process.env.MAIL_SENDER,
+        smtp_user: process.env.MAIL_USER,
+        smtp_password: process.env.MAIL_PASSWORD
     },
     poe: {
         base_url: process.env.POE_BASE_URL,
