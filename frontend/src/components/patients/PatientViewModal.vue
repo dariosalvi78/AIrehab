@@ -8,9 +8,12 @@
     </div>
     <q-card flat class="q-px-sm patient-view-card">
       <q-card-section>
-        <div class="text-h6">{{selectedPatient.names}}</div>
-        <div class="text-body2">
-          <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
+        <div class="text-h6 row">
+          <div class="col">{{selectedPatient.names}}</div>
+          <q-btn class="q-my-sm" style="height:fit-content;padding:4px;" icon="close" size="sm" type="submit" color="negative" v-close-popup  @click="deletePatient(selectedPatient)" />
+        </div>
+        <div class="text-body2" style="right:2px;position:relative;">
+          <q-icon style="bottom: 2px;" size="sm" name="calendar_month"/>
           {{ formatDate(selectedPatient.createdTimestamp) }}
         </div>
       </q-card-section>
@@ -111,6 +114,45 @@ export default {
           icon: 'report_problem'
         })
       }
+    },
+    async deletePatient (selectedPatient) {
+      const deleted = selectedPatient
+      this.$q.dialog({
+        color: 'primary',
+        title: 'Delete patient',
+        message: `
+          Are you sure you want to permanently delete patient <b>${deleted.names}</b>? 
+        `,
+        ok: { color: 'negative', label: 'Delete' },
+        persistent: false,
+        cancel: true,
+        html: true
+      })
+      .onOk(async () => {
+        try {
+          this.$q.loading.show()
+          await nicers.delay(500)
+          await API.deletePatient(deleted.id, deleted.physiotherapistId)
+          this.$q.notify({
+            color: 'info',
+            position: 'top',
+            message: `Deleted ${deleted.names}`,
+            icon: 'info'
+          })
+          this.$emit('panelFormGoBack')
+        } catch (err) {
+          let errMsg = err
+          if (err.response.status === 409) errMsg = err.response.data
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: `Cannot delete ${deleted.names}: ${errMsg}`,
+            icon: 'warning'
+          })
+        }
+        this.$q.loading.hide()
+        return 
+      })
     },
     navigateToSession (sessionID) {
       return this.$router.push('physiotherapist/sessions/' + sessionID)

@@ -119,7 +119,7 @@ export default {
      * @param {Object} res - express response
     */
     deletePatient: async (req, res) => {
-        if (!req.params.patientID || req.user.role !== 'admin') return res.sendStatus(403)
+        if (!req.params.patientID || !req.body.physiotherapistID) return res.sendStatus(403)
         let body = req.body
         try {
             let patient = await physiotherapist.getOnePatientByID(req.params.patientID)
