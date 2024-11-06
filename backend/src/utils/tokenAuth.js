@@ -18,13 +18,23 @@ const signResetPwdToken = async (email) => {
     return jwt.sign({ email }, config.JWT.SECRET_KEY, { expiresIn: '1h' })
 }
 
+const session_cookie = {
+    name: '__Host-session.id',
+    options: {
+        sameSite: 'lax',
+        secure: true,
+        httpOnly: true,
+        path: '/'
+    }
+}
+
 /**
  * Middleware method for authenticating user,
  * use for routes that require authorization
  */
 const authenticateToken = async (req, res, next) => {
     const headers = req.headers
-    const token = req.cookies.token
+    const token = req.cookies[session_cookie.name]
     try {
         if (!token || !headers["x-poe-api"]) {
             logger.debug({ data: headers }, 'blocking unauthorized request')
@@ -46,7 +56,7 @@ const authenticateToken = async (req, res, next) => {
 
 /**
  * Verify reset password token
- * @returns {Types.User} 
+ * @returns {Types.User}
  */
 const authenticateResetPWDToken = async (resetToken) => {
     return new Promise((resolve, reject) => {
@@ -54,7 +64,7 @@ const authenticateResetPWDToken = async (resetToken) => {
             const token = resetToken
             jwt.verify(token, config.JWT.SECRET_KEY, (err, data) => {
                 if (err) {
-                    return reject({reason: err.message, expiredAt: err.expiredAt})
+                    return reject({ reason: err.message, expiredAt: err.expiredAt })
                 }
                 resolve(data)
             })
@@ -88,5 +98,6 @@ export {
     signResetPwdToken,
     authenticateToken,
     authenticateResetPWDToken,
-    createAdmin
+    createAdmin,
+    session_cookie
 }

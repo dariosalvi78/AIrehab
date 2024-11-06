@@ -1,7 +1,7 @@
 
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import bcrypt from 'bcrypt'
-import { signAccessToken, signResetPwdToken, authenticateResetPWDToken } from "../utils/tokenAuth.js"
+import { signAccessToken, signResetPwdToken, authenticateResetPWDToken, session_cookie } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"
 import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
@@ -35,11 +35,7 @@ export default {
 
                 logger.debug({ data: user }, 'user logged in')
                 const token = await signAccessToken(user)
-                res.cookie('token', token, { 
-                    sameSite: 'lax', 
-                    secure: true, 
-                    httpOnly: true 
-                })
+                res.cookie(session_cookie.name, token, session_cookie.options)
                 return res.send({ user })
             } else {
                 res.status(404).send('Wrong credentials')
@@ -61,7 +57,7 @@ export default {
             if (req.user) {
                 logger.info('user logged out: ', req.user)
             }
-            res.clearCookie('token')
+            res.clearCookie(session_cookie.name, session_cookie.options)
             return res.sendStatus(204)
         } catch (err) {
             return res.status(500).send('Cannot log out ' + req.user.email)
