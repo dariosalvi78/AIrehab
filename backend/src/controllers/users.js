@@ -220,7 +220,7 @@ export default {
         } catch (err) {
             logger.error({ error: err }, 'error updating password: ')
             if ((err.expiredAt * 1000) >= new Date().getTime()) {
-                res.clearCookie('token')
+                res.clearCookie(session_cookie.name, session_cookie.options)
                 return res.sendStatus(401)
             }
             return res.sendStatus(500)

@@ -42,7 +42,7 @@ const authenticateToken = async (req, res, next) => {
         }
         jwt.verify(token, config.JWT.SECRET_KEY, (err, data) => {
             if (err) {
-                res.clearCookie('token')
+                res.clearCookie(session_cookie.name, session_cookie.options)
                 return res.status(401).send('Session has expired, please log in again')
             }
             req.user = data.user
