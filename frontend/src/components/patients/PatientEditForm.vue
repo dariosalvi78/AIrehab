@@ -22,7 +22,8 @@
                 v-model="this.physiotherapistEmail"
                 label="Physiotherapist email"
                 type="email"
-                hint="e.g. user@email.com"
+                :hint="!user.physiotherapistEmail ? 'e.g. user@email.com' : 'Assigned to physiotherapist'"
+                :readonly="!!user.physiotherapistEmail"
             />
             <!-- <q-input
                 filled
@@ -177,6 +178,10 @@ export default {
                 this.new.height = +this.user.height
                 this.new.weight = +this.user.weight
                 this.new.injuries = this.user.injuries
+            }
+            else if (this.mode == 'adminNew' && this.user) {
+                this.new = {}
+                this.physiotherapistEmail = this.user.physiotherapistEmail
             }
         },
         formatDate (date) {

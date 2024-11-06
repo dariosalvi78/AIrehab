@@ -34,6 +34,15 @@
         <q-tr :props="props">
           <q-td auto-width>
           <q-btn-dropdown :ripple="false" rounded flat size="sm" menu-anchor="center right" menu-self="center left">
+            <q-item v-show="props.row.role == 'physiotherapist'" clickable v-close-popup @click="onRowClick('add', props.row)">
+              <q-item-section avatar>
+                <q-avatar icon="person_add" size="lg"/>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Add</q-item-label>
+                <q-item-label caption>Assign patient to physiotherapist</q-item-label>
+              </q-item-section>
+            </q-item>
             <q-item clickable v-close-popup @click="onRowClick('delete', props.row)">
               <q-item-section avatar>
                 <q-avatar icon="person_remove" size="lg"/>
@@ -124,7 +133,13 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <patient-edit-form :user="selectedUser" formMode="adminEdit" v-model="openUserEditPrompt" @editPatient="editPatient" />
+    <patient-edit-form 
+      :user="selectedUser" 
+      :formMode="openPatientForm.form" 
+      v-model="openPatientForm.status" 
+      @editPatient="editPatient"
+      @addNewPatient="(newPatientData) => this.$emit('addPatient', newPatientData)"
+    />
     <div v-if="isLoadingUsers" class="q-ma-md flex flex-center">
       <q-separator inset />
         <q-spinner-dots
@@ -143,7 +158,7 @@ import PatientEditForm from '../patients/PatientEditForm.vue'
 export default {
   name: 'AdminUserTable',
   props: { users: Object },
-  emits: ['getUsers'],
+  emits: ['getUsers', 'addPatient'],
   components: { PatientEditForm },
   data () {
     return {
@@ -158,7 +173,7 @@ export default {
       selectedUser: {},
       email: { subject: 'POE App', content: undefined },
       openUserDeletePrompt: false,
-      openUserEditPrompt: false,
+      openPatientForm: { status: false, form: 'adminNew' },
       openUserMailPrompt: false
     }
   },
@@ -202,11 +217,14 @@ export default {
       if (prompt == 'delete') {
         this.openUserDeletePrompt = !this.openUserDeletePrompt
       } else if (prompt == 'edit' && this.selectedUser.role === 'patient') {
+        this.openPatientForm = { status: !this.openPatientForm.status, form: 'adminEdit' }        
         let resp = await API.getPatient(this.selectedUser.id)
         this.selectedUser.physiotherapistEmail = resp.physiotherapistEmail
-        this.openUserEditPrompt = !this.openUserEditPrompt
       } else if (prompt == 'mail' && this.selectedUser.role === 'physiotherapist') {
         this.openUserMailPrompt = !this.openUserMailPrompt
+      } else if (prompt == 'add' && this.selectedUser.role === 'physiotherapist') {
+        this.openPatientForm = { status: !this.openPatientForm.status, form: 'adminNew' }        
+        this.selectedUser.physiotherapistEmail = this.selectedUser.email
       }
       else return
     },
@@ -301,7 +319,7 @@ export default {
       this.selectedUser = {}
       this.isLoadingUsers = true
       this.openUserDeletePrompt = false
-      this.openUserEditPrompt = false
+      this.openPatientForm.status = false
       this.openUserMailPrompt = false
     }
   }

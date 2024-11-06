@@ -24,6 +24,7 @@
     <admin-user-table 
       :users="users" 
       @getUsers="getUsers()"
+      @addPatient="addNewPatient"
     />
     <admin-sessions-table 
       :sessions="sessions" 
