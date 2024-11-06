@@ -3,8 +3,7 @@
 </template>
 
 <script>
-import axios from 'axios';
-import API from './API.js';
+import API, { axios } from './API.js';
 import MainLayout from './layouts/MainLayout.vue';
 import store from './utils/storage.js';
 

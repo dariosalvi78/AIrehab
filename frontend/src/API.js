@@ -10,7 +10,7 @@ import { default as instance } from 'axios'
  */
 const URL_PRE = process.env.API_ENDPOINT
 
-const axios = instance.create({
+export const axios = instance.create({
   baseURL: URL_PRE,
   headers: {
     common: {
