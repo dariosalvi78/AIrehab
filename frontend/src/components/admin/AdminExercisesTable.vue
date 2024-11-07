@@ -115,6 +115,7 @@
 
 <script>
 import API from '../../API.js'
+import exerciseEnums from '../../utils/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers.js'
 
 export default {
@@ -144,9 +145,9 @@ export default {
       let exercises = newExercises
 
       exercises.map((exercise) => {
-          exercise["type"] = !exercise["type"] ? 'Not Specified' : exercise["type"] 
-          exercise["startTimestamp"] = nicers.formattedDayOfMonth(exercise["startTimestamp"])
-          exercise["endTimestamp"] = nicers.formattedDayOfMonth(exercise["endTimestamp"])
+        exercise["type"] = !exercise["type"] ? 'Not Specified' : exerciseEnums.typeToAsc(exercise["type"]) 
+        exercise["startTimestamp"] = nicers.formattedDayOfMonth(exercise["startTimestamp"])
+        exercise["endTimestamp"] = nicers.formattedDayOfMonth(exercise["endTimestamp"])
       })
 
       this.rows = newExercises
