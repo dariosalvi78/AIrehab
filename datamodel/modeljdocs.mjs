@@ -21,7 +21,9 @@
  * @property {!string} dateOfBirth - date of birth, format "yyyy-MM-DD"
  * @property {number} height - height in cm
  * @property {number} weight - weight in KGs
- * @property {string} injuries - general description of injuries
+ * @property {?string} injuries - general description of injuries
+ * @property {?string} injuredSide - side of the body that is injured, 'left' or 'right'
+ * @property {?string} injuredBodyPart - body part that is injured. 'foot', 'knee', 'hip', 'back'
  */
 
 /**
