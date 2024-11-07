@@ -97,8 +97,8 @@ export default {
     },
     async addNewPatient (newPatient) {
       try {
-        const { fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail } = newPatient
-        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail)
+        const { fullName, dateOfBirth, height, weight, injuries, injuredSide, injuredBodyPart, physiotherapistEmail } = newPatient
+        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, { description: injuries, side: injuredSide, bodyPart: injuredBodyPart }, physiotherapistEmail)
         if (resp) {
           this.$q.notify({
             type: 'positive',

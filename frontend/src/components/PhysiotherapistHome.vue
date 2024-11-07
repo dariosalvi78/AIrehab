@@ -98,8 +98,8 @@ export default {
   methods: {
      async addNewUser (newUser) {
       try {
-        const { fullName, dateOfBirth, height, weight, injuries } = newUser
-        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, injuries)
+        const { fullName, dateOfBirth, height, weight, injuries, injuredSide, injuredBodyPart } = newUser
+        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, { description: injuries, side: injuredSide, bodyPart: injuredBodyPart })
         if (resp.data) {
           this.$q.notify({
             type: 'positive',

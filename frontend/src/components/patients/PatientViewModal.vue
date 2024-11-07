@@ -31,7 +31,17 @@
       <q-card-section>
         <div class="text-subtitle1">Date of birth</div>
         <div class="text-body2">{{ formatDate(selectedPatient.dateofbirth) }}</div>
-      </q-card-section>                
+      </q-card-section>
+      <q-separator inset />
+      <q-card-section>
+        <div class="text-subtitle1">Injuries</div>
+        <div class="text-body2">
+          {{ selectedPatient.injuredBodyPart ? getInjuredBodyPart : 'Body part not specified' }}
+        </div>
+        <div class="text-body2">
+          {{ selectedPatient.injuredSide ? getInjuredSide : 'Side not specified' }}
+        </div>
+      </q-card-section>
       <q-separator inset />
       <q-card-section>
         <div class="text-subtitle1">Description</div>
@@ -54,6 +64,7 @@
 
 <script>
 import API from '../../API.js'
+import exerciseEnums from '../../utils/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers'
 import PatientEditForm from './PatientEditForm.vue'
 
@@ -95,8 +106,8 @@ export default {
     },
     async editPatient (edited) {
       try {
-        const { fullName, dateOfBirth, height, weight, injuries } = edited
-        await API.editPatient(fullName, dateOfBirth, height, weight, injuries, this.selectedPatient.id)
+        const { fullName, dateOfBirth, height, weight, injuries, injuredSide, injuredBodyPart } = edited
+        await API.editPatient(fullName, dateOfBirth, height, weight, { description: injuries, side: injuredSide, bodyPart: injuredBodyPart }, this.selectedPatient.id)
         this.$q.notify({
           color: 'secondary',
           position: 'top',
@@ -159,6 +170,15 @@ export default {
     },
     formatDate (date) {
       return nicers.formattedDate(date)
+    }
+  },
+  computed: {
+    getInjuredBodyPart () {
+      return 'Part of the body: ' + exerciseEnums.typeToAsc(this.selectedPatient.injuredBodyPart)
+    },
+    getInjuredSide () {
+      let side = this.selectedPatient.injuredSide
+      return side[0].toUpperCase() + side.slice(1) + ' side injured'
     }
   }
 }

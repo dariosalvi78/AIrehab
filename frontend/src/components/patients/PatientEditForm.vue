@@ -96,8 +96,25 @@
                 v-model="this.new.injuries"
                 label="Notes"
                 type="textarea"
-                hint="Optional. List of injuries"
+                hint="Optional. Description / list of injuries"
                 :rules="[injuries => !injuries ? true : injuries.length <= 150 || 'Limit reached']"
+            />
+            <q-toggle v-model="hasInjury" :label="!hasInjury ? 'Patient has no injuries' : 'Patient has injuries' " />
+            <div class="q-my-md q-gutter-sm" v-if="hasInjury">
+                <div class="q-px-sm">Side of the body that is injured</div>
+                <q-radio v-model="this.new.injuredSide" val="left" label="Left" />
+                <q-radio v-model="this.new.injuredSide" val="right" label="Right" />
+            </div>
+            <q-select
+                v-if="hasInjury"
+                class="q-my-md"
+                filled
+                clearable
+                behavior="menu"
+                v-model="this.new.injuredBodyPart"
+                :options="this.bodyParts"
+                label="Injured body part"
+                hint="Part of the body that is injured"
             />
         </q-form>
         <q-card-actions align="right" class="text-primary">
@@ -115,6 +132,7 @@
 </template>
 
 <script>
+import exerciseEnums from '../../utils/exerciseTypesEnum'
 import nicers from '../../utils/nicers'
 
 export default {
@@ -128,14 +146,21 @@ export default {
                 dateOfBirth: undefined,
                 height: undefined,
                 weight: undefined,
-                injuries: undefined
+                injuries: undefined,
+                injuredSide: undefined,
+                injuredBodyPart: undefined
             },
             physiotherapistEmail: undefined,
-            mode: 'new'
+            mode: 'new',
+            hasInjury: false,
+            bodyParts: []
         }
     },
     async mounted () {
         this.resetForm()
+        exerciseEnums.types.patient.map((type, i) => {
+            this.bodyParts[i] = exerciseEnums.typeToAsc(type)
+        })
         if (this.formMode == 'edit' ) await this.populateEdit()
     },
     watch: {
@@ -161,7 +186,13 @@ export default {
                 dateOfBirth: this.new.dateOfBirth, 
                 height: this.new.height ? +this.new.height : null,
                 weight: this.new.weight ? +this.new.weight : null,
-                injuries: this.new.injuries ? this.new.injuries : ''
+                injuries: this.new.injuries ? this.new.injuries : '',
+                injuredSide: '',
+                injuredBodyPart: ''
+            }
+            if (this.hasInjury) {
+                userSubmitted.injuredSide = this.new.injuredSide ? this.new.injuredSide : '',
+                userSubmitted.injuredBodyPart = this.new.injuredBodyPart ? exerciseEnums.typeToDesc(this.new.injuredBodyPart) : ''
             }
             if (this.mode == 'adminNew') userSubmitted.physiotherapistEmail = this.physiotherapistEmail
             if (this.mode === 'new' || this.mode == 'adminNew') this.$emit('addNewPatient', userSubmitted)
@@ -178,6 +209,11 @@ export default {
                 this.new.height = +this.user.height
                 this.new.weight = +this.user.weight
                 this.new.injuries = this.user.injuries
+                if (this.user.injuredBodyPart || this.user.injuredSide) {
+                    this.hasInjury = true
+                    this.new.injuredBodyPart = exerciseEnums.typeToAsc(this.user.injuredBodyPart)
+                    this.new.injuredSide = this.user.injuredSide
+                }
             }
             else if (this.mode == 'adminNew' && this.user) {
                 this.new = {}

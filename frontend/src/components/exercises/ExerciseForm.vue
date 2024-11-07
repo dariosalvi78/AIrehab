@@ -74,7 +74,7 @@ export default {
     this.resetForm()
     if (this.formMode == 'edit' ) await this.populateEdit()
 
-    exerciseEnums.types.map((type, i) => {
+    exerciseEnums.types.exercise.map((type, i) => {
       this.exerciseTypes[i] = exerciseEnums.typeToAsc(type)
     })
    },
