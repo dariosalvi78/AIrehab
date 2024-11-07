@@ -11,7 +11,7 @@
               <q-icon name="calendar_month" />
             </q-btn>
             <div class="list-line" />
-            <div class="text-subtitle2 line-desc q-mr-sm">Physiotherapy sessions</div>
+            <div class="text-subtitle2 line-desc q-mr-sm">Sessions</div>
           </div>
           <q-intersection
             v-for="session in sessions"

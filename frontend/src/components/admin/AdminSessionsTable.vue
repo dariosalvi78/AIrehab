@@ -2,7 +2,7 @@
   <div>
     <div v-if="!isLoadingSessions" class="q-pl-lg fit row wrap justify-left">
       <q-chip :ripple="false" outline size="md" class="col-auto" icon="workspaces">
-        Physiotherapy sessions: {{this.rows.length}}
+        Sessions: {{this.rows.length}}
       </q-chip>
        <q-chip :ripple="false" outline size="md" class="col-auto" icon="accessibility">
         Exercises: {{this.exercisesTotal}}
@@ -10,7 +10,7 @@
     </div>
     <q-table 
       class="q-ma-lg" 
-      title="Physiotherapy Sessions"
+      title="Sessions"
       :rows="rows"
       :columns="columns"
       row-key="sessionid"
@@ -60,7 +60,7 @@
     <q-dialog v-model="openSessionDeletePrompt">
       <q-card class="q-pl-mx" style="min-width: 350px">
         <q-card-section>
-          <div class="text-body1">Delete physiotherapy session</div>
+          <div class="text-body1">Delete session</div>
           <div class="text-body2">
             <div><b>- ID:</b> {{selectedSession.sessionID}}</div>
             <div><b>- Created:</b> {{selectedSession.sessionStartTimestamp}}</div>
