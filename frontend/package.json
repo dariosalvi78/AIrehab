@@ -2,7 +2,7 @@
   "name": "airehab.web",
   "version": "0.0.1",
   "description": "Frontend of the AI Rehab project",
-  "productName": "AI Rehab",
+  "productName": "POE Assessment",
   "author": "Dario Salvi and Elliott Hellstrand",
   "private": true,
   "scripts": {

@@ -5,7 +5,8 @@
         <q-form class="resetForm">
           <q-card flat class="q-pa-sm">
             <q-card-section>
-              <div class="text-h4">AI Rehab - Password reset</div>
+              <div class="text-h4">POE Assessment</div>
+              <div class="text-h5">Password reset</div>
             </q-card-section>
             <q-card-section>
               <form autocomplete="on">

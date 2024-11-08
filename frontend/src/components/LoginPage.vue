@@ -4,10 +4,11 @@
       <q-page class="flex flex-center">
         <q-form ref="loginForm" class="loginForm">
           <q-card flat class="q-py-sm">
-            <q-card-section>
-              <div class="text-h4">AI Rehab Sign-in</div>
+            <q-card-section class="q-px-sm">
+              <div class="text-h4">POE Assessment</div>
+              <div class="text-h5">Sign-in</div>
             </q-card-section>
-            <q-card-section>
+            <q-card-section class="q-px-sm">
               <form autocomplete="on">
                 <q-input
                   class="q-my-md"
@@ -45,8 +46,8 @@
               </div>
               </form>
             </q-card-section>
-            <q-card-actions class="flex flex-center">
-              <q-btn size="lg" label="login" color="primary" @click="login()" />
+            <q-card-actions class="flex flex-center q-py-none">
+              <q-btn class="full-width" size="md" label="login" color="primary" @click="login()" />
             </q-card-actions>
           </q-card>
         </q-form>
@@ -63,7 +64,6 @@ export default {
   name: 'LoginPage',
   data () {
     return {
-        // TODO: add email form validation
         email: "",
         password: "",
         showPassword: false
@@ -127,7 +127,7 @@ export default {
 
 <style scoped>
 .loginForm {
-  width: 80%;
+  width: 90%;
   max-width: 500px;
 }
 </style>
