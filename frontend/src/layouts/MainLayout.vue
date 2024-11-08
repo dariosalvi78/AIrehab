@@ -34,7 +34,7 @@ export default {
     async logout () {
       await API.logout()
       store.removeLoginStatus()
-      this.$router.push('login')
+      this.$router.push('/login')
     },
   },
   computed: {
