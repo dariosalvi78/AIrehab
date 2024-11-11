@@ -8,6 +8,8 @@ networks:
 
 volumes:
   poe_db_data:
+  frontend_web_build:
+    external: true
 
 services:
   poe_db:
@@ -43,7 +45,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q 'SELECT 1' || exit 1"]
       interval: 5s
-      retries: 3
+      retries: 5
       start_period: 5s
       timeout: 3s
     container_name: poe_db
@@ -61,7 +63,8 @@ services:
       - ./uploads/:/usr/src/app/uploads
       - ./logs/:/usr/src/app/logs
       - /usr/src/app/node_modules
-      - ../datamodel/:/usr/src/datamodel
+      - ../datamodel/:/usr/src/datamodel:ro
+      - frontend_web_build:/usr/src/web:ro 
     command: "npm run node:start"
     ports:
       - 8080:8080

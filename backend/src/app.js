@@ -12,12 +12,16 @@ import cookieParser from 'cookie-parser'
 import connection from './db/dbConnection.js'
 import db from './db/dbDriver.js'
 import mailer from './utils/mailer.js'
+import http from 'http'
+import https from 'https'
+import fs from 'node:fs'
+import path from 'node:path'
 
 (async () => {
 
     console.log('Starting express app')
 
-    const port = config.server.port
+    const port = config.server.port || 8080
     const hostname = config.domain
     const app = express()
     app.use(helmet())
@@ -43,7 +47,23 @@ import mailer from './utils/mailer.js'
 
     await setRoutes(app, authenticateToken)
 
-    app.listen(port, () => {
+    let server
+    if (config.certs.key && config.certs.file) {
+        const key = fs.readFileSync(config.certs.key, 'utf8')
+        const cert = fs.readFileSync(config.certs.chain_file, 'utf8')
+
+        app.use(express.static(path.join(import.meta.dirname, '../../web')))
+        app.get('/*', (req, res) => {
+            res.sendFile(path.join(import.meta.dirname, "../../web", "index.html"))
+        })
+
+        server = https.createServer({ private_key: key, cert: cert }, app)
+    } else {
+        // HTTP no certificate
+        server = http.createServer(app)
+    }
+
+    server.listen(port, () => {
         console.log(`Server running on http://${hostname}:${port}`)
     })
 
