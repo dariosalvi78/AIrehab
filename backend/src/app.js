@@ -24,7 +24,9 @@ import path from 'node:path'
     const port = config.server.port || 8080
     const hostname = config.domain
     const app = express()
-    app.use(helmet())
+    app.use(helmet({
+        contentSecurityPolicy: { directives: { 'media-src': [`'self' blob:`] } }
+    }))
     app.use(cookieParser())
 
     await db.init(connection.msSQLConnection)
@@ -41,7 +43,7 @@ import path from 'node:path'
         res.header('Access-Control-Allow-Origin', '*')
         res.header('Vary', 'Cookie') // cache any cookies
         res.header('Access-Control-Allow-Methods', 'PUT, PATCH, DELETE, GET, POST')
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+        res.header('Cache-Control', 'no-cache, must-revalidate')
         next()
     })
 
