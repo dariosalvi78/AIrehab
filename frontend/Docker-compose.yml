@@ -1,0 +1,12 @@
+version: '3'
+
+volumes:
+  web_build:
+
+services:
+  build:
+    build: .
+    restart: "no"
+    volumes: 
+      - web_build:/usr/src/app/dist/spa:ro
+    container_name: web_build
