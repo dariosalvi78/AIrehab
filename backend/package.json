@@ -5,8 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "node:start": "nodemon -L --env-file ./config/.env ./src/app.js",
-    "dev": "docker compose --env-file ./config/.env up",
+    "start": "node ./src/app.js",
+    "dev": "node --env-file ./config/.env ./src/app.js",
+    "dev:watch": "nodemon --env-file ./config/.env ./src/app.js",
     "test": "node ./tests/jasmine.js",
     "test:watch": "nodemon  \"./tests/jasmine.js\""
   },

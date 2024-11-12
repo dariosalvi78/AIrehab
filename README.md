@@ -14,7 +14,9 @@ AI based physiotherapy rehabilitation
 
 From the folder database/ run:
 ```sh
-docker run --name airehabdb -d -p 1433:1433 -t $(docker build -q .)
+docker network create airrehabnet
+docker build -t airehabdb  .
+docker run --name airehabdb -d -p 1433:1433 --net=airrehabnet airehabdb
 ```
 
 This will build a MS SQL image and run initialization files to create the user (`airehab`, `MyPassword_1234`), the schema (`AIREHAB`) and the tables.
@@ -48,6 +50,49 @@ Then run:
 ```sh
 npm run dev:watch
 ```
+
+
+### Compile and run the docker container
+
+The docker container needs to copy source files from both the backend/ directory and the datamodel/directory, thus you need to run docker build from the root folder as:
+
+```sh
+docker build -t airehabbackend -f backend/Dockerfile .
+```
+
+Now run the docker container, remember to pass all the environemntal variables to it:
+
+```sh
+docker run -i \
+--net=airrehabnet \
+-p 8080:8080 \
+--name airehabbackend \
+-v ./web:/usr/src/web:ro \
+-e ENVIRONMENT=dev \
+-e DOMAIN_NAME=localhost \
+-e SERVER_PORT=8080 \
+-e JWT_SECRET_KEY=asdasdasdasdad \
+-e JWT_EXPIRE=24h \
+-e ADMIN_USERNAME=admin@test.test \
+-e ADMIN_PASSWORD=MyPassword_1234 \
+-e DB_HOSTNAME=airehabdb \
+-e DB_PORT=1433 \
+-e DB_NAME=airehab \
+-e DB_USER=airehab \
+-e DB_PASSWORD=MyPassword_1234 \
+-e LOG_PATH=logs/ \
+-e BASE_PATH_UPLOADS=uploads/ \
+-e MAIL_PORT=587 \
+-e MAIL_HOST=smtp.ethereal.email \
+-e MAIL_SENDER=username@ethereal.email \
+-e MAIL_USER=username@ethereal.email \
+-e MAIL_PASSWORD=password \
+-e POE_BASE_URL=airehabpoe \
+-e POE_PORT=3000 \
+airehabbackend 
+```
+
+Please notice that you need to set the account for ethereal.email and specify the web/ folder where the frontend static website is located.
 
 
 ## Frontend
@@ -92,10 +137,11 @@ npm run test:watch
 ```
 
 
-## Docker compose for testing
+## Docker compose for development
 
-There is a a docker compose file for testing in docker_compose/testing. It will spin up a database, the API server, the AI server and the frontend.
+There is a a docker compose file for testing in docker_compose/dev. It will spin up a database, the API server, the AI server and the frontend. While not useful for development, it can be used to check that the all setup holds up together.
 
+Some folders are mounted on the mount/ folder so that it's possible to inspect their content easily.
 
 ## Docker compose for production
 
