@@ -1,4 +1,4 @@
-FROM node:20.17.0 as build
+FROM node:22.11.0 as build
 
 RUN npm install -g @quasar/cli@2.4.1
 
