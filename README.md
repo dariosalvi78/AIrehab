@@ -145,7 +145,7 @@ docker run -i \
 --net=airrehabnet \
 -p 8080:8080 \
 --name airehabbackend \
--v airehabfrontend-store:/usr/src/public \
+-v airehabfrontend-store:/usr/src/app/public:ro \
 
 .... all the env variables here
 
