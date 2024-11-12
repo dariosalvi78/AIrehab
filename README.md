@@ -1,48 +1,29 @@
 # AIrehab
 AI based physiotherapy rehabilitation
 
+## Pre requisites
+
+- nodejs v 22
+- a running MSQL server
+- (optional) [Quasar CLI](https://quasar.dev/quasar-cli/installation)
+
+
+### Setup of the database (for development):
+
+- Start a Microsoft SQL server from the root folder of the project:
+
+From the folder database/ run:
+```sh
+docker run --name airehabdb -d -p 1433:1433 -t $(docker build -q .)
+```
+
+This will build a MS SQL image and run initialization files to create the user (`airehab`, `MyPassword_1234`), the schema (`AIREHAB`) and the tables.
+
 
 ## Backend
 
 The backend exposes the database and the AI algorithm through a REST API adding authentication and access control. It is programmed as a nodejs application, and can be run as a Docker container.
 
-### Setup of the database (for development):
-
-- Start a Microsoft SQL server:
-`docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=MyPassword_1234" -e "MSSQL_PID=Developer" -p 1433:1433  --name msql --hostname msql -d mcr.microsoft.com/mssql/server:2022-preview-ubuntu-22.04`. Notice that the administrator user for the database will be `sa` with password `MyPassword_1234`.
-- Connect to the database from command line using: `docker exec -it msql /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P MyPassword_1234`. Now you are running the SQL interpreter inside the container and can send commands through it. Alternatively, you can use a graphical client, such as DBeaver, and connect to the instance using localhost and port 1433.
-- Create a new database:
-send the following commands to the interpreter
-```sql
-CREATE DATABASE AIREHAB COLLATE SQL_Latin1_General_CP1_CI_AS;
-GO
-USE AIREHAB
-GO
-```
-- Create a user for the database with login information: 
-```sql
-CREATE LOGIN airehab
-WITH PASSWORD = 'MyPassword_1234';
-GO
-CREATE USER airehab FOR LOGIN airehab WITH DEFAULT_SCHEMA=airehab
-GO
-```
-- Create a schema inside the database:
-```sql
-CREATE SCHEMA airehab AUTHORIZATION airehab
-GO
-```
-- Give permissions to user:
-```sql
-EXEC sp_addrolemember 'db_ddladmin', 'airehab';
-EXEC sp_addrolemember 'db_datareader', 'airehab';
-EXEC sp_addrolemember 'db_datawriter', 'airehab';
-GO
-```
-- Create the schema tables: copy paste the schema.sql found in the datamodel folder into the SQL interpreter and run it.
-
-
-When setting up the database for production, we c
 
 ### Setup of the nodejs server:
 
@@ -51,23 +32,35 @@ When setting up the database for production, we c
 
 ### Start the server in development mode
 
-```bash
+Run:
+```sh
 npm run dev
 ```
 
 _Make sure that database is running in the background_
 
+If you want auto-reload when file chnage, install nodemon globally
+```sh
+npm i -g nodemon
+```
+
+Then run:
+```sh
+npm run dev:watch
+```
+
+
 ## Frontend
 
-This project is built using [Quasar framework](https://quasar.dev/)
+This project is built using [Quasar framework](https://quasar.dev/).
 
 ### Pre requisites
 
 - nodejs
-- (optional) [Quasar CLI](https://quasar.dev/quasar-cli/installation)
+- (optional) [Quasar CLI](https://quasar.dev/quasar-cli/installation) installed globally
 
-Install the dependencies using
-```bash
+Install the dependencies using:
+```sh
 yarn
 # or
 npm install
@@ -76,12 +69,6 @@ npm install
 ### Start the app in development mode
 ```bash
 quasar dev
-```
-
-
-### Build the app for production
-```bash
-quasar build
 ```
 
 ### Customize the configuration
@@ -94,12 +81,23 @@ See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-
 
 Once DB is running, start the tests using
 
-```bash
+```sh
 npm run test
 ```
 
 Or if you want to run tests during development
 
-```bash
+```sh
 npm run test:watch
 ```
+
+
+## Docker compose for testing
+
+There is a a docker compose file for testing in docker_compose/testing. It will spin up a database, the API server, the AI server and the frontend.
+
+
+## Docker compose for production
+
+A similar docker compose file is available for production under  docker_compose/production. Make sure you modify all parameters according to your environment.
+ 

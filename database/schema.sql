@@ -1,3 +1,5 @@
+USE AIREHAB
+GO
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[user]') AND type in (N'U'))
 BEGIN

@@ -54,10 +54,10 @@ import path from 'node:path'
         const key = fs.readFileSync(config.certs.key, 'utf8')
         const cert = fs.readFileSync(config.certs.chain_file, 'utf8')
 
-        app.use(express.static(path.join(import.meta.dirname, '../../web')))
-        app.get('/*', (req, res) => {
-            res.sendFile(path.join(import.meta.dirname, "../../web", "index.html"))
-        })
+        app.use(express.static('public'))
+        // app.get('/*', (req, res) => {
+        //     res.sendFile(path.join(import.meta.dirname, "../../web", "index.html"))
+        // })
 
         server = https.createServer({ private_key: key, cert: cert }, app)
     } else {
