@@ -250,7 +250,7 @@ export default {
         let errMsg = err
         if (err.response.status == 404) {
           errMsg = err.response.data
-          this.$router.push('/physiotherapist')
+          this.$router.push('/home')
         }
         return this.$q.notify({
           type: 'negative',

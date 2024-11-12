@@ -3,7 +3,7 @@
     <q-card-actions class="q-pb-xl flex flex-center q-gutter-md">
       <q-btn padding="md" color="secondary" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
         <q-icon left name="person"/>
-        <div>Add new Physiotherapist</div>
+        <div>Add new Test leader</div>
       </q-btn>
       <q-btn class="action-button" padding="md" color="accent" @click="() => { this.newPatientPrompt = !this.newPatientPrompt }">
         <q-icon left name="group_add"/>
@@ -79,7 +79,7 @@ export default {
           createdNotify({
             type: 'positive',
             color: 'positive',
-            message: 'Physiotherapist created: ' + resp.data.newUser.email,
+            message: 'Test leader created: ' + resp.data.newUser.email,
             spinner: false
           })
         }

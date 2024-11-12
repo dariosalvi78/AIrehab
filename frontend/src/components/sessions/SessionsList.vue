@@ -115,7 +115,7 @@ export default {
       await this.getSessions()
     },
     openSessionView (session) {
-      return this.$router.push('physiotherapist/sessions/' + session.id)
+      return this.$router.push('home/sessions/' + session.id)
     },
     formatDate (date) {
       return nicers.formattedDayOfMonth(date)

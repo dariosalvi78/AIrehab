@@ -20,9 +20,9 @@
                 v-if="mode == 'adminNew'"
                 filled
                 v-model="this.physiotherapistEmail"
-                label="Physiotherapist email"
+                label="Test leader email"
                 type="email"
-                :hint="!user.physiotherapistEmail ? 'e.g. user@email.com' : 'Assigned to physiotherapist'"
+                :hint="!user.physiotherapistEmail ? 'e.g. user@email.com' : 'Assigned to test leader'"
                 :readonly="!!user.physiotherapistEmail"
             />
             <!-- <q-input

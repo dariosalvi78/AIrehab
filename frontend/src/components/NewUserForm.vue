@@ -2,12 +2,12 @@
     <q-dialog ref="qDialog">
         <q-card class="q-pl-mx" style="min-width: 350px">
             <q-card-section>
-                <div class="text-h6">New Physiotherapist</div>
+                <div class="text-h6">New Test leader</div>
                 <div class="text-body2">Account details will be sent to the specified email</div>
             </q-card-section>
             <q-form class="q-px-lg">
                 <q-input
-                    class="q-my-lg"            
+                    class="q-my-lg"
                     filled
                     v-model="this.email"
                     label="Email"
@@ -16,17 +16,17 @@
                 />
                 <q-input
                     ref="qPass"
-                    class="q-my-lg"            
+                    class="q-my-lg"
                     filled
                     v-model="this.password"
                     label="Password"
                     type="password"
-                    :hint="'Password for physiotherapist ' + getPwdFeedback"
+                    :hint="'Password for Test leader ' + getPwdFeedback"
                     :rules="[(pwd) => !getPwdStrength || getPwdStrength]"
                 />
                 <q-input
                     ref="qConfirmPass"
-                    class="q-my-lg"            
+                    class="q-my-lg"
                     filled
                     v-model="this.passwordConfirm"
                     label="Confirm password"

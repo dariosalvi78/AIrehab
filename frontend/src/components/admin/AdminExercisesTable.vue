@@ -91,7 +91,7 @@
         <q-card-section>
           <div class="text-body1">Delete exercise - {{selectedExercise.type}}</div>
           <div class="text-body2">
-            <div><b>- Physiotherapist:</b> {{selectedExercise.assignedTo}}</div>
+            <div><b>- Test leader:</b> {{selectedExercise.assignedTo}}</div>
             <div><b>- Patient:</b> {{selectedExercise.patientName}}</div>
             <div><b>- Date:</b> {{`${selectedExercise.startTimestamp} -  ${selectedExercise.endTimestamp ? selectedExercise.endTimestamp : 'Ongoing'}`}}</div>
             <div><b>- Video:</b> {{selectedExercise.videoFile ? 'Uploaded' : 'No video uploaded'}}</div>
@@ -126,7 +126,7 @@ export default {
     return {
       columns: [
         { name: 'patientName', align:'left', label: 'Patient', field: 'patientName', sortable: true, required: true },
-        { name: 'assignedTo', align:'left', label: 'Physiotherapist', field: 'assignedTo', sortable: true, required: true },
+        { name: 'assignedTo', align:'left', label: 'Test leader', field: 'assignedTo', sortable: true, required: true },
         { name: 'type', align:'left' , label: 'Type', field: 'align', sortable: true },
         { name: 'startTimestamp', align:'left' , label: 'Start', field: 'startTimestamp', sortable: true }
       ],

@@ -2,7 +2,7 @@
   <div>
      <div v-if="!isLoadingUsers" class="q-pl-lg fit row wrap justify-left">
       <q-chip :ripple="false" outline size="md" class="col-auto" icon="person">
-        Physiotherapists: {{this.users.therapists.length}}
+        Test leaders: {{this.users.therapists.length}}
       </q-chip>
        <q-chip :ripple="false" outline size="md" class="col-auto" icon="group">
         Patients: {{this.users.patients.length}}
@@ -40,7 +40,7 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>Add</q-item-label>
-                <q-item-label caption>Assign patient to physiotherapist</q-item-label>
+                <q-item-label caption>Assign patient to test leader</q-item-label>
               </q-item-section>
             </q-item>
             <q-item clickable v-close-popup @click="onRowClick('delete', props.row)">
@@ -58,7 +58,7 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>Email</q-item-label>
-                <q-item-label caption>Send email to physiotherapist</q-item-label>
+                <q-item-label caption>Send email to test leader</q-item-label>
               </q-item-section>
             </q-item>
             <q-item v-show="props.row.role == 'patient'" clickable v-close-popup @click="onRowClick('edit', props.row)">
@@ -76,7 +76,7 @@
             {{ props.row.email }}
           </q-td>
           <q-td key="role" name="role" :props="props" class="text-capitalize">
-            {{ props.row.role }}
+            {{ getFormattedUserRole(props.row.role) }}
           </q-td>
           <q-td key="created" name="created" :props="props">
             {{ props.row.createdTimestamp }}
@@ -321,6 +321,15 @@ export default {
       this.openUserDeletePrompt = false
       this.openPatientForm.status = false
       this.openUserMailPrompt = false
+    },
+    getFormattedUserRole (role) {
+      if (role === 'physiotherapist') {
+        return 'Test leader'
+      } else if (role === 'patient') {
+        return 'Patient'
+      } else {
+        return role
+      }
     }
   }
 }

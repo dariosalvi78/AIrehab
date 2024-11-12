@@ -60,6 +60,7 @@
 </template>
 
 <script>
+import store from '../utils/storage.js'
 import API from '../API'
 import PatientEditForm from './patients/PatientEditForm.vue'
 import PatientsList from './patients/PatientsList.vue'
@@ -67,7 +68,7 @@ import PatientViewModal from './patients/PatientViewModal.vue'
 import SessionsList from './sessions/SessionsList.vue'
 
 export default {
-  name: 'PhysiotherapistHome',
+  name: 'TestLeaderHome',
   components: { PatientEditForm, SessionsList, PatientViewModal, PatientsList },
   data () {
     return {

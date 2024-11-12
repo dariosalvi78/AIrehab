@@ -76,7 +76,7 @@ export default {
         if (data.user) {
           store.setLoginStatus(true)
           if (data.user.role == 'admin') this.$router.push('admin')
-          else if (data.user.role == 'physiotherapist') this.$router.push('physiotherapist')
+          else if (data.user.role == 'physiotherapist') this.$router.push('home')
         }
       } catch (err) {
         let errMsg = err
