@@ -99,7 +99,7 @@ export default {
 
             await poeMA.createUser(addedPatient.id, addedPatient.height, addedPatient.weight)
 
-            logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to physiotherapist ${results.email}`)
+            logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to test leader ${results.email}`)
             return res.status(201).json({
                 status: 'created', data: { patient: addedPatient }
             })
