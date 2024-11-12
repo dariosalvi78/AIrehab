@@ -92,7 +92,7 @@ docker run -i \
 airehabbackend 
 ```
 
-Please notice that you need to set the account for ethereal.email and specify the web/ folder where the frontend static website is located.
+Please notice that you need to set the account for ethereal.email and specify the public/ folder where the frontend static website is located.
 
 
 ## Frontend
@@ -112,13 +112,45 @@ npm install
 ```
 
 ### Start the app in development mode
+
 ```bash
 quasar dev
 ```
 
-### Customize the configuration
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+### Compile the docker container
 
+This container does not run anything specific, it only compiles the code with `quasar build -m spa -s`.
+
+First create a volume where to place the static code:
+
+```sh
+docker volume create airehabfrontend-store
+```
+
+Then build the image:
+```sh
+docker build -t airehabfrontend .
+```
+
+Then you can load the static content from the image into the volume  with:
+```sh
+docker run -v airehabfrontend-store:/usr/src/app/dist/spa --rm airehabfrontend true
+```
+
+You can now use this volume for example mounted on the public folder of the backend container:
+
+
+```sh
+docker run -i \
+--net=airrehabnet \
+-p 8080:8080 \
+--name airehabbackend \
+-v airehabfrontend-store:/usr/src/public \
+
+.... all the env variables here
+
+airehabbackend 
+```
 
 ## Tests
 - You will need to create a test database in order to run tests locally. You can use the following command below, or configure your own connection config to match the one in /tests
