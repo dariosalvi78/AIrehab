@@ -166,7 +166,7 @@ export default {
       })
     },
     navigateToSession (sessionID) {
-      return this.$router.push('physiotherapist/sessions/' + sessionID)
+      return this.$router.push('home/sessions/' + sessionID)
     },
     formatDate (date) {
       return nicers.formattedDate(date)

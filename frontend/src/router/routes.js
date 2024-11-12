@@ -19,11 +19,10 @@ const routes = [
     ]
   },
   {
-    path: '/physiotherapist',
+    path: '/home',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('components/PhysiotherapistHome.vue') },
-      { path: '/patient', component: () => import('components/PatientHome.vue') },
+      { path: '', component: () => import('components/TestLeaderHome.vue') },
       { path: 'sessions/:sessionID', component: () => import('components/sessions/SessionViewModal.vue'), props: true },
       { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true }
     ]
