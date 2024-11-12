@@ -67,7 +67,7 @@ docker run -i \
 --net=airrehabnet \
 -p 8080:8080 \
 --name airehabbackend \
--v ./web:/usr/src/web:ro \
+-v ./public:/usr/src/public:ro \
 -e ENVIRONMENT=dev \
 -e DOMAIN_NAME=localhost \
 -e SERVER_PORT=8080 \

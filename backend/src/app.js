@@ -47,6 +47,9 @@ import path from 'node:path'
         next()
     })
 
+    app.use(express.static('public'))
+
+
     await setRoutes(app, authenticateToken)
 
     let server
@@ -54,7 +57,6 @@ import path from 'node:path'
         const key = fs.readFileSync(config.certs.key, 'utf8')
         const cert = fs.readFileSync(config.certs.chain_file, 'utf8')
 
-        app.use(express.static('public'))
         // app.get('/*', (req, res) => {
         //     res.sendFile(path.join(import.meta.dirname, "../../web", "index.html"))
         // })
