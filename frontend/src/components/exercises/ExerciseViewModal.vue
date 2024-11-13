@@ -58,27 +58,50 @@
           <q-card flat class="q-ma-lg evaluation-card">
             <q-card-section>
               <div class="text-h6">Video Evaluation</div>
+              <div class="text-subtitle2">Results from recorded exercise video</div>
             </q-card-section>
             <q-separator inset />
-            <q-card-section>
-              <div class="text-subtitle1">Score</div>
-              <div class="text-body2">
-                Score: {{ poe.score }}
-              </div>
-              <div class="text-body2">
-                Confidence: {{ poe.scoreConfidence_0 }}
-              </div>
-            </q-card-section>
-            <q-separator inset />
-            <q-card-section>
-              <div class="text-subtitle1">Postural orientation</div>
-              <div class="text-body2">{{ poe.posturalOrientation }}</div>
-            </q-card-section>
-            <q-separator inset />
-            <q-card-section>
-              <div class="text-subtitle1">Repetition</div>
-              <div class="text-body2">{{ poe.repetition }}</div>
-            </q-card-section>
+            <q-list bordered class="rounded-borders" :key="res.posturalOrientation" v-for="res in poe">
+              <q-expansion-item
+                expand-separator
+              >
+                <template v-slot:header>
+                <q-item-section class="text-subtitle2">
+                  {{ res.posturalOrientation }}
+                </q-item-section>
+                <q-item-section side>
+                  <q-chip
+                    outline
+                    :clickable="false" 
+                    :ripple="false" 
+                    :text-color="`${res.score === 0 ? 'positive' : res.score === 1 ? 'warning' : 'accent'}`" 
+                  >
+                    {{ res.scoreToText }}
+                  </q-chip>
+                </q-item-section>
+                </template>
+                <q-card>
+                 <q-card-section>
+                    <div class="text-body2">
+                      Score: {{ res.scoreToText }}
+                    </div>
+                    <div class="text-body2">
+                      Predicted confidence for score: <b>{{ res.highestPredictedConfidence }} %</b>
+                    </div>
+                  </q-card-section>
+                  <q-separator inset />
+                  <q-card-section>
+                    <div class="text-subtitle1">Postural orientation</div>
+                    <div class="text-body2">{{ res.posturalOrientation }}</div>
+                  </q-card-section>
+                  <q-separator inset />
+                  <q-card-section>
+                    <div class="text-subtitle1">Repetition</div>
+                    <div class="text-body2">{{ res.repetition }}</div>
+                  </q-card-section>
+                </q-card>
+              </q-expansion-item>
+            </q-list>
           </q-card>
         </transition>
         <div class="q-pa-lg video-container">
@@ -265,7 +288,13 @@ export default {
         this.poe_interval = setInterval(async () => {
           let resp = await API.getPOE(this.exerciseID)
           if (resp) {
-            this.poe = resp
+            let poe_results = resp
+            poe_results.map((poe, i) => {
+              poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
+              poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
+              poe["highestPredictedConfidence"] = parseFloat((poe['scoreConfidence_'+ poe.score]*100)).toFixed(0)
+            })
+            this.poe = poe_results
             clearInterval(this.poe_interval)
           }
         }, 2000)
