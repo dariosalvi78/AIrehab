@@ -15,7 +15,6 @@ import mailer from './utils/mailer.js'
 import http from 'http'
 import https from 'https'
 import fs from 'node:fs'
-import path from 'node:path'
 
 (async () => {
 
@@ -56,10 +55,6 @@ import path from 'node:path'
     if (config.certs.key && config.certs.file) {
         const key = fs.readFileSync(config.certs.key, 'utf8')
         const cert = fs.readFileSync(config.certs.chain_file, 'utf8')
-
-        // app.get('/*', (req, res) => {
-        //     res.sendFile(path.join(import.meta.dirname, "../../web", "index.html"))
-        // })
 
         server = https.createServer({ private_key: key, cert: cert }, app)
     } else {

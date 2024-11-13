@@ -9,6 +9,7 @@ COPY ./backend/package.json /usr/src/app/
 RUN npm i
 
 COPY ./datamodel /usr/src/datamodel
+COPY ./backend/public /usr/src/app/public
 COPY ./backend/src /usr/src/app/src
 
 CMD [ "npm", "start" ]
