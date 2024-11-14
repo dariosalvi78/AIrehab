@@ -62,9 +62,9 @@ BEGIN
         exerciseId uniqueidentifier NOT NULL,
         posturalOrientation varchar(100) NOT NULL,
         score int NOT NULL,
-        scoreConfidence_0 decimal,
-        scoreConfidence_1 decimal,
-        scoreConfidence_2 decimal,
+        scoreConfidence_0 DECIMAL(4,2),
+        scoreConfidence_1 DECIMAL(4,2),
+        scoreConfidence_2 DECIMAL(4,2),
         repetition int
     )
     ALTER TABLE poe_evaluation ADD CONSTRAINT poe_evaluation_exercise_id_fk FOREIGN KEY (exerciseId) REFERENCES exercise (id);
