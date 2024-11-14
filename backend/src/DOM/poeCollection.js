@@ -3,17 +3,27 @@ import db from '../db/dbDriver.js'
 
 export default {
     /**
-     * Get POE from exercise
+     * Get POE results from exercise ID
      * @param {Promise<Types.Exercise["id"]>} exerciseID
-     * @returns {Promise<Types.POEEvaluation>}
+     * @returns {Promise<Array<Types.POEEvaluation>>}
      */
-    getEvaluationFromID: async function (exerciseID) {
+    getEvaluationsFromID: async function (exerciseID) {
         const response = await db.query(`
-            SELECT poe.*, e.videoFile FROM [poe_evaluation] poe
-            INNER JOIN [exercise] e ON poe.exerciseID = e.id
-            WHERE poe.exerciseID = '${exerciseID}';
-        `)
-        return response.recordset[0]
+            DECLARE @exerciseID AS uniqueidentifier
+            SET @exerciseID = '${exerciseID}'
+            BEGIN
+                SELECT 
+                    poe.posturalOrientation,
+                    poe.score,
+                    poe.scoreConfidence_0,
+                    poe.scoreConfidence_1,
+                    poe.scoreConfidence_2,  
+                    poe.repetition
+                    FROM [poe_evaluation] poe
+                WHERE poe.exerciseID = @exerciseID;
+            END
+            `)
+        return response.recordset
     },
 
     /**
