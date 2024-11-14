@@ -1,8 +1,8 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
-import poeCollection from '../DOM/poeCollection.js';
 import axios from 'axios'
 import logger from './logger.js';
 import config from './config.js';
+import fileHandler from './fileHandler.js';
 
 const POE_SERVER_URL = `http://${config.poe.base_url}:${config.poe.port}` 
 
@@ -29,7 +29,7 @@ export default {
             logger.debug({ patientID: userId }, 'POE MA user created')
             return resp.data
         } catch (err) {
-            logger.error({ error: err }, 'Cant create user on POEMA')
+            logger.error({ reason: err.code, patientID: userId }, 'Cant create user on POEMA')
             return
         }
     },
@@ -44,36 +44,74 @@ export default {
             logger.debug({ patientID: userId }, 'Deleted POE MA user')
             return resp.status
         } catch (err) {
-            logger.error({ error: err }, 'Cant delete user on POEMA')
+            logger.error({ reason: err.code, patientID: userId }, 'Cant delete user on POEMA')
             return
         }
     },
 
     /**
      * Uploads the video file to the AI POE server
-     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
-     * @param {Types.Exercise["videoFile"]} videoPath - path of the file local on the server
+     * @param {Types.Exercise["id"]} exerciseID - exercise ID as we have it on the application server
+     * @param {Types.Exercise["physiotherapySessionId"]} sessionID
+     * @param {Types.Exercise["videoFile"]} videoFilename - video file local on the server
      * @param {Types.Exercise["type"]} exerciseType -  "singleLeggedSquatLeft" or "singleLeggedSquatRight", mapped to "L" or "R"
      * @returns {Promise<Boolean>}
      */
-    async uploadVideo (userId, videoPath, exerciseType) {
-        console.log('UPLADED VIDEO ON POEMA', userId)
-        this.videoSentTimestamp = new Date()
-        return true;
+    async uploadVideo (exerciseID, sessionID, videoFilename, exerciseType) {
+        if (config.poe.runModel) {
+            const SESSION_DIR = 'session_' + sessionID + '/exercise_' + exerciseID
+            const VIDEO_PATH = SESSION_DIR + '/vid_' + videoFilename
+            try {
+                let leg = exerciseType == 'singleLeggedSquatLeft' ? 'L' : 'R'
+                let resp = await axios.post(`${POE_SERVER_URL}/analyse_video?path=${VIDEO_PATH}&leg=${leg}`, 
+                    { headers: { "Content-Type": 'application/json' } 
+                })
+                logger.info({ exerciseID: exerciseID }, 'UPLOADED VIDEO ON POEMA')
+                console.log(resp)
+                if (resp) {
+                    // we need to know the ID of the task in order to see ongoing status
+                    const TASK_ID = (/\(*([a-f0-9\\-]*)\s*\)/g).exec(resp.data)[1]
+                    await fileHandler.createTaskFile(SESSION_DIR, TASK_ID)
+                    return
+                }
+            } catch (err) {
+                logger.error({ reason: err.code, exerciseID: exerciseID }, 'cannot upload video on POEMA')
+                return
+            }
+        } else {
+            logger.debug('UPLOADED VIDEO ON POEMA', exerciseID)
+            this.videoSentTimestamp = new Date()
+            return true;
+        }
     },
 
     /**
      * Tells if a video is being analyzed
-     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
+     * @param {Types.Exercise["id"]} exerciseID - exercise ID as we have it on the application server
+     * @param {Types.Exercise["physiotherapySessionId"]} sessionID
+     * @param {Types.Exercise["videoFile"]} videoFilename - video file local on the server
      * @returns {Promise<Boolean>}
      */
-    async isEvaluationOngoing (userId) {
-        if (!this.videoSentTimestamp) return false
-        if (new Date().getTime() - this.videoSentTimestamp.getTime() > 10000) {
-            this.videoSentTimestamp = null
-            return false
+    async isEvaluationOngoing (sessionID, exerciseID, videoFilename) {
+        if (config.poe.runModel) {
+            try {
+                const SESSION_DIR = 'session_' + sessionID + '/exercise_' + exerciseID
+                const TASK_ID = await fileHandler.getOngoingTask(SESSION_DIR)
+
+                let resp = await axios.get(`${POE_SERVER_URL}/ongoing?id=${TASK_ID}`)
+                return resp.status === 201 ? false : true              
+            } catch (err) {
+                logger.error({ error: err }, 'cannot get ongoing POEMA status')
+                return
+            }
+        } else {
+            if (!this.videoSentTimestamp) return false
+            if (new Date().getTime() - this.videoSentTimestamp.getTime() > 10000) {
+                this.videoSentTimestamp = null
+                return false
+            }
+            else return true
         }
-        else return true
     },  
 
     /**
@@ -81,108 +119,26 @@ export default {
      * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
      * @returns {Promise<Array<Types.POEEvaluation>>}
      */
-    async getLatestPOEAnalysis (userId) {
-
-        // simulation of a returned object from the POE API
-        let POEObj = {
-            "combined": {
-                "time": "string",
-                "pred": {
-                    "femval": 0,
-                    "trunk": 0,
-                    "hip": 0,
-                    "kmfp": 1
-                },
-                "conf": {
-                    "femval": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "trunk": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "hip": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "kmfp": [
-                        88.5,
-                        0,
-                        0
-                    ]
-                }
-            },
-            "reps": {
-                "femval": {
-                    "pred": [
-                        0
-                    ],
-                    "conf": [
-                        0
-                    ]
-                },
-                "trunk": {
-                    "pred": [
-                        0
-                    ],
-                    "conf": [
-                        0
-                    ]
-                },
-                "hip": {
-                    "pred": [
-                        0
-                    ],
-                    "conf": [
-                        0
-                    ]
-                },
-                "kmfp": {
-                    "pred": [
-                        0
-                    ],
-                    "conf": [
-                        0
-                    ]
-                }
-            }
-        }
+    async getLatestPOEAnalysis (sessionID, exerciseID, filename) {
+        const SESSION_DIR = 'session_' + sessionID + '/exercise_' + exerciseID
+        let returned_poe_obj = await fileHandler.getAnalysedVideo(SESSION_DIR, filename)
 
         /**
          * Array of POEEvaluation
          */
         let returnedValue = []
 
-        // adapt theobject returned from the API into the POEEvaluation
-        for (let postOr in POEObj.combined.pred) {
-            returnedValue.push(
-                {
-                    posturalOrientation: this.mapPosturalOrientation(postOr), //'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
-                    repetition: 0, // summative or "combined"
-                    score: POEObj.combined.pred[postOr], // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
-                    confidence0: POEObj.combined.conf[postOr][0],
-                    confidence1: POEObj.combined.conf[postOr][1],
-                    confidence2: POEObj.combined.conf[postOr][2],
-                }
-            )
-        }
-
-        for (let postOr in POEObj.reps) {
-            for (let repetition = 0; repetition < POEObj.reps[postOr].pred.length; repetition++)
-                returnedValue.push(
-                    {
-                        posturalOrientation: this.mapPosturalOrientation(postOr), //'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
-                        repetition: repetition,
-                        score: POEObj.reps[postOr].pred[repetition], // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
-                        confidence0: POEObj.reps[postOr].conf[repetition]
-                        // confidence1: POEObj.combined.conf[postOr][1], ???
-                        // confidence2: POEObj.combined.conf[postOr][2], ???
-                    }
-                )
+        // adapt returned results from the API into the POEEvaluation
+        for (const type in returned_poe_obj) {
+            console.log(returned_poe_obj[type])
+            returnedValue.push({
+                posturalOrientation: this.mapPosturalOrientation(type), //'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
+                repetition: 0, // summative or "combined"
+                score: returned_poe_obj[type].pred, // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
+                confidence0: returned_poe_obj[type].conf[0], // score is based on index with highest confidence
+                confidence1: returned_poe_obj[type].conf[1], 
+                confidence2: returned_poe_obj[type].conf[2],
+            })
         }
 
         return returnedValue;
