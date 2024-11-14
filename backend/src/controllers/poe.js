@@ -24,29 +24,32 @@ export default {
         let exerciseID = req.params.exerciseID
         try {
             if (!exerciseID) return res.sendStatus(400)
-            const results = await poe.getEvaluationFromID(exerciseID)
-            if (!results) {
+            const results = await poe.getEvaluationsFromID(exerciseID)
+            if (!results.length) {
                 const exercise = await exercises.getOneExerciseByEmail(exerciseID, req.user.email)
 
                 // results are not available yet let's see if the evaluation is ongoing
-                let isOngoing = await poeMA.isEvaluationOngoing(exercise.patientID)
+                let isOngoing = await poeMA.isEvaluationOngoing(exercise.physiotherapySessionId, exerciseID, exercise.videoFile)
                 if (isOngoing) {
                     res.sendStatus(204)
                     return
                 }
 
-                let latestResults = await poeMA.getLatestPOEAnalysis(exercise.patientID, exerciseID)
-                if (latestResults) {
-                    let evaluation = latestResults[3]
-                    let poe_results = await poe.updateEvaluationResults(
-                        exerciseID,
-                        evaluation.posturalOrientation,
-                        evaluation.score,
-                        evaluation.confidence0,
-                        evaluation.confidence1,
-                        evaluation.confidence2,
-                        evaluation.repetition
-                    )
+                logger.debug({ exerciseID: exerciseID }, 'POEMA EVALUATION DONE, GETTING RESULTS')
+
+                let poe_results = await poeMA.getLatestPOEAnalysis(exercise.physiotherapySessionId, exerciseID, exercise.videoFile)
+                if (poe_results) {
+                    for (let i = 0; i < poe_results.length; i++) {
+                        await poe.updateEvaluationResults(
+                            exerciseID,
+                            poe_results[i].posturalOrientation,
+                            poe_results[i].score,
+                            poe_results[i].confidence0,
+                            poe_results[i].confidence1,
+                            poe_results[i].confidence2,
+                            poe_results[i].repetition
+                        )
+                    }
                     res.send(poe_results)
                     return
                 } else {
@@ -77,7 +80,9 @@ export default {
             const exercise = await exercises.getExerciseByID(exerciseID)
             if (!exercise) return res.status(404).send('Exercise does not exist')
             if (!exercise.videoFile) return res.status(400).send('Video does not exist')
-            await poeMA.uploadVideo(exercise.videoFile);
+            await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type);
+
+            // await new Promise(res => setTimeout(res, 10000))
             return res.sendStatus(200)
         } catch (err) {
             logger.error({ error: err }, 'error sending POE: ')

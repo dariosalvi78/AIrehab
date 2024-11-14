@@ -25,7 +25,7 @@ export default {
             }
 
             return res.sendFile(path.join(import.meta.dirname,
-                '../../' + config.uploads.base_path + '/session_' + exercise.physiotherapySessionId + '/exercise_' + exercise.videoFile
+                '../../' + config.uploads.base_path + '/session_' + exercise.physiotherapySessionId + '/exercise_' + exercise.id + '/vid_' + exercise.videoFile
             ))
         } catch (err) {
             logger.error({ error: err }, 'error getting file: ')

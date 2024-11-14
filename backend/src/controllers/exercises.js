@@ -123,7 +123,7 @@ export default {
 
             if (!req.body || !exerciseID || !sessionID) return res.sendStatus(400)
 
-            if (videoName) await files.deleteVideo(sessionID, videoName)
+            if (videoName) await files.deleteVideo(sessionID, exerciseID, videoName)
             await poe.deletePOEForExerciseByID(exerciseID)
             await exercises.deleteOneExercise(exerciseID)
 
