@@ -19,7 +19,7 @@ export default {
     async saveVideo(sessionID, exerciseID, req) {
         try {
             let filename = undefined
-            const SESSION_DIR = config.uploads.base_path + 'session_' + sessionID
+            const SESSION_DIR = config.uploads.base_path + 'session_' + sessionID + '/exercise_' + exerciseID
 
             if (!fs.existsSync(SESSION_DIR)) {
                 await mkdir(SESSION_DIR, { recursive: true })
@@ -47,7 +47,7 @@ export default {
                     if (fileType.mime !== file.mimetype) return reject({ exerciseID, httpCode: 400, reason: 'Could not parse uploaded file type' })
 
                     filename = file.newFilename + '_' + Date.now() + '.' + fileType.ext
-                    const exercise_file_path = SESSION_DIR + '/exercise_' + filename
+                    const exercise_file_path = SESSION_DIR + '/vid_' + filename
 
                     fs.copyFile(file.filepath, exercise_file_path, async (err) => {
                         if (err) return reject({ exerciseID, error: err.message })
@@ -69,18 +69,19 @@ export default {
         }
     },
     /**
-     * Delete video associated with exercise
+     * Delete video and data associated with exercise
      * @param {Types.PhysiotherapySession["id"]} sessionID
+     * @param {Types.Exercise["id"]} exerciseID
      * @param {Types.Exercise["videoFile"]} filename
      */
-    async deleteVideo(sessionID, filename) {
+    async deleteVideo(sessionID, exerciseID, filename) {
         try {
-            const SESSION_DIR = config.uploads.base_path + '/session_' + sessionID
-            let fullPath = SESSION_DIR + '/exercise_' + filename
+            const SESSION_DIR = config.uploads.base_path + '/session_' + sessionID + '/exercise_' + exerciseID
+            let fullPath = SESSION_DIR + '/vid_' + filename
 
             return new Promise(async (resolve, reject) => {
                 if (fs.existsSync(fullPath)) {
-                    fs.unlink(fullPath, (err) => {
+                    fs.rm(SESSION_DIR, { recursive: true }, (err) => {
                         if (err) reject(err)
                     })
                     resolve(fullPath)
@@ -93,7 +94,7 @@ export default {
         }
     },
     /**
-     * Remove folder associated with physiotherapy session
+     * Remove folder associated with session
      * @param {Types.PhysiotherapySession["id"]} sessionID 
      */
     async closeDirectory(sessionID) {
@@ -113,6 +114,94 @@ export default {
             logger.error({ error: err }, 'cannot remove folder: ')
             return
         }
-        
+    },
+    /**
+     * Rename file from uploads directory
+     * @param {Types.PhysiotherapySession["id"]} sessionID 
+     * @param {Types.Exercise["id"]} exerciseID 
+     * @param {String} oldFileName 
+     * @param {String} newFileName
+     * @returns
+     */
+    async renameFile(sessionID, exerciseID, oldFileName, newFileName) {
+        try {
+            const SESSION_DIR = config.uploads.base_path + 'session_' + sessionID
+            let fullPath = SESSION_DIR + '/exercise_' + exerciseID + '/vid_', oldFilePath = fullPath + oldFileName
+
+            return new Promise(async (resolve, reject) => {
+                fs.readdir(SESSION_DIR, async (err, files) => {
+                    if (err) reject(err)
+                    const file = await fileTypeFromFile(oldFilePath)
+                    let updatedFileName = newFileName + '.' + file.ext
+
+                    fs.renameSync(oldFilePath, fullPath + updatedFileName)
+                    return resolve(updatedFileName)
+                })
+            })    
+        } catch (err) {
+            logger.error({ error: err }, 'cannot rename file: ')
+            return
+        }
+    },
+    /**
+     * Saves file containing task id of video that is being analysed
+     * @param {String} dirToExercise 
+     * @param {String} taskID 
+     */
+    async createTaskFile(dirToExercise, taskID) {
+        try {
+            const fileName = config.uploads.base_path + dirToExercise + '/.env.task_id'
+            return new Promise(async (resolve, reject) => {
+                fs.writeFile(fileName, `TASK_ID=${taskID}`, (err) => {
+                    if (err) reject(err)
+                    logger.debug({ data: fileName }, 'saved task file ')
+                    resolve(fileName)
+                })
+            })    
+        } catch (err) {
+            logger.error({ error: err }, 'cannot save task file: ')
+            return
+        }
+    },
+    /**
+     * Get task id from file for retrieving ongoing status
+     * @param {String} dirToExercise 
+     * @returns {String} Task ID for exercise
+     */
+    async getOngoingTask (dirToExercise) {
+        try {
+            const fileName = config.uploads.base_path + dirToExercise + '/.env.task_id'
+            return new Promise(async (resolve, reject) => {
+                fs.readFile(fileName, { encoding: 'utf-8' }, (err, data) => {
+                    if (err) reject(err)
+                    let parseData = data.split('TASK_ID=')[1]
+                    return resolve(parseData)
+                })
+            })   
+        } catch (err) {
+            logger.error({ error: err }, 'cannot get task file: ')
+            return
+        }
+    },
+    /**
+     * Get results from video associated with exercise
+     * @param {String} dirToExercise
+     * @param {Types.Exercise["videoFile"]} filename
+     * @returns {Promise<Array<Types.POEEvaluation>>} POE results
+    */
+    async getAnalysedVideo(dirToExercise, videoFilename) {
+        try {
+            const fileName = config.uploads.base_path + dirToExercise + '/vid_' + videoFilename.replace('.mp4', '.json')
+            return new Promise(async (resolve, reject) => {
+                fs.readFile(fileName, { encoding: 'utf-8' }, (err, data) => {
+                    if (err) reject(err)
+                    let parsedJSONData = JSON.parse(data)
+                    return resolve(parsedJSONData)
+                })
+            })
+        } catch (err) {
+            logger.error({ error: err }, 'cannot get poe results from video: ')
+            return
+        }
     }
 }
