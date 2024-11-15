@@ -44,8 +44,9 @@
       <div v-else>
         <q-card v-if="!poe" flat class="q-pa-lg flex flex-center">
           <q-card-section>
-            <div class="text-h6 q-mb-md">Loading POE Evaluation, please wait</div>
-            <q-separator inset />
+            <div class="text-h6 flex flex-center">Processing video</div>
+            <div class="text-subtitle2 q-mb-md">Retrieving results from analysed video</div>
+            <q-separator />
             <div class="q-mt-md flex flex-center">
               <q-spinner-dots
                 color="primary"
@@ -74,7 +75,11 @@
                     outline
                     :clickable="false" 
                     :ripple="false" 
-                    :text-color="`${res.score === 0 ? 'positive' : res.score === 1 ? 'warning' : 'accent'}`" 
+                    :text-color="`${ 
+                      res.score === 0 ? 'positive' 
+                      : res.score === 1 ? 'warning' 
+                      : 'negative'
+                    }`" 
                   >
                     {{ res.scoreToText }}
                   </q-chip>
@@ -134,7 +139,7 @@ export default {
       uploadedFile: undefined,
       videoFile: undefined,
       poe: undefined,
-      poe_interval: undefined
+      isGettingPOEStatus: true
     }
   },
   async beforeMount () {
@@ -212,8 +217,9 @@ export default {
     },
     async saveVideo () {
       if (this.uploadedFile && this.exerciseID) {
+        let loading = this.$q.loading
         try {
-          this.$q.loading.show({
+          loading.show({
             message: 'Uploading video to server, please wait...'
           })
           await nicers.delay(300)
@@ -221,28 +227,27 @@ export default {
           form.append('uploaded_file', this.uploadedFile)
           let results = await API.uploadFile(form, this.exerciseID)
           if (results) {
-            this.$q.loading.hide()
-            this.$q.notify({
-              type: 'positive',
-              position: 'top',
-              message: 'Video has been saved for exercise',
-            })
             try {
               this.videoFile = results.videoFile
             } catch (err) {
               // do not trigger the general catch below, because we want the sendPOE to be called in any case
               console.error(err)
             }
+            loading.show({
+              message: '<b>Video uploaded</b><br>Processing will start in a moment<br>Please wait...',
+              html: true
+            })
             let poe_evaluation = await API.sendPOE(results.videoFile, this.exerciseID)
             if (poe_evaluation) {
+              loading.hide()
               this.$q.notify({
                 type: 'info',
                 position: 'top',
-                message: 'Video evaluation sent, processing has started',
+                message: 'Video has been sent for processing',
                 icon: 'info'
               })
-              await this.getPOE()
               await this.getVideoPathForExercise()
+              await this.getPOE()
             }
           }
         } catch (err) {
@@ -258,7 +263,7 @@ export default {
           this.$refs.uploader.nativeEl.value = ''
           this.uploadedFile = undefined
         }
-        this.$q.loading.hide()
+        loading.hide()
         return
       }
     },
@@ -283,28 +288,28 @@ export default {
         })
       }
     },
-     async getPOE() {
-      try {
-        this.poe_interval = setInterval(async () => {
-          let resp = await API.getPOE(this.exerciseID)
-          if (resp) {
-            let poe_results = resp
-            poe_results.map((poe, i) => {
-              poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
-              poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
-              poe["highestPredictedConfidence"] = parseFloat((poe['scoreConfidence_'+ poe.score]*100)).toFixed(0)
-            })
-            this.poe = poe_results
-            clearInterval(this.poe_interval)
+    async getPOE() {
+        while (this.isGettingPOEStatus) {
+          try {
+            let resp = await API.getPOE(this.exerciseID)
+            if (resp && resp._results) {
+              let poe_results = resp._results, scoreFixed
+              poe_results.map((poe, i) => {
+                poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
+                poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
+                poe["highestPredictedConfidence"] = parseFloat((poe['scoreConfidence_'+ poe.score]*100)).toFixed(0)
+              })
+              this.poe = poe_results
+              return
+            } else if (resp && !resp._results) {
+              await nicers.delay(10000)
+              return await this.getPOE()
+            }
+          } catch (err) {
+            // ongoing status not available yet, video in queue = 500 response
+            // keep checking until we can fetch ongoing status
+            await nicers.delay(10000)
           }
-        }, 2000)
-      } catch (err) {
-        return this.$q.notify({
-          type: 'negative',
-          position: 'top',
-          message: 'Cannot get video evaluation: ' + err,
-          icon: 'warning'
-        })
       }
     },
     async getVideoPathForExercise () {
@@ -323,7 +328,7 @@ export default {
     }
   },
   unmounted () {
-    if (this.poe_interval) clearInterval(this.poe_interval)
+    this.isGettingPOEStatus = false
   }
 }
 </script>
