@@ -282,13 +282,33 @@ describe('getPatient access:', function () {
 })
 
 describe('deletePatient access:', function () {
-    it('only admin can delete patient', async function () {
+    it('user can delete own patient', async function () {
+        let patient = this.patient, therapist = this.physiotherapist
+        await spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({ physiotherapistId: therapist.id, sessionID: undefined })
+        await spyOn(physiotherapistCollection, 'deleteOnePatient')
+        await physiotherapist.deletePatient({
+            user: therapist,
+            params: { patientID: patient.id },
+            body: { physiotherapistID: therapist.id }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(204)
+                expect(physiotherapistCollection.getOnePatientByID).toHaveBeenCalledWith(patient.id)
+                expect(physiotherapistCollection.deleteOnePatient).toHaveBeenCalledWith(therapist.id, patient.id)
+            }
+        })
+    })
+    it('user cannot delete non assigned patients', async function () {
+        let patient = this.patient
+        spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({ physiotherapistId: 2, sessionID: undefined  })
         await physiotherapist.deletePatient({
             user: this.physiotherapist,
-            params: { patientID: 1 }
+            params: { patientID: patient.id },
+            body: { physiotherapistID: this.physiotherapist.id }
         }, {
             sendStatus(status) {
                 expect(status).toBe(403)
+                expect(physiotherapistCollection.getOnePatientByID).toHaveBeenCalledWith(patient.id)
             }
         })
     })
@@ -306,7 +326,7 @@ describe('deletePatient access:', function () {
             }
         })
     })
-    it('cant delete patient that is part of a physiotherapy session', async function () {
+    it('cant delete patient that is part of a session', async function () {
         let patient = this.patient
         await spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({ physiotherapistId: this.physiotherapist.id, sessionID: 1 })
         await physiotherapist.deletePatient({
