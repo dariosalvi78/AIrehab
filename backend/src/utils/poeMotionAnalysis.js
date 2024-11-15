@@ -58,22 +58,16 @@ export default {
      * @returns {Promise<Boolean>}
      */
     async uploadVideo (exerciseID, sessionID, videoFilename, exerciseType) {
-        if (config.poe.runModel) {
+        if (config.poe.runModel === 'true') {
             const SESSION_DIR = 'session_' + sessionID + '/exercise_' + exerciseID
             const VIDEO_PATH = SESSION_DIR + '/vid_' + videoFilename
             try {
                 let leg = exerciseType == 'singleLeggedSquatLeft' ? 'L' : 'R'
-                let resp = await axios.post(`${POE_SERVER_URL}/analyse_video?path=${VIDEO_PATH}&leg=${leg}`, 
+                let response = await axios.post(`${POE_SERVER_URL}/analyse_video?path=${VIDEO_PATH}&leg=${leg}`, 
                     { headers: { "Content-Type": 'application/json' } 
                 })
                 logger.info({ exerciseID: exerciseID }, 'UPLOADED VIDEO ON POEMA')
-                console.log(resp)
-                if (resp) {
-                    // we need to know the ID of the task in order to see ongoing status
-                    const TASK_ID = (/\(*([a-f0-9\\-]*)\s*\)/g).exec(resp.data)[1]
-                    await fileHandler.createTaskFile(SESSION_DIR, TASK_ID)
-                    return
-                }
+                if (response) return response
             } catch (err) {
                 logger.error({ reason: err.code, exerciseID: exerciseID }, 'cannot upload video on POEMA')
                 return
@@ -89,28 +83,27 @@ export default {
      * Tells if a video is being analyzed
      * @param {Types.Exercise["id"]} exerciseID - exercise ID as we have it on the application server
      * @param {Types.Exercise["physiotherapySessionId"]} sessionID
-     * @param {Types.Exercise["videoFile"]} videoFilename - video file local on the server
-     * @returns {Promise<Boolean>}
+     * @param {Types.Exercise["videoFile"]} videoFilename
+     * @returns {Promise<Response>}
      */
-    async isEvaluationOngoing (sessionID, exerciseID, videoFilename) {
-        if (config.poe.runModel) {
+    async isEvaluationOngoing(sessionID, exerciseID, videoFilename) {
+        if (config.poe.runModel === 'true') {
             try {
-                const SESSION_DIR = 'session_' + sessionID + '/exercise_' + exerciseID
-                const TASK_ID = await fileHandler.getOngoingTask(SESSION_DIR)
-
-                let resp = await axios.get(`${POE_SERVER_URL}/ongoing?id=${TASK_ID}`)
-                return resp.status === 201 ? false : true              
+                const PATH_TO_VIDEO = 'session_' + sessionID + '/exercise_' + exerciseID + '/vid_' + videoFilename
+                let response = await axios.get(`${POE_SERVER_URL}/ongoing?path=${PATH_TO_VIDEO}`)
+                return response
             } catch (err) {
+                if (err.status === 401) return { status: 200 }
                 logger.error({ error: err }, 'cannot get ongoing POEMA status')
-                return
+                return err
             }
         } else {
-            if (!this.videoSentTimestamp) return false
+            if (!this.videoSentTimestamp) return { status: 201 }
             if (new Date().getTime() - this.videoSentTimestamp.getTime() > 10000) {
                 this.videoSentTimestamp = null
-                return false
+                return { status: 201 }
             }
-            else return true
+            else return { status: 200 }
         }
     },  
 

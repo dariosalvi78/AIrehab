@@ -191,6 +191,7 @@ export default {
     */
     async getAnalysedVideo(dirToExercise, videoFilename) {
         try {
+            if (config.poe.runModel === 'false') return (await import('../../tests/mock_data.js')).default.poe_results
             const fileName = config.uploads.base_path + dirToExercise + '/vid_' + videoFilename.replace('.mp4', '.json')
             return new Promise(async (resolve, reject) => {
                 fs.readFile(fileName, { encoding: 'utf-8' }, (err, data) => {

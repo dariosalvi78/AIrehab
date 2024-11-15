@@ -29,12 +29,10 @@ export default {
                 const exercise = await exercises.getOneExerciseByEmail(exerciseID, req.user.email)
 
                 // results are not available yet let's see if the evaluation is ongoing
-                let isOngoing = await poeMA.isEvaluationOngoing(exercise.physiotherapySessionId, exerciseID, exercise.videoFile)
-                if (isOngoing) {
-                    res.sendStatus(204)
-                    return
-                }
+                let ongoing = await poeMA.isEvaluationOngoing(exercise.physiotherapySessionId, exerciseID, exercise.videoFile)
+                if (ongoing && ongoing.status !== 201) return res.sendStatus(ongoing.status || 500)
 
+                // Finished analysing video, continue 
                 logger.debug({ exerciseID: exerciseID }, 'POEMA EVALUATION DONE, GETTING RESULTS')
 
                 let poe_results = await poeMA.getLatestPOEAnalysis(exercise.physiotherapySessionId, exerciseID, exercise.videoFile)
@@ -50,13 +48,13 @@ export default {
                             poe_results[i].repetition
                         )
                     }
-                    res.send(poe_results)
+                    res.send({ _results: poe_results })
                     return
                 } else {
                     logger.error(null, 'No POE results available for user ' + exercise.patientID)
                 }
             } else {
-                res.send(results)
+                res.send({ _results: results })
                 return
             }
         } catch (err) {
@@ -80,10 +78,8 @@ export default {
             const exercise = await exercises.getExerciseByID(exerciseID)
             if (!exercise) return res.status(404).send('Exercise does not exist')
             if (!exercise.videoFile) return res.status(400).send('Video does not exist')
-            await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type);
-
-            // await new Promise(res => setTimeout(res, 10000))
-            return res.sendStatus(200)
+            let response = await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type);
+            if (response) return res.sendStatus(200)
         } catch (err) {
             logger.error({ error: err }, 'error sending POE: ')
             res.sendStatus(500)
