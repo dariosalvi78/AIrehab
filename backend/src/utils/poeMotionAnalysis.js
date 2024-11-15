@@ -12,44 +12,6 @@ export default {
     videoSentTimestamp: undefined,
 
     /**
-     * Creates a user on the AI POE server
-     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
-     * @param {Types.Patient["height"]} length - length of subject in cm
-     * @param {Types.Patient["weight"]} weight - weight in kg
-     */
-    async createUser(userId, length, weight) {
-        try {
-            const form = new FormData()
-            form.append('id', userId)
-            form.append('length', length)
-            form.append('weight', weight)
-            let resp = await axios.post(`${POE_SERVER_URL}/create_user`, form, 
-                { headers: { "Content-Type": 'multipart/form-data' } 
-            })
-            logger.debug({ patientID: userId }, 'POE MA user created')
-            return resp.data
-        } catch (err) {
-            logger.error({ reason: err.code, patientID: userId }, 'Cant create user on POEMA')
-            return
-        }
-    },
-
-    /**
-     * Deletes user on the AI POE server
-     * @param {Types.Patient["id"]} userId - patient ID as we have it on the application server
-     */
-    async deleteUser(userId) {
-        try {
-            let resp = await axios.delete(`${POE_SERVER_URL}/delete_user/${userId}`)
-            logger.debug({ patientID: userId }, 'Deleted POE MA user')
-            return resp.status
-        } catch (err) {
-            logger.error({ reason: err.code, patientID: userId }, 'Cant delete user on POEMA')
-            return
-        }
-    },
-
-    /**
      * Uploads the video file to the AI POE server
      * @param {Types.Exercise["id"]} exerciseID - exercise ID as we have it on the application server
      * @param {Types.Exercise["physiotherapySessionId"]} sessionID

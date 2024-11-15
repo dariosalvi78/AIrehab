@@ -1,6 +1,5 @@
 import * as Types from '../../../datamodel/modeljdocs.mjs'
 import physiotherapist from "../DOM/physiotherapistCollection.js"
-import poeMA from '../utils/poeMotionAnalysis.js'
 import logger from "../utils/logger.js"
 
 export default {
@@ -97,8 +96,6 @@ export default {
             }
             const addedPatient = await physiotherapist.createPatient(patient, results.id)
 
-            await poeMA.createUser(addedPatient.id, addedPatient.height, addedPatient.weight)
-
             logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to test leader ${results.email}`)
             return res.status(201).json({
                 status: 'created', data: { patient: addedPatient }
@@ -129,8 +126,6 @@ export default {
             }
 
             await physiotherapist.deleteOnePatient(body.physiotherapistID, req.params.patientID)
-
-            await poeMA.deleteUser(req.params.patientID)
 
             logger.info({ data: { patientID: req.params.patientID } }, 'Deleted patient permanently')
             return res.sendStatus(204)
