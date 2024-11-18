@@ -7,6 +7,7 @@ import express from 'express'
 import helmet from 'helmet'
 import setRoutes from './routes.js'
 import config from './utils/config.js'
+import historyRouterMode from 'connect-history-api-fallback'
 import { authenticateToken, createAdmin } from './utils/tokenAuth.js'
 import cookieParser from 'cookie-parser'
 import connection from './db/dbConnection.js'
@@ -24,7 +25,12 @@ import fs from 'node:fs'
     const hostname = config.domain
     const app = express()
     app.use(helmet({
-        contentSecurityPolicy: { directives: { 'media-src': [`'self' blob:`] } }
+        contentSecurityPolicy: {
+            directives: {
+                'media-src': [`'self' blob:`],
+                'img-src': [`'self' data:`]
+            }
+        }
     }))
     app.use(cookieParser())
 
@@ -46,8 +52,8 @@ import fs from 'node:fs'
         next()
     })
 
+    app.use(historyRouterMode())
     app.use(express.static('public'))
-
 
     await setRoutes(app, authenticateToken)
 
