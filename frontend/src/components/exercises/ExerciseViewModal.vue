@@ -39,6 +39,7 @@
             </div>
             <q-btn :disabled="!uploadedFile" class="q-mt-md" label="Save video" color="secondary" size="md" icon-right="camera" @click="saveVideo" />
           </q-card-section>
+          <exercise-instructions />
         </q-card>
       </div>
       <div v-else>
@@ -122,7 +123,10 @@
 <script>
 import API from '../../API'
 import nicers from '../../utils/nicers'
+import ExerciseInstructions from './ExerciseInstructions.vue'
+
 export default {
+  components: { ExerciseInstructions },
   name: 'ExerciseViewModal',
   props: {
     sessionID: String,
@@ -293,7 +297,7 @@ export default {
           try {
             let resp = await API.getPOE(this.exerciseID)
             if (resp && resp._results) {
-              let poe_results = resp._results, scoreFixed
+              let poe_results = resp._results
               poe_results.map((poe, i) => {
                 poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
                 poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
