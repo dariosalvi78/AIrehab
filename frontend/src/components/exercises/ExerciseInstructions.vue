@@ -1,9 +1,10 @@
 <template>
-  <q-list bordered class="rounded-borders q-mt-lg">
+  <q-list bordered class="rounded-borders q-ma-sm">
     <q-expansion-item expand-separator label="Exercise instructions" icon="accessibility">
       <q-card>
+        <q-separator />
         <q-card-section>
-          <div class="text-subtitle2">How to perform the exercise:</div>
+          <div class="text-subtitle2">How to perform exercise:</div>
           Place something behind the person being tested, e.g., a box or bench, so that the knee is bent to about 60-70 degrees at the lowest position.
           <br>
           <br>

@@ -1,46 +1,57 @@
 <template>
-  <q-page-container class="q-pa-lg">
-    <q-page>
-      <q-btn round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />
+  <q-page-container>
+    <q-btn class="q-ml-md" round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />
+    <q-page class="q-py-md">
       <div v-if="!videoFile">
-        <q-card v-if="!hasVideoDevice" flat class="q-pa-lg">
-          <q-card-section class="flex column items-center">
-            <div class="text-h6 col">Device has no video inputs</div>
-            <div class="col">
-              <q-btn label="Reconnect" color="secondary" size="md" @click="checkForVideoSupport" />
-            </div>
-          </q-card-section>
-        </q-card>
-        <q-card flat v-else class="q-pt-lg q-ma-md">
-          <q-card-section class="flex flex-center q-gutter-md">
-            <q-btn label="Open camera" color="positive" size="md" icon-right="camera" @click="videoCapture" />
-            <q-btn label="Stop recording" color="secondary" size="md" icon-right="camera" @click="stopVideoCapture" />
-          </q-card-section>
-          <q-card-section class="column items-center q-pa-sm">
-            <q-file class="q-mb-sm" ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" v-model="uploadedFile" label="Upload video" @change.capture="uploadedRecordedVideo">
-              <template v-slot:prepend>
-                <q-icon name="camera" />
-              </template>
-            </q-file>
-            <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
-            </form>
+        <exercise-instructions class="q-mb-md"/>
+        <q-tabs v-model="deviceTab" dense class="text-grey" active-color="primary" indicator-color="primary" align="justify" narrow-indicator>
+          <q-tab name="phone" label="Upload" />
+          <q-tab name="app" label="Record" />
+        </q-tabs>
+        <q-separator />
+        <q-tab-panels keep-alive v-model="deviceTab" animated>
+          <q-tab-panel class="device-panel" name="phone">
+            <q-card flat class="q-ma-md">
+              <q-card-section class="column items-center q-pa-sm">
+                <q-file class="q-mb-sm" ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" v-model="uploadedFile" label="Open camera" @change.capture="uploadedRecordedVideo">
+                  <template v-slot:prepend>
+                    <q-icon name="camera" />
+                  </template>
+                </q-file>
+                <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
+                </form>
+                <div class="video-container col" v-show="uploadedFile">
+                  <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
+                </div>
+                <div class="q-mt-md text-body2" v-if="uploadedFile">
+                  Recorded: {{formatModifiedDate}}<br/>
+                  Size: {{getUploadedFileSize}}
+                </div>
+                <q-btn :disabled="!uploadedFile" class="q-my-md" label="Save video" color="secondary" size="md" icon-right="camera" @click="saveVideo" />
+              </q-card-section>
+            </q-card>
+          </q-tab-panel>
+          <q-tab-panel class="device-panel" name="app">
+            <q-card flat class="q-pa-lg">
+              <q-card-section v-if="!hasVideoDevice" class="flex column items-center">
+                <div class="text-h6 col">Device has no video inputs</div>
+                <div class="col">
+                  <q-btn label="Reconnect" color="secondary" size="md" @click="checkForVideoSupport" />
+                </div>
+              </q-card-section>
+              <q-card-section v-else class="flex flex-center q-gutter-md">
+                <q-btn :disabled="isRecording" label="Start recording" color="positive" size="md" icon-right="camera" @click="videoCapture" />
+                <q-btn :disabled="!isRecording" label="Stop recording" color="secondary" size="md" icon-right="camera" @click="stopVideoCapture" />
+              </q-card-section>
               <div class="video-container col">
-              <video v-if="isRecording" ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
+                <video v-if="isRecording" ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
                   <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
-              </video>
-            </div>
-            <div class="video-container col" v-show="uploadedFile">
-              <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
-            </div>
-            <div class="q-mt-md text-body1" v-if="uploadedFile">
-              Recorded: {{formatModifiedDate}}<br/>
-              Size: {{getUploadedFileSize}}
-            </div>
-            <q-btn :disabled="!uploadedFile" class="q-mt-md" label="Save video" color="secondary" size="md" icon-right="camera" @click="saveVideo" />
-          </q-card-section>
-          <exercise-instructions />
-        </q-card>
+                </video>
+              </div>
+            </q-card>
+          </q-tab-panel>
+        </q-tab-panels>
       </div>
       <div v-else>
         <q-card v-if="!poe" flat class="q-pa-lg flex flex-center">
@@ -62,7 +73,7 @@
               <div class="text-h6">Video Evaluation</div>
               <div class="text-subtitle2">Results from recorded exercise video</div>
             </q-card-section>
-            <q-separator inset />
+            <q-separator />
             <q-list bordered class="rounded-borders" :key="res.posturalOrientation" v-for="res in poe">
               <q-expansion-item
                 expand-separator
@@ -143,7 +154,8 @@ export default {
       uploadedFile: undefined,
       videoFile: undefined,
       poe: undefined,
-      isGettingPOEStatus: true
+      isGettingPOEStatus: true,
+      deviceTab: 'phone'
     }
   },
   async beforeMount () {
@@ -353,6 +365,9 @@ export default {
   margin: 0 auto;
   max-width: 400px;
   width: 100%;
+}
+.device-panel {
+  min-height: 300px;
 }
 
 @media only screen and (max-width: 550px) {
