@@ -13,7 +13,9 @@
           <q-tab-panel class="device-panel" name="phone">
             <q-card flat class="q-ma-md">
               <q-card-section class="column items-center q-pa-sm">
-                <q-file class="q-mb-sm" ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" v-model="uploadedFile" label="Open camera" @change.capture="uploadedRecordedVideo">
+                <q-file class="q-mb-sm" ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" label="Open camera" 
+                  v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload"
+                >
                   <template v-slot:prepend>
                     <q-icon name="camera" />
                   </template>
@@ -76,6 +78,7 @@
             <q-separator />
             <q-list bordered class="rounded-borders" :key="res.posturalOrientation" v-for="res in poe">
               <q-expansion-item
+                class="q-py-sm"
                 expand-separator
               >
                 <template v-slot:header>
@@ -314,6 +317,7 @@ export default {
                 poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
                 poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
                 poe["highestPredictedConfidence"] = parseFloat((poe['scoreConfidence_'+ poe.score]*100)).toFixed(0)
+                poe["repetition"] = poe["repetition"] === 0 ? 'Summative evaluation' : poe["repetition"]
               })
               this.poe = poe_results
               return
@@ -332,6 +336,15 @@ export default {
       let blob = await API.getUploadFile(this.exerciseID)
       let videoURL = URL.createObjectURL(blob)
       this.$refs.videoPreview.src = videoURL
+    },
+    rejectedUpload (file) {
+      this.$q.notify({
+        color: 'negative',
+        position: 'top',
+        message: 'Uploaded file is not a video: ' + file[0].file.name,
+        icon: 'report_problem'
+      })
+      this.$refs.uploader.removeFile(this.uploadedFile)
     }
   },
   computed: {
