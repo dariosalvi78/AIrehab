@@ -42,9 +42,9 @@ export default {
                             exerciseID,
                             poe_results[i].posturalOrientation,
                             poe_results[i].score,
-                            poe_results[i].confidence0,
-                            poe_results[i].confidence1,
-                            poe_results[i].confidence2,
+                            poe_results[i].scoreConfidence_0,
+                            poe_results[i].scoreConfidence_1,
+                            poe_results[i].scoreConfidence_2,
                             poe_results[i].repetition
                         )
                     }

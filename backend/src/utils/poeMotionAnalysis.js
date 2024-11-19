@@ -90,9 +90,9 @@ export default {
                 posturalOrientation: this.mapPosturalOrientation(type), //'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
                 repetition: 0, // summative or "combined"
                 score: returned_poe_obj[type].pred, // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
-                confidence0: returned_poe_obj[type].conf[0], // score is based on index with highest confidence
-                confidence1: returned_poe_obj[type].conf[1], 
-                confidence2: returned_poe_obj[type].conf[2],
+                scoreConfidence_0: returned_poe_obj[type].conf[0], // score is based on index with highest confidence
+                scoreConfidence_1: returned_poe_obj[type].conf[1], 
+                scoreConfidence_2: returned_poe_obj[type].conf[2],
             })
         }
 
