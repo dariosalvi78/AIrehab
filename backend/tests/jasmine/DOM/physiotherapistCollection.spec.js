@@ -195,7 +195,9 @@ describe('Physiotherapist collection', function () {
             expect(res.createdTimestamp).toBeDefined()
             expect(res.height).toBe(this.patient.height)
             expect(res.weight).toBe(this.patient.weight)
-            expect(res.injuries).toBe(this.patient.injuries)
+            expect(res.injuries).toBe(this.patient.injuries.description)
+            expect(res.injuredSide).toBe(this.patient.injuries.injuredSide)
+            expect(res.injuredBodyPart).toBe(this.patient.injuries.injuredBodyPart)
             expect(res.therapistEmail).toBe(therapist.email)
             expect(res.sessionID).toBeNull()
         })
@@ -233,7 +235,9 @@ describe('Physiotherapist collection', function () {
             expect(res.createdTimestamp).toBeDefined()
             expect(res.height).toBe(this.patient.height)
             expect(res.weight).toBe(this.patient.weight)
-            expect(res.injuries).toBe(this.patient.injuries)
+            expect(res.injuries).toBe(this.patient.injuries.description)
+            expect(res.injuredSide).toBe(this.patient.injuries.injuredSide)
+            expect(res.injuredBodyPart).toBe(this.patient.injuries.injuredBodyPart)
             expect(res.physiotherapistEmail).toBe(therapist.email)
             expect(res.sessionID).toBeNull()
         })
@@ -390,7 +394,9 @@ describe('Physiotherapist collection', function () {
             let res = await physiotherapist.getOnePatientByID(patient.id)
             expect(res.id).toBe(patient.id)
             expect(res.names).toBe(this.patient.names)
-            expect(res.injuries).toBe(this.patient.injuries)
+            expect(res.injuries).toBe(this.patient.injuries.description)
+            expect(res.injuredSide).toBe(this.patient.injuries.injuredSide)
+            expect(res.injuredBodyPart).toBe(this.patient.injuries.injuredBodyPart)
             expect(res.height).toBe(this.patient.height)
             expect(res.weight).toBe(this.patient.weight)            
             expect(res.dateofbirth).toBeDefined()       
@@ -400,7 +406,7 @@ describe('Physiotherapist collection', function () {
                 dateOfBirth: newDateOfBirth,
                 height: newHeight,
                 weight: newWeight,
-                injuries: newDesc
+                injuries: { description: newDesc }
             }, patient.id)
 
             res = await physiotherapist.getOnePatientByID(patient.id)

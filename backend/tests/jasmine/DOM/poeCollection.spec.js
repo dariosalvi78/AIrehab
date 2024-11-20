@@ -24,7 +24,7 @@ describe('POE collection', function () {
         await db.dropDatabase(config.db)
     })
 
-    describe('getEvaluationFromID', function () {
+    describe('getEvaluationsFromID', function () {
         let patient, therapist, session, exercise, poe_created
         beforeAll(async function () {
             let poe = this.poe
@@ -54,17 +54,15 @@ describe('POE collection', function () {
         })
 
         it('can get POE results from exercise using exercise id', async function () {
-            let res = await poeCollection.getEvaluationFromID(exercise.id)
+            let res = await poeCollection.getEvaluationsFromID(exercise.id)
 
-            expect(Array.isArray(res)).toEqual(false)
-            expect(res.id).toBeDefined()
-            expect(res.exerciseId).toBe(exercise.id)
-            expect(res.posturalOrientation).toBe(poe_created.posturalOrientation)
-            expect(res.score).toEqual(poe_created.score)
-            expect(res.scoreConfidence_0).toEqual(poe_created.scoreConfidence_0)
-            expect(res.scoreConfidence_1).toEqual(poe_created.scoreConfidence_1)
-            expect(res.scoreConfidence_2).toEqual(poe_created.scoreConfidence_2)
-            expect(res.repetition).toEqual(poe_created.repetition)
+            expect(Array.isArray(res)).toEqual(true)
+            expect(res[0].posturalOrientation).toBe(poe_created.posturalOrientation)
+            expect(res[0].score).toEqual(poe_created.score)
+            expect(res[0].scoreConfidence_0).toEqual(poe_created.scoreConfidence_0)
+            expect(res[0].scoreConfidence_1).toEqual(poe_created.scoreConfidence_1)
+            expect(res[0].scoreConfidence_2).toEqual(poe_created.scoreConfidence_2)
+            expect(res[0].repetition).toEqual(poe_created.repetition)
         })
     })
 
@@ -96,8 +94,8 @@ describe('POE collection', function () {
         })
 
         it('can update POE results from exercise using exercise id', async function () {
-            let poe = this.poe, res = await poeCollection.getEvaluationFromID(exercise.id)
-            expect(res).toBeUndefined()
+            let poe = this.poe, res = await poeCollection.getEvaluationsFromID(exercise.id)
+            expect(res.length).toEqual(0)
 
             res = await poeCollection.updateEvaluationResults(exercise.id, poe.posturalOrientation, poe.score, poe.confidence0, poe.confidence1, poe.confidence2, poe.repetition)
             expect(Array.isArray(res)).toEqual(false)
@@ -142,15 +140,13 @@ describe('POE collection', function () {
         })
 
         it('can delete POE results from exercise using exercise id', async function () {
-            let res = await poeCollection.getEvaluationFromID(exercise.id)
-            expect(Array.isArray(res)).toEqual(false)
-            expect(res.id).toBeDefined()
-            expect(res.exerciseId).toBe(exercise.id)
+            let res = await poeCollection.getEvaluationsFromID(exercise.id)
+            expect(Array.isArray(res)).toEqual(true)
 
             await poeCollection.deletePOEForExerciseByID(exercise.id)
 
-            res = await poeCollection.getEvaluationFromID(exercise.id)
-            expect(res).toBeUndefined()
+            res = await poeCollection.getEvaluationsFromID(exercise.id)
+            expect(res.length).toEqual(0)
         })
     })
 })

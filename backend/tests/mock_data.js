@@ -12,7 +12,11 @@ const mock = {
         dateOfBirth: "177718530000",
         height: 170,
         weight: 75,
-        injuries: "description of injuries..."
+        injuries: {
+            description: "description of injuries...",
+            injuredSide: 'L',
+            injuredBodyPart: 'foot'
+        }
     },
     sessions: [
         {
