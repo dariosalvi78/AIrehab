@@ -3,6 +3,7 @@ import config from '../src/utils/config.js'
 
 config.log.path = '../backend/tests/tests_logs/'
 config.uploads.base_path = '../backend/tests/tests_uploads/'
+config.poe.runModel = 'false'
 
 const runner = new jasmine()
 

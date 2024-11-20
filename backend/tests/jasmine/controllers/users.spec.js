@@ -137,22 +137,28 @@ describe('login access:', function () {
         })
     })
     it('user login ok, timestamp set', async function () {
-        spyOn(jwt, 'sign').and.returnValue({
-            expiresIn: config.JWT.EXPIRE,
-            user: this.physiotherapist.id
-        })
-        spyOn(bcrypt, 'compareSync').and.returnValue(true)
-        let userFind = spyOn(usersCollection, 'getUserByEmail').and.returnValue(this.physiotherapist)
-        spyOn(usersCollection, 'createUser').and.returnValue(this.physiotherapist)
-        let loginTimestamp = spyOn(usersCollection, 'updateUserLoginTimestamp')
+        let leader = JSON.parse(JSON.stringify(this.physiotherapist))
 
-        await users.login({ body: { email: 'email@test.com', password: 'password', role: 'physiotherapist' } }, {
-            send(data) {
-                expect(loginTimestamp).toHaveBeenCalled()
-                expect(userFind).toHaveBeenCalled()
-                expect(data.user).toBeDefined()
+        spyOn(jwt, 'sign').and.returnValue({
+            expiresIn: '1s',
+            user: { email: leader.email, role: leader.role }
+        })
+        
+        spyOn(bcrypt, 'compareSync').and.returnValue(true)
+        spyOn(usersCollection, 'getUserByEmail').and.returnValue(leader)
+        spyOn(usersCollection, 'createUser').and.returnValue(leader)
+        spyOn(usersCollection, 'updateUserLoginTimestamp')
+
+        await users.login({ body: { email: leader.email, password: leader.hashedPassword, role: leader.role } }, {
+            cookie(data) {
+                expect(data).toBeDefined()
+                return this
             },
-            cookie() { }
+            send(data) {
+                expect(usersCollection.updateUserLoginTimestamp).toHaveBeenCalled()
+                expect(usersCollection.getUserByEmail).toHaveBeenCalled()
+                expect(data.user).toBeDefined()
+            }
         })
     })
 })
@@ -232,10 +238,9 @@ describe('deleteUser access:', function () {
         })
     })
     it('cannot delete physiotherapist with patients', async function () {
-        this.physiotherapist["numOfPatients"] = 2
         spyOn(usersCollection, 'deleteOneUser')
         spyOn(usersCollection, 'getOneUser').and.returnValue(this.physiotherapist)
-        spyOn(physiotherapistCollection, 'getOneTherapistByEmail').and.returnValue(this.physiotherapist)
+        spyOn(physiotherapistCollection, 'getOneTherapistByEmail').and.returnValue({ numOfPatients: 2 }, this.physiotherapist)
         await users.deleteUser({
             user: {
                 email: 'admin@test.com',
@@ -254,10 +259,9 @@ describe('deleteUser access:', function () {
             })
     })
     it('admin can delete one physiotherapist with no patients', async function () {
-        this.physiotherapist["numOfPatients"] = 0
         spyOn(usersCollection, 'deleteOneUser')
         spyOn(usersCollection, 'getOneUser').and.returnValue(this.physiotherapist)
-        spyOn(physiotherapistCollection, 'getOneTherapistByEmail').and.returnValue(this.physiotherapist)
+        spyOn(physiotherapistCollection, 'getOneTherapistByEmail').and.returnValue({ numOfPatients: 0 }, this.physiotherapist)
         await users.deleteUser({
             user: {
                 email: 'admin@test.com',

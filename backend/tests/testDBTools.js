@@ -4,7 +4,7 @@ import path from 'path'
 
 const mssql_port = 1443
 const root_password = 'TestPassword_1234'
-const pathToSQLFile = '../../datamodel/schema.sql'
+const pathToSQLFile = '../../database/schema.sql'
 
 /**
  * @type {mssql.ConnectionPool}
