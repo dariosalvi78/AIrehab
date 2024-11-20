@@ -5,8 +5,17 @@
         <q-btn flat round dense icon="menu">
           <q-menu>
             <q-list dense style="min-width: 100px">
-              <q-item clickable>
-                <q-item-section>POE App v. {{appVersion}}</q-item-section>
+              <q-item>
+                <q-item-section>
+                  <div class="text-subtitle2">POE App v. {{appVersion}}</div>
+                </q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item clickable to="/about" exact>
+                <q-item-section>About</q-item-section>
+                <q-item-section side>
+                  <q-icon name="chevron_right" />
+                </q-item-section>
               </q-item>
             </q-list>
           </q-menu>

@@ -53,6 +53,11 @@
         </q-form>
       </q-page>
     </q-page-container>
+    <q-footer class="bg-white text-black">
+      <div class="flex justify-evenly q-pa-sm">
+        <q-btn flat dense no-caps label="About" @click="$router.push('/about')" />
+      </div>
+    </q-footer>
   </q-layout>
 </template>
 
