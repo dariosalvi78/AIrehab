@@ -8,10 +8,6 @@ let logger
 
 (async () => {
     try {
-        if (!fs.existsSync(basePath)) {
-            fs.mkdirSync(basePath)
-        }
-
         logger = pino({
             transport: {
                 target: 'pino/file',
@@ -33,7 +29,7 @@ export default {
     info (data, msg) {
         if (msg) {
             logger.info(data, msg)
-            console.info(msg, data)    
+            console.info(msg, data)
         } else {
             console.info(data)
         }
