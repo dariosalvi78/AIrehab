@@ -270,17 +270,17 @@ export default {
             }
           }
         } catch (err) {
+          loading.hide()
           let errMsg = err
-          if (err.response.status == 400 || err.response.status == 404 || err.response.status === 413) errMsg = err.response.data
+          if (err.response.status == 400 || err.response.status == 404 || err.response.status === 413 || err.response.status === 500) errMsg = err.response.data
           this.$q.notify({
             type: 'negative',
             position: 'top',
             message: 'Video cannot be saved: ' + errMsg,
             icon: 'warning'
           })
-          this.$refs.uploader.removeFile(this.uploadedFile)
-          this.$refs.uploader.nativeEl.value = ''
           this.uploadedFile = undefined
+          this.videoFile = undefined
         }
         loading.hide()
         return

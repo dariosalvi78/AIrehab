@@ -84,10 +84,10 @@ export default {
                     fs.rm(SESSION_DIR, { recursive: true }, (err) => {
                         if (err) reject(err)
                     })
-                    resolve(fullPath)
+                    return resolve(fullPath)
                 }
                 logger.error({ filePath: fullPath, exerciseID: exerciseID }, 'Tried to delete file but did not find it')
-                resolve()
+                return resolve()
             })
         } catch (err) {
             logger.error({ error: err }, 'cannot remove video: ')

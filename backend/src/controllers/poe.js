@@ -3,12 +3,8 @@ import * as Types from '../../../datamodel/modeljdocs.mjs'
 import poe from "../DOM/poeCollection.js"
 import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
-import formidable from 'formidable'
-import { mkdir } from 'fs/promises'
-import fs from 'node:fs'
-import config from '../utils/config.js'
-
 import poeMA from '../utils/poeMotionAnalysis.js'
+import files from '../utils/fileHandler.js'
 
 export default {
 
@@ -74,15 +70,18 @@ export default {
     sendVideoForPOEEvaluation: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let exerciseID = req.params.exerciseID
+        const exercise = await exercises.getExerciseByID(exerciseID)
         try {
-            const exercise = await exercises.getExerciseByID(exerciseID)
             if (!exercise) return res.status(404).send('Exercise does not exist')
             if (!exercise.videoFile) return res.status(400).send('Video does not exist')
-            let response = await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type);
+            let response = await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type)
+            console.log(response)
             if (response) return res.sendStatus(200)
         } catch (err) {
+            await files.deleteVideo(exercise.physiotherapySessionId, exercise.id, exercise.videoFile)
+            await exercises.updateExerciseVideo(exercise.id, { fileName: null, endTimestamp: null })
             logger.error({ error: err }, 'error sending POE: ')
-            res.sendStatus(500)
+            res.status(500).send('POE evaluation is not available')
             return
         }
     }

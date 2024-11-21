@@ -32,7 +32,7 @@ export default {
                 if (response) return response
             } catch (err) {
                 logger.error({ reason: err.code, exerciseID: exerciseID }, 'cannot upload video on POEMA')
-                return
+                throw { code: err.code, status: 500, exerciseID }
             }
         } else {
             logger.debug('UPLOADED VIDEO ON POEMA', exerciseID)
@@ -56,8 +56,8 @@ export default {
                 return response
             } catch (err) {
                 if (err.status === 401) return { status: 200 }
-                logger.error({ error: err }, 'cannot get ongoing POEMA status')
-                return err
+                logger.error({ reason: err.code, exerciseID: exerciseID }, 'cannot get ongoing POEMA status')
+                throw { code: err.code, status: 500, exerciseID }
             }
         } else {
             if (!this.videoSentTimestamp) return { status: 201 }
