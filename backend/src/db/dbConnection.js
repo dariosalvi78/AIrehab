@@ -17,7 +17,7 @@ export default {
         },
         options: {
             encrypt: true, // for azure
-            trustServerCertificate: config.environment == 'dev' ? true : false // change to true for local dev / self-signed certs
+            trustServerCertificate: true // true for self-signed certs
         }
     }
 }
