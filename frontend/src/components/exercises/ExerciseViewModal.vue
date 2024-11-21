@@ -1,5 +1,5 @@
 <template>
-  <q-page-container>
+  <q-page-container class="q-pt-md" style="paddingTop:auto;">
     <q-btn class="q-ml-md" round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />
     <q-page class="q-py-md">
       <div v-if="!videoFile">

@@ -1,8 +1,8 @@
 <template>
-  <q-page-container class="q-py-md">
+  <q-page-container class="q-py-md" style="paddingTop:auto;">
     <q-page v-if="session">
       <q-btn round dense class="q-ml-md" color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />        
-       <q-card flat class="q-py-lg q-mt-sm">
+       <q-card flat class="q-pb-lg q-mt-sm">
         <q-card-section>
           <div class="text-h6">
             Session for {{session.patientName}}

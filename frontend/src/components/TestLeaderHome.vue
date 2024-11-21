@@ -34,7 +34,7 @@
             class="flex flex-center"
           />
         </q-tab-panel>
-        <q-tab-panel name="view" class="q-px-sm">
+        <q-tab-panel name="view" class="q-px-none">
           <patient-view-modal 
             :selectedPatient="selectedPatient" 
             @openView="openPatientView"
