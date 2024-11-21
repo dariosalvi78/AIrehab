@@ -8,7 +8,6 @@ COPY ./package.json /usr/src/app/
 
 RUN npm i
 
-COPY ./datamodel /usr/src/datamodel
 COPY ./public /usr/src/app/public
 COPY ./src /usr/src/app/src
 
