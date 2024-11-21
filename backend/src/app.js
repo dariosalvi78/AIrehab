@@ -58,8 +58,8 @@ import fs from 'node:fs'
     await setRoutes(app, authenticateToken)
 
     let server
-    if (config.certs.key && config.certs.file) {
-        const key = fs.readFileSync(config.certs.key, 'utf8')
+    if (config.certs.key_file && config.certs.chain_file) {
+        const key = fs.readFileSync(config.certs.key_file, 'utf8')
         const cert = fs.readFileSync(config.certs.chain_file, 'utf8')
 
         server = https.createServer({ key: key, cert: cert }, app)

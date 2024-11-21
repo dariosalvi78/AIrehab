@@ -39,7 +39,7 @@ const config = {
         runModel: process.env.POE_RUN_MODEL
     },
     certs: {
-        key: process.env.CERT_PRIVATE_KEY,
+        key_file: process.env.CERT_PRIVATE_KEY,
         chain_file: process.env.CERT_CHAIN
     }
 }
