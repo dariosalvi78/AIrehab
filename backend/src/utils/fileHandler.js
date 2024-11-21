@@ -1,5 +1,5 @@
 
-import * as Types from '../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import { mkdir, rm } from 'fs/promises'
 import fs from 'node:fs'
 import { fileTypeFromFile } from 'file-type'

@@ -1,5 +1,5 @@
 
-import * as Types from '../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
 import config from '../utils/config.js'

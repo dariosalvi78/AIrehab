@@ -1,5 +1,5 @@
 
-import * as Types from '../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import bcrypt from 'bcrypt'
 import { signAccessToken, signResetPwdToken, authenticateResetPWDToken, session_cookie } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"

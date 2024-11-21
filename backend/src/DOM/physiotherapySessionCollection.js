@@ -1,4 +1,4 @@
-import * as Types from '../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import db from '../db/dbDriver.js'
 
 export default {

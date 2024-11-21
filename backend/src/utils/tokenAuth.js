@@ -1,5 +1,5 @@
 
-import * as Types from '../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import config from './config.js'

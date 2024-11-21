@@ -1,4 +1,4 @@
-import * as Types from '../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import axios from 'axios'
 import logger from './logger.js';
 import config from './config.js';
