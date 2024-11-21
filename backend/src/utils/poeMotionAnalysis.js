@@ -1,10 +1,10 @@
-import * as Types from '../../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import axios from 'axios'
 import logger from './logger.js';
 import config from './config.js';
 import fileHandler from './fileHandler.js';
 
-const POE_SERVER_URL = `http://${config.poe.base_url}:${config.poe.port}` 
+const POE_SERVER_URL = `http://${config.poe.base_url}:${config.poe.port}`
 
 export default {
 
@@ -25,9 +25,10 @@ export default {
             const VIDEO_PATH = SESSION_DIR + '/vid_' + videoFilename
             try {
                 let leg = exerciseType == 'singleLeggedSquatLeft' ? 'L' : 'R'
-                let response = await axios.post(`${POE_SERVER_URL}/analyse_video?path=${VIDEO_PATH}&leg=${leg}`, 
-                    { headers: { "Content-Type": 'application/json' } 
-                })
+                let response = await axios.post(`${POE_SERVER_URL}/analyse_video?path=${VIDEO_PATH}&leg=${leg}`,
+                    {
+                        headers: { "Content-Type": 'application/json' }
+                    })
                 logger.info({ exerciseID: exerciseID }, 'UPLOADED VIDEO ON POEMA')
                 if (response) return response
             } catch (err) {
@@ -48,7 +49,7 @@ export default {
      * @param {Types.Exercise["videoFile"]} videoFilename
      * @returns {Promise<Response>}
      */
-    async isEvaluationOngoing(sessionID, exerciseID, videoFilename) {
+    async isEvaluationOngoing (sessionID, exerciseID, videoFilename) {
         if (config.poe.runModel === 'true') {
             try {
                 const PATH_TO_VIDEO = 'session_' + sessionID + '/exercise_' + exerciseID + '/vid_' + videoFilename
@@ -67,7 +68,7 @@ export default {
             }
             else return { status: 200 }
         }
-    },  
+    },
 
     /**
      * Retrieves the POE analysis for the latest uploaded video
@@ -91,7 +92,7 @@ export default {
                 repetition: 0, // summative or "combined"
                 score: returned_poe_obj[type].pred, // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
                 scoreConfidence_0: returned_poe_obj[type].conf[0], // score is based on index with highest confidence
-                scoreConfidence_1: returned_poe_obj[type].conf[1], 
+                scoreConfidence_1: returned_poe_obj[type].conf[1],
                 scoreConfidence_2: returned_poe_obj[type].conf[2],
             })
         }

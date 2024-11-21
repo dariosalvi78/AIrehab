@@ -1,4 +1,4 @@
-import * as Types from '../../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import db from '../db/dbDriver.js'
 
 export default {
@@ -44,11 +44,10 @@ export default {
                     p.id, 
                     p.createdTimestamp
                 ORDER BY
-                    ${
-                        pagination.type == 'date' 
-                        ? `p.createdTimestamp ${pagination.date.sortOrder}` 
-                        : `CAST(p.names AS NVARCHAR(100)) ${pagination.name.sortOrder}`
-                    }
+                    ${pagination.type == 'date'
+                ? `p.createdTimestamp ${pagination.date.sortOrder}`
+                : `CAST(p.names AS NVARCHAR(100)) ${pagination.name.sortOrder}`
+            }
                 OFFSET (@pageNo-1) * ${pagination.limit} ROWS
                 FETCH NEXT ${pagination.limit} ROWS ONLY
                 SET @pageNo = @pageNo + 1
@@ -74,12 +73,12 @@ export default {
         return response.recordset[0]
     },
 
-     /**
-     * Get one patient by ID for a specific physiotherapist
-     * @param {Types.Patient["id"]} patientID 
-     * @returns {Promise<Types.Patient>}
-     */
-     getOnePatientByID: async function (patientID) {
+    /**
+    * Get one patient by ID for a specific physiotherapist
+    * @param {Types.Patient["id"]} patientID 
+    * @returns {Promise<Types.Patient>}
+    */
+    getOnePatientByID: async function (patientID) {
         const response = await db.query(`
             SELECT TOP 1 p.*, u.email AS physiotherapistEmail, s.id AS sessionID FROM [patient] p
             RIGHT JOIN [user] u ON p.physiotherapistId = u.id

@@ -1,4 +1,4 @@
-import * as Types from '../../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
 

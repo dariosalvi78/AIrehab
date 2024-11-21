@@ -1,5 +1,5 @@
 
-import * as Types from '../../../datamodel/modeljdocs.mjs'
+import * as Types from '../datamodel/modeljdocs.mjs'
 import { mkdir, rm } from 'fs/promises'
 import fs from 'node:fs'
 import { fileTypeFromFile } from 'file-type'
@@ -16,7 +16,7 @@ export default {
     * @param {Object} req contains form with video
     * @returns {Types.Exercise} exercise with updated video, endtimestamp 
     */
-    async saveVideo(sessionID, exerciseID, req) {
+    async saveVideo (sessionID, exerciseID, req) {
         try {
             let filename = undefined
             const SESSION_DIR = config.uploads.base_path + 'session_' + sessionID + '/exercise_' + exerciseID
@@ -74,7 +74,7 @@ export default {
      * @param {Types.Exercise["id"]} exerciseID
      * @param {Types.Exercise["videoFile"]} filename
      */
-    async deleteVideo(sessionID, exerciseID, filename) {
+    async deleteVideo (sessionID, exerciseID, filename) {
         try {
             const SESSION_DIR = config.uploads.base_path + '/session_' + sessionID + '/exercise_' + exerciseID
             let fullPath = SESSION_DIR + '/vid_' + filename
@@ -98,11 +98,11 @@ export default {
      * Remove folder associated with session
      * @param {Types.PhysiotherapySession["id"]} sessionID 
      */
-    async closeDirectory(sessionID) {
+    async closeDirectory (sessionID) {
         try {
             const SESSION_DIR = config.uploads.base_path + '/session_' + sessionID
             return new Promise(async (resolve, reject) => {
-                fs.readdir(SESSION_DIR, (err, files) => {    
+                fs.readdir(SESSION_DIR, (err, files) => {
                     if (!files || files.length <= 0) {
                         fs.rmdir(SESSION_DIR, (err) => {
                             if (err) reject(err)
@@ -110,7 +110,7 @@ export default {
                     }
                     resolve(SESSION_DIR)
                 })
-            })    
+            })
         } catch (err) {
             logger.error({ error: err }, 'cannot remove folder: ')
             return
@@ -124,7 +124,7 @@ export default {
      * @param {String} newFileName
      * @returns
      */
-    async renameFile(sessionID, exerciseID, oldFileName, newFileName) {
+    async renameFile (sessionID, exerciseID, oldFileName, newFileName) {
         try {
             const SESSION_DIR = config.uploads.base_path + 'session_' + sessionID
             let fullPath = SESSION_DIR + '/exercise_' + exerciseID + '/vid_', oldFilePath = fullPath + oldFileName
@@ -138,7 +138,7 @@ export default {
                     fs.renameSync(oldFilePath, fullPath + updatedFileName)
                     return resolve(updatedFileName)
                 })
-            })    
+            })
         } catch (err) {
             logger.error({ error: err }, 'cannot rename file: ')
             return
@@ -149,7 +149,7 @@ export default {
      * @param {String} dirToExercise 
      * @param {String} taskID 
      */
-    async createTaskFile(dirToExercise, taskID) {
+    async createTaskFile (dirToExercise, taskID) {
         try {
             const fileName = config.uploads.base_path + dirToExercise + '/.env.task_id'
             return new Promise(async (resolve, reject) => {
@@ -158,7 +158,7 @@ export default {
                     logger.debug({ data: fileName }, 'saved task file ')
                     resolve(fileName)
                 })
-            })    
+            })
         } catch (err) {
             logger.error({ error: err }, 'cannot save task file: ')
             return
@@ -178,7 +178,7 @@ export default {
                     let parseData = data.split('TASK_ID=')[1]
                     return resolve(parseData)
                 })
-            })   
+            })
         } catch (err) {
             logger.error({ error: err }, 'cannot get task file: ')
             return
@@ -190,7 +190,7 @@ export default {
      * @param {Types.Exercise["videoFile"]} filename
      * @returns {Promise<Array<Types.POEEvaluation>>} POE results
     */
-    async getAnalysedVideo(dirToExercise, videoFilename) {
+    async getAnalysedVideo (dirToExercise, videoFilename) {
         try {
             if (config.poe.runModel === 'false') return (await import('../../tests/mock_data.js')).default.poe_results
             const fileName = config.uploads.base_path + dirToExercise + '/vid_' + videoFilename.replace('.mp4', '.json')
