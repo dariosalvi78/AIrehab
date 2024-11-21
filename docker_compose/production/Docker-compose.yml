@@ -1,0 +1,91 @@
+# production or testing environment with external database
+name: ai_rehab_prod
+
+networks:
+  default:
+    name: ai_rehab_network_prod
+
+volumes:
+  airehabfrontend-store:
+  frontend_web_build:
+
+
+services:
+  # for the AI models
+  redis:
+    image: redis
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - path_to/poe-backend/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379"
+
+  poemaweb:
+    build: ./poe-backend
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    image: app-rq
+    volumes:
+      - path_to/videouploads:/data
+    ports:
+      - 3000:3000
+    command: gunicorn -b :3000 backend:app
+
+  poemaworker:
+    image: app-rq
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - path_to/videouploads:/data
+    depends_on:
+      - redis
+      - poemaweb
+    command: rqworker --name worker --url redis://redis:6379/0
+
+  # for the application
+  frontend:
+    build: path_to/frontend
+    volumes:
+      - frontend_web_build:/usr/src/app/dist/spa
+
+  poe_server:
+    build: ./AIrehab/backend
+    environment:
+      - ENVIRONMENT=production
+      - DOMAIN_NAME=mydomain.lu.se
+      - SERVER_PORT=8080
+      - CERT_PRIVATE_KEY=certs/cert.key
+      - CERT_CHAIN=certs/cert.cer
+      - JWT_SECRET_KEY=something_something
+      - JWT_EXPIRE=24h
+      - ADMIN_USERNAME=admin@test.test
+      - ADMIN_PASSWORD=something_something
+      - DB_HOSTNAME=mydomain.lu.se
+      - DB_PORT=1433
+      - DB_NAME=dbanme
+      - DB_USER=dbuser
+      - DB_PASSWORD=dbpassword
+      - LOG_PATH=logs/
+      - BASE_PATH_UPLOADS=videouploads/
+      - MAIL_PORT=587
+      - MAIL_HOST=smpt.something.se
+      - MAIL_SENDER=email@test.test
+      - MAIL_USER=email@test.test
+      - MAIL_PASSWORD=mydomain.lu.se
+      - POE_BASE_URL=airehabpoe
+      - POE_PORT=3000
+      - POE_RUN_MODEL=true
+    depends_on:
+      - frontend
+      - poemaworker
+    volumes:
+      - frontend_web_build:/usr/src/app/public
+      - path_to/logs:/usr/src/app/logs
+      - path_to/videouploads:/usr/src/app/videouploads
+      - path_to/certs:/usr/src/app/certs
+    command: "npm run start"
+    ports:
+      - 443:8080
