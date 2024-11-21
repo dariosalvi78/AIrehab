@@ -62,7 +62,7 @@ import fs from 'node:fs'
         const key = fs.readFileSync(config.certs.key, 'utf8')
         const cert = fs.readFileSync(config.certs.chain_file, 'utf8')
 
-        server = https.createServer({ private_key: key, cert: cert }, app)
+        server = https.createServer({ key: key, cert: cert }, app)
     } else {
         // HTTP no certificate
         server = http.createServer(app)
