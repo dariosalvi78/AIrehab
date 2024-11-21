@@ -9,33 +9,41 @@ import config from './config.js'
 import logger from './logger.js'
 
 let transport_config = undefined
+let domain = undefined
 
 export default {
 
   init: async () => {
     logger.debug('Setting up mailer')
-    if (config.environment === 'dev') {
-      await nodemailer.createTestAccount((err, account) => {
-        if (err) logger.error(`failed to create test email: ${err}`)
+    try {
+      if (config.environment === 'dev') {
+        await nodemailer.createTestAccount((err, account) => {
+          if (err) return logger.error(`failed to create test email: ${err}`)
+          transport_config = {
+            host: config.mailer.host,
+            port: config.mailer.port,
+            auth: {
+              user: account.user,
+              pass: account.pass
+            }
+          }
+        })
+        domain = `http://${config.domain}:9000`
+      } else {
         transport_config = {
-          host: config.mailer.host,
-          port: config.mailer.port,
+          host: config.mailer.host, // mail server host
+          port: config.mailer.port, // 587 if "secure" false 
+          secure: false, // TLS, false will default to starttls
           auth: {
-            user: account.user,
-            pass: account.pass
+            user: config.mailer.smtp_user,
+            pass: config.mailer.smtp_password
           }
         }
-      })
-    } else {
-      transport_config = {
-        host: config.mailer.host, // mail server host
-        port: config.mailer.port, // 587 if "secure" false 
-        secure: false, // TLS, false will default to starttls
-        auth: {
-          user: config.mailer.smtp_user,
-          pass: config.mailer.smtp_password
-        }
-      }
+        domain = `https://${config.domain}`
+      }    
+    } catch (err) {
+      logger.debug({ error: err }, 'cannot start mailer: ')
+      return
     }
   },
 
@@ -49,11 +57,16 @@ export default {
     const options = {
       from: config.mailer.from_address,
       to: recipient,
-      subject: 'Account created',
+      subject: 'Account created • POE Assessment',
       html: `
-        Account created details<br/>
-        Email: ${recipient}<br/>
+        Account created details:
+        <br/>
+        <br/>
+        Email: ${recipient}</br>
         Password: ${password}
+        <br/>
+        <br/>
+        Visit this <a href="${domain}/login">link</a> to login
       `
     }
 
@@ -64,10 +77,12 @@ export default {
     const options = {
       from: config.mailer.from_address,
       to: recipient,
-      subject: 'Password reset',
+      subject: 'Password reset • POE Assessment',
       html: `
-        You have requested a new password<br/>
-        Proceed to this <a href="http://${config.domain}:9000/resetpassword?token=${resetToken}&email=${recipient}">link</a>
+        You have requested a new password
+        <br/>
+        <br/>
+        Proceed to this <a href="${domain}/resetpassword?token=${resetToken}&email=${recipient}">link</a>
       `
     }
 
