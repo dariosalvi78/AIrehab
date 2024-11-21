@@ -27,7 +27,13 @@ const routes = [
       { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true }
     ]
   },
-
+  {
+    path: '/about',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('components/About.vue') }
+    ]
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
