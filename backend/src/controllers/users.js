@@ -1,5 +1,5 @@
 
-import * as Types from '../../../datamodel/modeljdocs.mjs'
+import * as Types from '../../datamodel/modeljdocs.mjs'
 import bcrypt from 'bcrypt'
 import { signAccessToken, signResetPwdToken, authenticateResetPWDToken, session_cookie } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"
@@ -191,10 +191,10 @@ export default {
             const user = await users.getUserByEmail(email)
             if (!user) return res.sendStatus(204)
 
-            const token = await signResetPwdToken(email) 
+            const token = await signResetPwdToken(email)
 
             await mailer.sendPhysiotherapistPasswordReset(email, token)
-            logger.debug({ data: { email: email }}, 'user requested new password')
+            logger.debug({ data: { email: email } }, 'user requested new password')
             return res.sendStatus(204)
         } catch (err) {
             logger.error({ error: err }, 'error sending reset password email: ')

@@ -1,4 +1,4 @@
-import * as Types from '../../../datamodel/modeljdocs.mjs'
+import * as Types from '../../datamodel/modeljdocs.mjs'
 import db from '../db/dbDriver.js'
 
 export default {
@@ -34,12 +34,12 @@ export default {
         return response.recordset[0]
     },
 
-     /**
-     * Get one exercise by physiotherapist email
-     * @param {Types.Exercise["id"]} exerciseID
-     * @param {Types.User["email"]} therapistEmail 
-     * @returns {Promise<Types.Exercise>}
-     */
+    /**
+    * Get one exercise by physiotherapist email
+    * @param {Types.Exercise["id"]} exerciseID
+    * @param {Types.User["email"]} therapistEmail 
+    * @returns {Promise<Types.Exercise>}
+    */
     getOneExerciseByEmail: async function (exerciseID, therapistEmail) {
         const response = await db.query(`
             SELECT TOP 1 e.*, u.email AS physiotherapistEmail, p.id AS patientID FROM [exercise] e
@@ -52,12 +52,12 @@ export default {
         return response.recordset[0]
     },
 
-     /**
-     * Get all exercises in session assigned to a physiotherapist
-     * @param {Types.User["email"]} therapistEmail 
-     * @param {Types.PhysiotherapySession["id"]} sessionID 
-     * @returns {Promise<Array.<Types.Exercise>>}
-     */
+    /**
+    * Get all exercises in session assigned to a physiotherapist
+    * @param {Types.User["email"]} therapistEmail 
+    * @param {Types.PhysiotherapySession["id"]} sessionID 
+    * @returns {Promise<Array.<Types.Exercise>>}
+    */
     getExercisesInSessionByEmail: async function (sessionID, therapistEmail) {
         const response = await db.query(`
             SELECT e.* FROM [exercise] e

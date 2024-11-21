@@ -54,10 +54,10 @@ npm run dev:watch
 
 ### Compile and run the docker container
 
-The docker container needs to copy source files from both the backend/ directory and the datamodel/directory, thus you need to run docker build from the root folder as:
+The docker container needs to copy source files from both the backend/ directory and the datamodel/directory, thus you need to run docker build from the backend folder as:
 
 ```sh
-docker build -t airehabbackend -f backend/Dockerfile .
+docker build -t airehabbackend  .
 ```
 
 Now run the docker container, remember to pass all the environemntal variables to it:
@@ -68,7 +68,9 @@ docker run -i \
 -p 8080:8080 \
 --name airehabbackend \
 -v ./public:/usr/src/public:ro \
--e ENVIRONMENT=dev \
+-v ./logs:/usr/src/app/logs \
+-v ./videouploads:/usr/src/app/videouploads \
+-e ENVIRONMENT=production \
 -e DOMAIN_NAME=localhost \
 -e SERVER_PORT=8080 \
 -e JWT_SECRET_KEY=asdasdasdasdad \

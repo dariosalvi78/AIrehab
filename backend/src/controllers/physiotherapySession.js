@@ -1,5 +1,5 @@
 
-import * as Types from '../../../datamodel/modeljdocs.mjs'
+import * as Types from '../../datamodel/modeljdocs.mjs'
 import sessions from "../DOM/physiotherapySessionCollection.js"
 import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
@@ -71,7 +71,7 @@ export default {
         try {
             if (req.user.role == 'physiotherapist') {
                 const isAssignedTo = await physiotherapist.getOnePatientByEmail(req.user.email, patientID)
-                if (!isAssignedTo) return res.sendStatus(403)    
+                if (!isAssignedTo) return res.sendStatus(403)
             }
             const addedSession = await sessions.createSession(patientID)
             delete addedSession.patientId

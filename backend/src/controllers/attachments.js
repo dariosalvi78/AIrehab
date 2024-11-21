@@ -1,5 +1,5 @@
 
-import * as Types from '../../../datamodel/modeljdocs.mjs'
+import * as Types from '../../datamodel/modeljdocs.mjs'
 import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
 import config from '../utils/config.js'
@@ -50,7 +50,7 @@ export default {
             if (!exercise) return res.status(404).send('Exercise does not exist')
 
             if (exercise.videoFile && exercise.endTimestamp) return res.status(400).send('Video has already been uploaded')
-                
+
             let video = await files.saveVideo(exercise.physiotherapySessionId, exercise.id, req)
             if (!video) return res.sendStatus(500)
             return res.send(video)
