@@ -27,7 +27,7 @@
               <q-item-section>
                 <q-item-label>{{ session.names }}</q-item-label>
                 <q-item-label caption>Start: {{ formatDate(session.startTimestamp) }}</q-item-label>
-                <q-item-label caption>{{ session.endTimestamp ? formatDate(session.endTimestamp) : 'No end date' }}</q-item-label>
+                <q-item-label caption>{{ session.endTimestamp ? `End: ${formatDate(session.endTimestamp)}` : 'No end date' }}</q-item-label>
                 <q-item-label caption>{{ session.numOfExercises ?  `${session.numOfExercises} exercise(s)` : 'No exercises' }}</q-item-label>
               </q-item-section>
 

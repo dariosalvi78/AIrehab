@@ -7,15 +7,12 @@
           <div class="text-h6">
             Session for {{session.patientName}}
           </div>
-          <div class="text-subtitle-1">
+          <div class="text-body2 q-mt-sm" style="marginLeft: -3px;">
             <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
-            {{ formatDate(session.startTimestamp) }}
-          </div>
-          <div class="text-body2">
-            {{ session.endTimestamp ? formatDate(session.endTimestamp) : 'No end date' }}
+            {{ formatDate(session.startTimestamp) }} - {{ session.endTimestamp ? formatDate(session.endTimestamp) : 'No end date' }}
           </div>
           <div>
-            <q-btn dense class="q-mr-md" label="Close session" color="negative" size="sm" icon="close" @click="closeSession"/>
+            <q-btn dense class="q-mr-md" label="Delete session" color="negative" size="sm" icon="close" @click="closeSession"/>
             <q-btn dense class="q-my-md" color="secondary" size="sm" label="Start new exercise" icon-right="chevron_right" @click="openExerciseModal('new')" />
           </div>
         </q-card-section>
@@ -31,7 +28,8 @@
         :formMode="this.exerciseForm" 
         :sessionID="sessionID" 
         :newExerciseData="newExercise" 
-        @openExerciseModal="e => openExerciseModal('edit', e)" 
+        @openExerciseModal="e => openExerciseModal('edit', e)"
+        @deletedExercise="getSessionData"
       />
     </q-page>
     <div v-else-if="isloadingSession" class="q-ma-md flex flex-center">
@@ -124,7 +122,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Something went wrong when closing session: ' + errMsg,
+          message: 'Cannot delete session: ' + errMsg,
           icon: 'warning'
         })
       }
@@ -140,7 +138,7 @@ export default {
       return this.formatDate(date) >= this.date.from
     },
     formatDate (date) {
-      return nicers.formattedDate(date)
+      return nicers.formattedDayOfMonth(date)
     },
     resetForm () {
       this.session = undefined

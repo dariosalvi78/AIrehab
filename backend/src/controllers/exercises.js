@@ -127,6 +127,11 @@ export default {
             await poe.deletePOEForExerciseByID(exerciseID)
             await exercises.deleteOneExercise(exerciseID)
 
+            let latestExercise = await exercises.getExercisesInSessionByEmail(sessionID, req.user.email)
+            await sessions.updateSessionTimestamp(sessionID, latestExercise.length >= 1
+                ? `'${new Date(latestExercise[0].endTimestamp).toISOString()}'` : null
+            )
+
             logger.info({ data: { exerciseID } }, 'Deleted exercise permanently')
             return res.sendStatus(204)
         } catch (err) {

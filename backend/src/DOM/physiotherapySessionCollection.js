@@ -101,6 +101,23 @@ export default {
     },
 
     /**
+     * Update session with end timestamp
+     * @param {Types.PhysiotherapySession["id"]} sessionID
+     * @param {Types.PhysiotherapySession["endTimestamp"]} newEndTimestamp
+     * @returns {Promise<Types.PhysiotherapySession["endTimestamp"]>} updated end timestamp
+     */
+    updateSessionTimestamp: async function (sessionID, newEndTimestamp) {
+        const response = await db.query(`
+            UPDATE s SET 
+            endTimestamp = ${newEndTimestamp}
+            OUTPUT Inserted.endTimestamp
+            FROM [physiotherapy_session] s
+            WHERE s.id = '${sessionID}';
+        `)
+        return response.recordset[0]
+    },
+
+    /**
      * Delete one session
      * @param {Types.PhysiotherapySession["id"]} sessionID 
      */

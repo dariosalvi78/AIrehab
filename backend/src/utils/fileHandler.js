@@ -7,6 +7,7 @@ import logger from './logger.js'
 import config from '../utils/config.js'
 import formidable, { errors as formidableErrors } from 'formidable'
 import exercises from '../DOM/exercisesCollection.js'
+import sessions from '../DOM/physiotherapySessionCollection.js'
 
 export default {
     /**
@@ -56,6 +57,7 @@ export default {
                         await rm(file.filepath, { recursive: true }) // remove copy from /temp folder
 
                         const exercise_with_video = await exercises.updateExerciseVideo(exerciseID, { fileName: `'${filename}'`, endTimestamp: 'CURRENT_TIMESTAMP' })
+                        await sessions.updateSessionTimestamp(sessionID, `'${new Date().toISOString()}'`)
                         if (exercise_with_video) {
                             resolve(exercise_with_video)
                             return

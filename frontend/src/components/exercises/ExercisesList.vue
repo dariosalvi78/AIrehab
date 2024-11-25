@@ -165,6 +165,7 @@ export default {
             message: 'Deleted exercise',
             icon: 'info'
           })
+        this.$emit('deletedExercise')
         return this.getExercises()
       } catch (err) {
          this.$q.notify({
