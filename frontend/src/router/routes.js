@@ -29,7 +29,6 @@ const routes = [
   },
   {
     path: '/about',
-    component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('components/About.vue') }
     ]
