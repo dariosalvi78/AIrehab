@@ -186,7 +186,7 @@ export default {
     async videoCapture () {
       console.log('start')
       this.isRecording = true
-      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } }, audio: false })
         .then((stream) => {
           this.hasPermissions = true
           console.log(stream)
@@ -200,11 +200,13 @@ export default {
           console.log(this.videoChunks)
         })
         .catch((err) => {
+          this.isRecording = false
           this.hasPermissions = false
+          console.error(err)
           return this.$q.notify({
             color: 'negative',
             position: 'top',
-            message: 'Camera not available: ' + err,
+            message: 'Rear-facing camera not available',
             icon: 'report_problem'
           })
         })
