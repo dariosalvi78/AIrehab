@@ -35,6 +35,11 @@ let API = {
     await axios.post('/logout')
   },
 
+  async getInfo () {
+    let response = await axios.get('/info')
+    return response.data
+  },
+
   async getUsers () {
     let response = await axios.get('/users')
     return response.data

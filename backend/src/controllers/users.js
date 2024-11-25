@@ -225,5 +225,26 @@ export default {
             }
             return res.sendStatus(500)
         }
-    }
+    },
+
+    /**
+     * Get info about authenticated user
+     * @param {Object} req - express request
+     * @param {Object} res - express response
+     * @returns {Promise<Types.User>}
+     */
+    getInfo: async (req, res) => {
+        if (!req.user) return res.sendStatus(401)
+        try {
+            const user = await users.getUserByEmail(req.user.email)
+            return res.json({
+                email: user.email,
+                lastLoginTimestamp: user.lastLoginTimestamp,
+            })
+        } catch (err) {
+            logger.error({ error: err }, 'error getting info')
+            res.sendStatus(500)
+            return
+        }
+    },
 }
