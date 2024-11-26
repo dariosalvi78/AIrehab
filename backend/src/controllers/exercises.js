@@ -6,6 +6,7 @@ import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
 import config from '../utils/config.js'
 import files from '../utils/fileHandler.js'
+import physiotherapistCollection from '../DOM/physiotherapistCollection.js'
 
 export default {
 
@@ -114,11 +115,15 @@ export default {
      */
     deleteExercise: async (req, res) => {
         if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
-        let videoName = req.body.videoFile, exerciseID = req.params.exerciseID, sessionID = req.query.sessionID
+        let assignedTo = req.user.email, videoName = req.body.videoFile, exerciseID = req.params.exerciseID, sessionID = req.query.sessionID
         try {
             if (req.user.role == 'physiotherapist') {
-                const sessionAssignedTo = await sessions.getSessionByID(sessionID, req.user.email)
+                const sessionAssignedTo = await sessions.getSessionByID(sessionID, assignedTo)
                 if (sessionAssignedTo.id !== sessionID) return res.sendStatus(403)
+            } else if (req.user.role == 'admin') {
+                let exercise = await exercises.getExerciseByID(exerciseID)
+                let leader = await physiotherapistCollection.getOnePatientByID(exercise.patientID)
+                assignedTo = leader.physiotherapistEmail
             }
 
             if (!req.body || !exerciseID || !sessionID) return res.sendStatus(400)
@@ -127,7 +132,7 @@ export default {
             await poe.deletePOEForExerciseByID(exerciseID)
             await exercises.deleteOneExercise(exerciseID)
 
-            let latestExercise = await exercises.getExercisesInSessionByEmail(sessionID, req.user.email)
+            let latestExercise = await exercises.getExercisesInSessionByEmail(sessionID, assignedTo)
             await sessions.updateSessionTimestamp(sessionID, latestExercise.length >= 1
                 ? `'${new Date(latestExercise[0].endTimestamp).toISOString()}'` : null
             )
