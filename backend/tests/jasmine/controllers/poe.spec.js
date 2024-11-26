@@ -180,11 +180,15 @@ describe('sendVideoForPOEEvaluation access:', function () {
         spyOn(poeMotionAnalysis, 'uploadVideo')
         await poe.sendVideoForPOEEvaluation({
             user: { role: 'admin' },
-            params: { exerciseID: exercise.id }
+            params: { exerciseID: 0 }
         }, {
-            sendStatus(status) {
+            status(status) {
                 expect(status).toBe(500)
                 expect(poeMotionAnalysis.uploadVideo).not.toHaveBeenCalled()
+                return this
+            },
+            send(data) {
+                expect(data).toBeDefined()
             }
         })
     })
