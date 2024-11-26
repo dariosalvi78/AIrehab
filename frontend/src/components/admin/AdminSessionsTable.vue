@@ -45,11 +45,14 @@
               </q-item>
             </q-btn-dropdown>
           </q-td>
-          <q-td key="sessionid" name="sessionid" :props="props">
-            {{ props.row.sessionID }}
+          <q-td key="patientName" name="patientName" :props="props">
+            {{ props.row.patientName }}
           </q-td>
           <q-td key="numOfExercises" name="role" :props="props" class="text-capitalize">
             {{ props.row.numOfExercises }}
+          </q-td>
+          <q-td key="sessionEndTimestamp" name="endDate" :props="props">
+            {{ props.row.sessionEndTimestamp }}
           </q-td>
           <q-td key="sessionStartTimestamp" name="created" :props="props">
             {{ props.row.sessionStartTimestamp }}
@@ -93,8 +96,9 @@ export default {
   data () {
     return {
       columns: [
-        { name: 'sessionid', align:'left', label: 'Session ID', field: 'sessionid', sortable: true, required: true },
-        { name: 'numOfExercises', align:'left' , label: 'Ongoing Exercises', field: 'numOfExercises', sortable: true },
+        { name: 'patientName', align:'left', label: 'Patient', field: 'patientName', sortable: true, required: true },
+        { name: 'numOfExercises', align:'left' , label: 'Exercises', field: 'numOfExercises', sortable: true },
+        { name: 'sessionEndTimestamp', align:'left' , label: 'End date', field: 'sessionEndTimestamp', sortable: true },
         { name: 'sessionStartTimestamp', align:'left' , label: 'Created', field: 'sessionStartTimestamp', sortable: true }
       ],
       rows: [],
@@ -114,6 +118,7 @@ export default {
 
       sessions.map((session) => {
         session["sessionStartTimestamp"] = nicers.formattedDayOfMonth(session["sessionStartTimestamp"])
+        session["sessionEndTimestamp"] = session["sessionEndTimestamp"] ? nicers.formattedDayOfMonth(session["sessionEndTimestamp"]) : 'No end date'
         this.exercisesTotal += session.numOfExercises
       })
 

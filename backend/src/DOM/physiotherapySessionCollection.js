@@ -11,14 +11,19 @@ export default {
             SELECT
                 s.id AS sessionID,
                 s.startTimestamp AS sessionStartTimestamp,
+                s.endTimestamp AS sessionEndTimestamp,
                 s.patientId,
+                CAST(p.names AS NVARCHAR(100)) patientName,
                 COUNT(e.id) AS numOfExercises
             FROM [physiotherapy_session] s
                 LEFT JOIN [exercise] e ON s.id = e.physiotherapySessionId
+                LEFT JOIN [patient] p ON s.patientId = p.id
             GROUP BY
                 s.id,
                 s.patientId,
-                s.startTimestamp
+                s.startTimestamp,
+                s.endTimestamp,
+                CAST(p.names AS NVARCHAR(100)) 
             ORDER BY s.startTimestamp DESC;
         `)
         return response.recordset
