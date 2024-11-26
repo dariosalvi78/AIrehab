@@ -4,6 +4,7 @@ import poeCollection from '../../../src/DOM/poeCollection.js'
 import exercises from '../../../src/controllers/exercises.js'
 import mock from '../../mock_data.js'
 import fileHandler from '../../../src/utils/fileHandler.js'
+import physiotherapistCollection from '../../../src/DOM/physiotherapistCollection.js'
 
 beforeAll(function () {
     this.physiotherapist = mock.physiotherapist
@@ -268,20 +269,28 @@ describe('deleteExercise access:', function () {
         })
     })
     it('admin can delete one exercise', async function () {
-        let exercise = this.exercises[0]
+        let leader = this.physiotherapist, exercise = this.exercises[0], _session = this.sessions[0]
+        spyOn(exercisesCollection, 'getExerciseByID').and.returnValue({ patientID: 1 })
+        spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({ physiotherapistEmail: leader.email })
         spyOn(fileHandler, 'deleteVideo').and.returnValue(undefined)
         spyOn(poeCollection, 'deletePOEForExerciseByID')
         spyOn(exercisesCollection, 'deleteOneExercise')
+        spyOn(exercisesCollection, 'getExercisesInSessionByEmail').and.returnValue([])
+        spyOn(sessions, 'updateSessionTimestamp')
         await exercises.deleteExercise({ 
             user: { role: 'admin' },
             params: { exerciseID: exercise.id },
-            query: { sessionID: this.sessions[0].sessionID },
+            query: { sessionID: _session.sessionID },
             body: { videoFile: exercise.videoFile }
         }, {
             sendStatus(status) {
                 expect(status).toBe(204)
+                expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(exercise.id)
+                expect(physiotherapistCollection.getOnePatientByID).toHaveBeenCalled()
                 expect(poeCollection.deletePOEForExerciseByID).toHaveBeenCalledWith(exercise.id)
                 expect(exercisesCollection.deleteOneExercise).toHaveBeenCalledWith(exercise.id)
+                expect(exercisesCollection.getExercisesInSessionByEmail).toHaveBeenCalledWith(_session.sessionID, leader.email)
+                expect(sessions.updateSessionTimestamp).toHaveBeenCalled()
             }
         })
     })
@@ -291,6 +300,8 @@ describe('deleteExercise access:', function () {
         spyOn(fileHandler, 'deleteVideo').and.returnValue(undefined)
         spyOn(poeCollection, 'deletePOEForExerciseByID')
         spyOn(exercisesCollection, 'deleteOneExercise')
+        spyOn(exercisesCollection, 'getExercisesInSessionByEmail').and.returnValue([])
+        spyOn(sessions, 'updateSessionTimestamp')
         await exercises.deleteExercise({ 
             user: therapist,
             params: { exerciseID: exercise.id },
@@ -302,6 +313,8 @@ describe('deleteExercise access:', function () {
                 expect(sessions.getSessionByID).toHaveBeenCalledWith(_session.sessionID, therapist.email)
                 expect(poeCollection.deletePOEForExerciseByID).toHaveBeenCalledWith(exercise.id)
                 expect(exercisesCollection.deleteOneExercise).toHaveBeenCalledWith(exercise.id)
+                expect(exercisesCollection.getExercisesInSessionByEmail).toHaveBeenCalledWith(_session.sessionID, therapist.email)
+                expect(sessions.updateSessionTimestamp).toHaveBeenCalled()
             }
         })
     })
