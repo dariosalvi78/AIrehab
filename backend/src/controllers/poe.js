@@ -69,17 +69,18 @@ export default {
      */
     sendVideoForPOEEvaluation: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let exerciseID = req.params.exerciseID
-        const exercise = await exercises.getExerciseByID(exerciseID)
+        let exercise, exerciseID = req.params.exerciseID
         try {
+            exercise = await exercises.getExerciseByID(exerciseID)
             if (!exercise) return res.status(404).send('Exercise does not exist')
             if (!exercise.videoFile) return res.status(400).send('Video does not exist')
             let response = await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type)
-            console.log(response)
             if (response) return res.sendStatus(200)
         } catch (err) {
-            await files.deleteVideo(exercise.physiotherapySessionId, exercise.id, exercise.videoFile)
-            await exercises.updateExerciseVideo(exercise.id, { fileName: null, endTimestamp: null })
+            if (exercise) {
+                await files.deleteVideo(exercise.physiotherapySessionId, exercise.id, exercise.videoFile)
+                await exercises.updateExerciseVideo(exercise.id, { fileName: null, endTimestamp: null })
+            }
             logger.error({ error: err }, 'error sending POE: ')
             res.status(500).send('POE evaluation is not available')
             return
