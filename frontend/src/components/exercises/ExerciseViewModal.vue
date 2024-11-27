@@ -73,7 +73,7 @@
           <q-card flat class="q-ma-lg evaluation-card">
             <q-card-section>
               <div class="text-h6">Video Evaluation</div>
-              <div class="text-subtitle2">Results from recorded exercise video</div>
+              <div class="text-body1">Results from recorded exercise video</div>
             </q-card-section>
             <q-separator />
             <q-list bordered class="rounded-borders" :key="res.posturalOrientation" v-for="res in poe">
@@ -101,22 +101,33 @@
                 </q-item-section>
                 </template>
                 <q-card>
-                 <q-card-section>
-                    <div class="text-body2">
-                      Score: {{ res.scoreToText }}
-                    </div>
-                    <div class="text-body2">
-                      Predicted confidence for score: <b>{{ res.highestPredictedConfidence }} %</b>
-                    </div>
+                  <q-card-section>
+                    <div class="text-subtitle2">Evaluation</div>
+                    <div class="text-body2 q-mb-sm">Highest confidence score: <b>{{ res.scoreToText }}</b></div>
+                    <div class="text-body2">Predicted confidence in this score: <b>{{ res.highestPredictedConfidence }} %</b></div>
+                    <q-list dense class="rounded-borders">
+                      <q-expansion-item
+                        class="q-pt-sm q-pr-lg text-subtitle2"
+                        label="Score"
+                        caption="See all scores for evaluation"
+                        header-style="padding:0;"
+                      >
+                        <q-item-section class="q-mx-md q-pa-none">
+                          <div class="q-py-sm" v-for="confidence in res.confidences" :key="confidence">
+                            <q-item-label caption><b>{{confidence.text}}</b> · {{ confidence.score }} % confidence</q-item-label>
+                          </div>
+                        </q-item-section>
+                      </q-expansion-item>
+                    </q-list>
                   </q-card-section>
                   <q-separator inset />
                   <q-card-section>
-                    <div class="text-subtitle1">Postural orientation</div>
+                    <div class="text-subtitle2">Postural orientation</div>
                     <div class="text-body2">{{ res.posturalOrientation }}</div>
                   </q-card-section>
                   <q-separator inset />
                   <q-card-section>
-                    <div class="text-subtitle1">Repetition</div>
+                    <div class="text-subtitle2">Repetition</div>
                     <div class="text-body2">{{ res.repetition }}</div>
                   </q-card-section>
                 </q-card>
@@ -171,7 +182,6 @@ export default {
   },
   methods: {
     async checkForVideoSupport () {
-      console.log(navigator)
       if (navigator.mediaDevices) {
         let devices = await navigator.mediaDevices.enumerateDevices()
         for (const input in devices) {
@@ -184,12 +194,10 @@ export default {
       }
     },
     async videoCapture () {
-      console.log('start')
       this.isRecording = true
       navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } }, audio: false })
         .then((stream) => {
           this.hasPermissions = true
-          console.log(stream)
           this.$refs.videoOutput.srcObject = stream
 
           this.mediaRecorder = new MediaRecorder(stream)
@@ -197,7 +205,6 @@ export default {
           this.mediaRecorder.start(1000)
 
           this.mediaRecorder.ondataavailable = (e) => this.videoChunks.push(e.data)
-          console.log(this.videoChunks)
         })
         .catch((err) => {
           this.isRecording = false
@@ -213,7 +220,6 @@ export default {
     },
     async stopVideoCapture () {
       this.isRecording = false
-      console.log(this.mediaRecorder)
       this.mediaRecorder.stop()
       console.log('stopped recording: ', this.mediaRecorder)
 
@@ -316,10 +322,17 @@ export default {
             if (resp && resp._results) {
               let poe_results = resp._results
               poe_results.map((poe, i) => {
+                let confidences = []
                 poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
                 poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
-                poe["highestPredictedConfidence"] = parseFloat((poe['scoreConfidence_'+ poe.score]*100)).toFixed(0)
                 poe["repetition"] = poe["repetition"] === 0 ? 'Summative evaluation' : poe["repetition"]
+
+                for (let i = 0; i < 3; i++) {
+                  confidences.push({score: poe['scoreConfidence_'+ i] = parseFloat((poe['scoreConfidence_'+ i]*100)).toFixed(0), text: nicers.formattedScoreToText(i)})
+                  poe['confidences'] = confidences
+                  delete poe['scoreConfidence_'+ i]
+                }
+                poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
               })
               this.poe = poe_results
               return
