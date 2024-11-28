@@ -78,12 +78,12 @@ export default {
      */
     async deleteVideo (sessionID, exerciseID, filename) {
         try {
-            const SESSION_DIR = config.uploads.base_path + '/session_' + sessionID + '/exercise_' + exerciseID
-            let fullPath = SESSION_DIR + '/vid_' + filename
+            const EXERCISE_DIR = config.uploads.base_path + '/session_' + sessionID + '/exercise_' + exerciseID
+            let fullPath = EXERCISE_DIR + '/vid_' + filename
 
             return new Promise(async (resolve, reject) => {
                 if (fs.existsSync(fullPath)) {
-                    fs.rm(SESSION_DIR, { recursive: true }, (err) => {
+                    fs.rm(EXERCISE_DIR, { recursive: true }, (err) => {
                         if (err) reject(err)
                     })
                     return resolve(fullPath)
@@ -105,12 +105,11 @@ export default {
             const SESSION_DIR = config.uploads.base_path + '/session_' + sessionID
             return new Promise(async (resolve, reject) => {
                 fs.readdir(SESSION_DIR, (err, files) => {
-                    if (!files || files.length <= 0) {
-                        fs.rmdir(SESSION_DIR, (err) => {
-                            if (err) reject(err)
-                        })
-                    }
-                    resolve(SESSION_DIR)
+                    fs.rm(SESSION_DIR, { recursive : true }, (err) => {
+                        if (err) reject(err)
+                    })
+                    logger.debug({ directory: files, sessionID: sessionID }, 'Deleted session directory')
+                    return resolve(SESSION_DIR)
                 })
             })
         } catch (err) {

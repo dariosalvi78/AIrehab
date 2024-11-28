@@ -26,7 +26,12 @@ export default {
 
             return res.sendFile(path.join(import.meta.dirname,
                 '../../' + config.uploads.base_path + '/session_' + exercise.physiotherapySessionId + '/exercise_' + exercise.id + '/vid_' + exercise.videoFile
-            ))
+            ), (err) => {
+                if (err) {
+                    logger.error({ status: err.status, exerciseID: exercise.id, file: exercise.videoFile }, 'error sending file to client')
+                    return res.sendStatus(err.status)
+                }
+            })
         } catch (err) {
             logger.error({ error: err }, 'error getting file: ')
             res.sendStatus(500)
