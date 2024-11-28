@@ -6,6 +6,7 @@
       </q-card-section>
       <q-form class="q-px-sm">
         <q-select
+          ref="qInputExerciseType"
           class="q-my-md"
           filled
           clearable
@@ -13,7 +14,8 @@
           v-model="this.exercise.type"
           :options="this.exerciseTypes"
           label="Type of exercise"
-          hint="Optional. Type of exercise"
+          hint="Exercise that will be used for evaluation"
+          :rules="[type => !!type  || 'Please enter the type of exercise']"
         />
         <q-input
           ref="qInputNotes"
@@ -86,7 +88,8 @@ export default {
    methods: {
     formSubmit () {
       this.$refs.qInputNotes.validate()
-      if (this.$refs.qInputNotes.hasError) {
+      this.$refs.qInputExerciseType.validate()
+      if (this.$refs.qInputNotes.hasError || this.$refs.qInputExerciseType.hasError) {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
