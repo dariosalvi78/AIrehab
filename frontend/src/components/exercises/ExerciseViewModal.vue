@@ -136,7 +136,10 @@
           </q-card>
         </transition>
         <div class="q-pa-lg video-container">
-          <video ref="videoPreview" id="videoPreview" autoplay playsinline webkit-playsinline controls>
+          <div v-if="uploadedFile == 'missing'" class="q-ma-md flex flex-center">
+            <q-chip size="md" color="warning" icon="warning" text-color="black">Exercise video was not found</q-chip>
+          </div>
+          <video v-else ref="videoPreview" id="videoPreview" autoplay playsinline webkit-playsinline controls>
             Your browser does not support HTML5 video.
           </video>
         </div>
@@ -348,9 +351,13 @@ export default {
       }
     },
     async getVideoPathForExercise () {
-      let blob = await API.getUploadFile(this.exerciseID)
-      let videoURL = URL.createObjectURL(blob)
-      this.$refs.videoPreview.src = videoURL
+      try {
+        let blob = await API.getUploadFile(this.exerciseID)
+        let videoURL = URL.createObjectURL(blob)
+        this.$refs.videoPreview.src = videoURL        
+      } catch (err) {
+        this.uploadedFile = 'missing'
+      }
     },
     rejectedUpload (file) {
       this.$q.notify({
