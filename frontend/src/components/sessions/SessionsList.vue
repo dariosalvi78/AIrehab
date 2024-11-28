@@ -2,7 +2,7 @@
   <div>
     <div v-if="sessions.length >= 1 && pagination.maxPageNo >= 1">
       <div class="q-py-md flex justify-center">
-        <div style="width: 450px;">
+        <div class="sessionsList">
           <div style="display: flex;">
             <q-btn style="marginLeft:2px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
               :icon="pagination.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
@@ -21,11 +21,11 @@
           >
             <q-item clickable v-ripple @click="(e) => openSessionView(session)">
               <q-item-section avatar>
-                <q-avatar color="secondary" text-color="white" icon="accessibility" />
+                <q-avatar color="secondary" text-color="white" icon="accessibility" class="shadow-2"/>
               </q-item-section>
 
               <q-item-section>
-                <q-item-label>{{ session.names }}</q-item-label>
+                <q-item-label class="text-body2">{{ session.names }}</q-item-label>
                 <q-item-label caption>Start: {{ formatDate(session.startTimestamp) }}</q-item-label>
                 <q-item-label caption>{{ session.endTimestamp ? `End: ${formatDate(session.endTimestamp)}` : 'No end date' }}</q-item-label>
                 <q-item-label caption>{{ session.numOfExercises ?  `${session.numOfExercises} exercise(s)` : 'No exercises' }}</q-item-label>
@@ -49,6 +49,9 @@
         color="grey"
         active-color="primary"
         class="q-mb-md flex flex-center"
+        active-design="push"
+        size="md"
+        gutter="sm"
       />
     </div>
     <div v-if="isLoadingSessions" class="q-ma-md flex flex-center">
@@ -57,7 +60,9 @@
           size="3em"
         />
     </div>
-    <div v-else-if="pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">No sessions found</div>
+    <div v-else-if="pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
+      <q-chip outline :ripple="false" icon="accessibility" color="secondary" text-color="white" >No sessions found</q-chip>
+    </div>
   </div>
 </template>
 

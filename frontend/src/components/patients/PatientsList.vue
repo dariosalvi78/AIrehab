@@ -1,6 +1,6 @@
 <template>
   <div class="q-py-md flex justify-center" id="patients">
-    <div style="width: 450px;">
+    <div class="patientsList">
       <div style="display: flex;">
         <q-btn style="marginLeft:2px;paddingRight:0px;minWidth:fit-content;" color="grey-8" flat fab-mini :ripple="false" 
           :icon="pagination.date.sortOrder == 'DESC' ? 'arrow_drop_down' : 'arrow_drop_up'" 
@@ -25,7 +25,7 @@
       >
         <q-item clickable v-ripple @click="(e) => $emit('openView', patient)">
           <q-item-section avatar>
-            <q-avatar color="primary" text-color="white" icon="person">
+            <q-avatar color="primary" text-color="white" icon="person" class="shadow-2">
               <q-badge v-if="patient.isPartOfSession" floating color="teal" rounded>
                   <q-icon name="accessibility" style="width:7px;height:15px;"/>
               </q-badge>
@@ -33,7 +33,7 @@
           </q-item-section>
 
           <q-item-section>
-            <q-item-label>{{ patient.names }}</q-item-label>
+            <q-item-label class="text-body2">{{ patient.names }}</q-item-label>
             <q-item-label caption lines="1">{{ formatDate(patient.createdTimestamp) }}</q-item-label>
           </q-item-section>
 

@@ -47,6 +47,9 @@
           color="grey"
           active-color="primary"
           class="q-mb-md flex flex-center"
+          active-design="push"
+          size="md"
+          gutter="sm"
         />
       </div>
       <div v-else-if="isLoadingExercises" class="q-ma-md flex flex-center">

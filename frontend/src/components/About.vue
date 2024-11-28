@@ -1,5 +1,5 @@
 <template>
-  <div class="q-py-sm">
+  <div class="m-width q-py-sm">
     <q-btn round dense class="q-ml-md q-my-sm" color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />        
     <q-card flat class="q-py-none">
       <q-card-section>

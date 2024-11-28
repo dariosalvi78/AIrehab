@@ -2,7 +2,7 @@
    <q-layout>
     <q-page-container>
       <q-card-actions class="flex flex-center">      
-        <q-btn class="prompt-button" padding="md" color="accent" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+        <q-btn class="prompts" padding="sm" color="accent" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
           <q-icon left name="group_add"/>
           <div>Add new Patient</div>
         </q-btn>
@@ -32,6 +32,9 @@
             color="grey"
             active-color="primary"
             class="flex flex-center"
+            active-design="push"
+            size="md"
+            gutter="sm"
           />
         </q-tab-panel>
         <q-tab-panel name="view" class="q-px-none">
@@ -49,7 +52,7 @@
         />
       </div>
       <div v-else-if="pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
-        No patients found
+        <q-chip outline :ripple="false" icon="people" color="primary" text-color="white" >No patients found</q-chip>
       </div>
       <div v-if="panel == 'main'">
         <q-separator />
@@ -174,13 +177,6 @@ export default {
 }
 .shadow-2 {
   box-shadow: none;
-}
-
-@media only screen and (max-width: 450px) {
-  .prompt-button {
-    padding: 5px !important;
-    width: 90%
-  }
 }
 
 </style>
