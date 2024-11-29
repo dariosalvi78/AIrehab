@@ -133,7 +133,7 @@ export default {
             await exercises.deleteOneExercise(exerciseID)
 
             let latestExercise = await exercises.getExercisesInSessionByEmail(sessionID, assignedTo)
-            await sessions.updateSessionTimestamp(sessionID, latestExercise.length >= 1
+            await sessions.updateSessionTimestamp(sessionID, latestExercise.length >= 1 && latestExercise[0].endTimestamp
                 ? `'${new Date(latestExercise[0].endTimestamp).toISOString()}'` : null
             )
 
