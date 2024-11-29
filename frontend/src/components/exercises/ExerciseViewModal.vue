@@ -62,10 +62,7 @@
             <div class="text-subtitle2 q-mb-md">Retrieving results from analysed video</div>
             <q-separator />
             <div class="q-mt-md flex flex-center">
-              <q-spinner-dots
-                color="primary"
-                size="3em"
-              />
+              <q-spinner-dots color="primary" size="3em" />
             </div>
           </q-card-section>
         </q-card>
@@ -166,7 +163,6 @@ export default {
       videoChunks: [],
       hasVideoDevice: false,
       isRecording: false,
-      isLoadingExercise: true,
       hasPermissions: false,
       uploadedFile: undefined,
       videoFile: undefined,
@@ -224,7 +220,6 @@ export default {
     async stopVideoCapture () {
       this.isRecording = false
       this.mediaRecorder.stop()
-      console.log('stopped recording: ', this.mediaRecorder)
 
       let blob = new Blob(this.videoChunks, { type: "video/webm" });
       let mediaBlobUrl = URL.createObjectURL(blob);
@@ -300,10 +295,7 @@ export default {
     async getVideoExercise() {
       try {
         let resp = await API.getExercise(this.exerciseID)
-        console.log(resp)
-        if (resp) {
-          this.videoFile = resp.videoFile
-        }
+        if (resp) this.videoFile = resp.videoFile
       } catch (err) {
         let errMsg = err
         if (err.response.status == 404) {

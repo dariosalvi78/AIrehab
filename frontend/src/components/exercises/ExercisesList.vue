@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div ref="exercises" class="text-h5 q-ml-md">Exercises {{getCountExercises}}</div>
+    <div v-if="numOfExercises > 0" ref="exercises" class="text-h5 q-ml-md">Exercises {{getCountExercises}}</div>
       <div v-if="exercises.length >= 1 && pagination.maxPageNo >= 1">
         <div 
           v-for="exercise in exercises" 
@@ -9,9 +9,9 @@
           <transition appear enter-active-class="animated fadeIn delay-1s">
             <q-card class="q-ma-md exercise-card">
               <q-card-section class="row">
-                <div class="col-11">
-                  <q-btn class="q-mr-sm" :label="!exercise.videoFile ? 'Go to exercise' : 'Go to Evaluation'" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
-                  <q-btn class="q-my-sm" label="Edit exercise" dense color="primary" size="sm" icon-right="edit" @click="$emit('openExerciseModal', exercise)"/>
+                <div class="col">
+                  <q-btn class="q-mb-sm q-mr-sm" :label="!exercise.videoFile ? 'Go to exercise' : 'Go to Evaluation'" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
+                  <q-btn class="q-mb-sm" label="Edit exercise" dense color="primary" size="sm" icon-right="edit" @click="$emit('openExerciseModal', exercise)"/>
                   <div class="text-h6">{{ exercise.type ? exercise.type : 'Exercise' }}
                     <q-icon v-if="exercise.videoFile" size="sm" name="video_file" />
                   </div>
@@ -21,9 +21,7 @@
                     - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
                   </div>
                 </div>
-                <div class="col">
-                  <q-btn dense color="negative" size="sm" icon="close" @click="closeExercise(exercise)"/>
-                </div>
+                <q-btn style="height:fit-content;" dense color="negative" size="sm" icon="close" @click="closeExercise(exercise)"/>
               </q-card-section>
               <q-separator />
               <q-card-section>
@@ -59,9 +57,7 @@
         />
       </div>
       <div v-else-if="pagination.maxPageNo <= 0" class="flex flex-center column">
-        <div class="text-h6 q-pa-md">
-          No exercises in session
-        </div>
+        <div class="text-h6 q-pa-md text-weight-light">No exercises in session</div>
       </div>
   </div>
 </template>
