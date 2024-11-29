@@ -1,13 +1,9 @@
 
 export default {
-    types: { exercise: ['singleLeggedSquatLeft', 'singleLeggedSquatRight'], patient: ['foot', 'knee', 'hip', 'back'] },
+    types: { patient: ['foot', 'knee', 'hip', 'back'], sides: ['left', 'right', 'both'] },
 
     typeToDesc(t) {
         switch (t) {
-            case 'Single-leg Squat (Left)':
-                return 'singleLeggedSquatLeft'
-            case 'Single-leg Squat (Right)':
-                return 'singleLeggedSquatRight'
             case 'Foot':
                 return 'foot'
             case 'Knee':
@@ -16,6 +12,12 @@ export default {
                 return 'hip'
             case 'Back':
                 return 'back'
+            case 'Left':
+                return 'left'
+            case 'Right':
+                return 'right'
+            case 'Both':
+                return 'both'
             default:
                 return t
         }
@@ -23,10 +25,6 @@ export default {
 
     typeToAsc(t) {
         switch (t) {
-            case 'singleLeggedSquatLeft':
-                return 'Single-leg Squat (Left)'
-            case 'singleLeggedSquatRight':
-                return 'Single-leg Squat (Right)'
             case 'foot':
                 return 'Foot'
             case 'knee':
@@ -35,6 +33,12 @@ export default {
                 return 'Hip'
             case 'back':
                 return 'Back'
+            case 'left':
+                return 'Left'
+            case 'right':
+                return 'Right'
+            case 'both':
+                return 'Both'
             default:
                 return t
         }

@@ -115,7 +115,7 @@
 
 <script>
 import API from '../../API.js'
-import exerciseEnums from '../../utils/exerciseTypesEnum.js'
+import exerciseEnums from '../../utils/types/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers.js'
 
 export default {

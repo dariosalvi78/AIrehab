@@ -64,7 +64,7 @@
 
 <script>
 import API from '../../API'
-import exerciseEnum from '../../utils/exerciseTypesEnum.js'
+import exerciseEnum from '../../utils/types/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers'
 
 export default {

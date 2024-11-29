@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import exerciseEnums from '../../utils/exerciseTypesEnum.js'
+import exerciseEnums from '../../utils/types/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers.js'
 import { ref } from 'vue'
 

@@ -22,7 +22,7 @@
  * @property {number} height - height in cm
  * @property {number} weight - weight in KGs
  * @property {?string} injuries - general description of injuries
- * @property {?string} injuredSide - side of the body that is injured, 'left' or 'right'
+ * @property {?string} injuredSide - side of the body that is injured, 'left', 'right' or 'both'
  * @property {?string} injuredBodyPart - body part that is injured. 'foot', 'knee', 'hip', 'back'
  */
 

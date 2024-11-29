@@ -65,9 +65,9 @@
 
 <script>
 import API from '../../API.js'
-import exerciseEnums from '../../utils/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers'
 import PatientEditForm from './PatientEditForm.vue'
+import patientTypesEnum from '../../utils/types/patientTypesEnum.js'
 
 export default {
   name: 'PatientViewModal',
@@ -175,11 +175,12 @@ export default {
   },
   computed: {
     getInjuredBodyPart () {
-      return 'Part of the body: ' + exerciseEnums.typeToAsc(this.selectedPatient.injuredBodyPart)
+      return 'Part of the body: ' + patientTypesEnum.typeToAsc(this.selectedPatient.injuredBodyPart)
     },
     getInjuredSide () {
       let side = this.selectedPatient.injuredSide
-      return side[0].toUpperCase() + side.slice(1) + ' side injured'
+      side = side[0].toUpperCase() + side.slice(1)
+      return this.selectedPatient.injuredSide !== 'both' ? (side + ' side injured') : side + ' sides injured'
     }
   }
 }
