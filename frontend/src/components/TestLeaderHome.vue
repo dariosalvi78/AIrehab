@@ -13,7 +13,7 @@
           @addNewPatient="addNewUser"
         />
       </q-card-actions>
-      <q-tab-panels v-show="users.length >= 1 && pagination.maxPageNo >= 1" v-model="panel" ref="panelForm" vertical animated class="shadow-2 rounded-borders">
+      <q-tab-panels v-show="users.length >= 1 && pagination.maxPageNo >= 1" v-model="panel" ref="panelForm" vertical class="shadow-2 rounded-borders">
         <q-tab-panel id="panel" name="main" class="q-px-none">
           <patients-list
             @openView="openPatientView"
@@ -38,11 +38,13 @@
           />
         </q-tab-panel>
         <q-tab-panel name="view" class="q-px-none">
-          <patient-view-modal 
-            :selectedPatient="selectedPatient" 
-            @openView="openPatientView"
-            @panelFormGoBack="openHomePage"
-          />
+          <transition appear enter-active-class="animated fadeIn">
+            <patient-view-modal 
+              :selectedPatient="selectedPatient" 
+              @openView="openPatientView"
+              @panelFormGoBack="openHomePage"
+            />
+          </transition>
         </q-tab-panel>
       </q-tab-panels>
       <div v-if="isLoadingPatients" class="q-ma-md flex flex-center">
@@ -63,7 +65,6 @@
 </template>
 
 <script>
-import store from '../utils/storage.js'
 import API from '../API'
 import PatientEditForm from './patients/PatientEditForm.vue'
 import PatientsList from './patients/PatientsList.vue'
