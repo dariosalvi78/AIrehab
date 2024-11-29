@@ -60,9 +60,13 @@ export default {
   },
   methods: {
     async logout () {
-      await API.logout()
-      store.removeLoginStatus()
-      this.$router.push('/login')
+      try {
+        await API.logout()
+        store.removeLoginStatus()
+        this.$router.push('/login')        
+      } catch (err) {
+        console.info('Could not logout user: ', err.response.statusText)
+      }
     },
     async getLoggedInUser () {
       try {
