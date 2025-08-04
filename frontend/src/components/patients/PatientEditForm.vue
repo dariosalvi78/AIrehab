@@ -16,116 +16,152 @@
                 </div>
             </q-card-section>
             <q-form class="q-px-sm">
-            <q-input
-                v-if="mode == 'adminNew'"
-                filled
-                v-model="this.physiotherapistEmail"
-                label="Test leader email"
-                type="email"
-                :hint="!user.physiotherapistEmail ? 'e.g. user@email.com' : 'Assigned to test leader'"
-                :readonly="!!user.physiotherapistEmail"
-            />
-            <!-- <q-input
-                filled
-                v-model="this.new.email"
-                label="Email"
-                type="email"
-                hint="e.g. user@email.com"
-            /> -->
-            <q-input
-                class="q-my-md"            
-                filled
-                v-model="this.new.fullName"
-                label="Full name"
-                type="text"
-                hint="Patient full name"
-            />
-            <q-input
-              ref="qDate"
-              class="q-my-md"            
-              filled
-              v-model="this.new.dateOfBirth"
-              label="Date"
-              mask="####-##-##"
-              :rules="[(date) => dateRestrictions(date) || 'Please enter valid date']"
-              hint="Date of birth - in yyyy-mm-dd"
-            >
-              <template v-slot:append>
-                <q-icon name="event" style="cursor:pointer;">
-                <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                    <q-date 
-                      mask="YYYY-MM-DD"
-                      v-model="this.new.dateOfBirth" 
-                      @update:model="() => qDateProxy.hide()" 
-                      today-btn
-                      :options="dateRestrictions"
-                      >
-                      <template v-slot>
-                        <div class="row items-center justify-end q-gutter-sm">
-                            <q-btn label="Confirm" color="primary" size="sm" v-close-popup />
+                <div class="q-pt-md" v-if="mode == 'new' || mode == 'adminNew'">
+                    <div class="q-px-sm text-body2">Type of patient</div>
+                    <q-list v-for="item in [
+                            { type: 'real', name: 'Real patient', desc: 'Create a real patient' }, 
+                            { type: 'mock', name: 'Test patient', desc: 'Create a temporary mock patient for testing POE video assessment.' }
+                        ]" :key="item.type">
+                        <q-item tag="label" v-ripple>
+                            <q-item-section avatar>
+                                <q-radio v-model="this.new.test" :type="item.type" :val="item.type == 'mock' ? true : false" />
+                            </q-item-section>
+                            <q-item-section>
+                                <q-item-label>{{item.name}}</q-item-label>
+                                <q-item-label caption>
+                                   {{item.desc}}
+                                </q-item-label>
+                            </q-item-section>
+                        </q-item>
+                    </q-list>
+                </div>
+                <q-tab-panels v-model="this.new.test" animated>
+                    <q-tab-panel :name="true" class="q-pa-sm">
+                        <div class="q-py-sm text-body2">You can create a temporary test patient to test the POE video assessment.</div>
+                        <div class="q-py-sm text-body2">The test patient and all associated data will be deleted once its no longer in use.</div>
+                    </q-tab-panel>
+                    <q-tab-panel :name="false" class="q-pa-none">
+                        <q-input
+                            v-if="mode == 'adminNew'"
+                            filled
+                            v-model="this.physiotherapistEmail"
+                            label="Test leader email"
+                            type="email"
+                            :hint="!user.physiotherapistEmail ? 'e.g. user@email.com' : 'Assigned to test leader'"
+                            :readonly="!!user.physiotherapistEmail"
+                        />
+                        <!-- <q-input
+                            filled
+                            v-model="this.new.email"
+                            label="Email"
+                            type="email"
+                            hint="e.g. user@email.com"
+                        /> -->
+                        <q-input
+                            class="q-my-md"            
+                            filled
+                            v-model="this.new.fullName"
+                            label="Full name"
+                            type="text"
+                            hint="Patient full name"
+                        />
+                        <q-input
+                        ref="qDate"
+                        class="q-my-md"            
+                        filled
+                        v-model="this.new.dateOfBirth"
+                        label="Date"
+                        mask="####-##-##"
+                        :rules="[(date) => dateRestrictions(date) || 'Please enter valid date']"
+                        hint="Date of birth - in yyyy-mm-dd"
+                        >
+                        <template v-slot:append>
+                            <q-icon name="event" style="cursor:pointer;">
+                            <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                                <q-date 
+                                mask="YYYY-MM-DD"
+                                v-model="this.new.dateOfBirth" 
+                                @update:model="() => qDateProxy.hide()" 
+                                today-btn
+                                :options="dateRestrictions"
+                                >
+                                <template v-slot>
+                                    <div class="row items-center justify-end q-gutter-sm">
+                                        <q-btn label="Confirm" color="primary" size="sm" v-close-popup />
+                                    </div>
+                                </template>
+                                </q-date>
+                            </q-popup-proxy>
+                            </q-icon>
+                        </template>
+                        </q-input>
+                        <q-input
+                            ref="qHeight"
+                            class="q-my-md"            
+                            filled
+                            v-model="this.new.height"
+                            label="Height (cm)"
+                            type="number"
+                            hint="Optional. Patient height"
+                            :rules="[height => !height ? true : height <= 200 && height >= 0 || 'Enter valid height in cm']"
+                        />
+                        <q-input
+                            ref="qWeight"
+                            class="q-my-md"            
+                            filled
+                            v-model="this.new.weight"
+                            label="Weight (kg)"
+                            type="number"
+                            hint="Optional. Patient weight"
+                            :rules="[weight => !weight ? true : weight <= 200 && weight >= 0 || 'Enter valid weight in kg']"
+                        />
+                        <q-input
+                            class="q-my-md"            
+                            filled
+                            v-model="this.new.injuries"
+                            label="Notes"
+                            type="textarea"
+                            hint="Optional. Description / list of injuries"
+                            :rules="[injuries => !injuries ? true : injuries.length <= 150 || 'Limit reached']"
+                        />
+                        <q-toggle class="text-body2" v-model="hasInjury" :label="!hasInjury ? 'Patient has no injuries' : 'Patient has injuries' " />
+                        <div class="q-my-md q-gutter-sm" v-if="hasInjury">
+                            <div class="q-px-sm text-body2">Side of the body that is injured</div>
+                            <q-radio v-for="side in this.sides" :key="side" v-model="this.new.injuredSide" :val="side" :label="side" />
                         </div>
-                      </template>
-                    </q-date>
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
-            <q-input
-                ref="qHeight"
-                class="q-my-md"            
-                filled
-                v-model="this.new.height"
-                label="Height (cm)"
-                type="number"
-                hint="Optional. Patient height"
-                :rules="[height => !height ? true : height <= 200 && height >= 0 || 'Enter valid height in cm']"
-            />
-            <q-input
-                ref="qWeight"
-                class="q-my-md"            
-                filled
-                v-model="this.new.weight"
-                label="Weight (kg)"
-                type="number"
-                hint="Optional. Patient weight"
-                :rules="[weight => !weight ? true : weight <= 200 && weight >= 0 || 'Enter valid weight in kg']"
-            />
-            <q-input
-                class="q-my-md"            
-                filled
-                v-model="this.new.injuries"
-                label="Notes"
-                type="textarea"
-                hint="Optional. Description / list of injuries"
-                :rules="[injuries => !injuries ? true : injuries.length <= 150 || 'Limit reached']"
-            />
-            <q-toggle class="text-body2" v-model="hasInjury" :label="!hasInjury ? 'Patient has no injuries' : 'Patient has injuries' " />
-            <div class="q-my-md q-gutter-sm" v-if="hasInjury">
-                <div class="q-px-sm text-body2">Side of the body that is injured</div>
-                <q-radio v-for="side in this.sides" :key="side" v-model="this.new.injuredSide" :val="side" :label="side" />
-            </div>
-            <q-select
-                v-if="hasInjury"
-                class="q-my-md"
-                filled
-                clearable
-                behavior="menu"
-                v-model="this.new.injuredBodyPart"
-                :options="this.bodyParts"
-                label="Injured body part"
-                hint="Part of the body that is injured"
-            />
-        </q-form>
-        <q-card-actions align="right" class="text-primary">
-            <q-btn flat label="Cancel" v-close-popup />
-            <q-btn 
-                label="Submit" 
-                type="submit" 
-                color="primary" 
-                class="q-ml-sm" 
-                @click="formSubmit()"
-            />
-        </q-card-actions>
+                        <q-select
+                            v-if="hasInjury"
+                            class="q-my-md"
+                            filled
+                            clearable
+                            behavior="menu"
+                            v-model="this.new.injuredBodyPart"
+                            :options="this.bodyParts"
+                            label="Injured body part"
+                            hint="Part of the body that is injured"
+                        />
+                    </q-tab-panel>
+                </q-tab-panels>
+            </q-form>
+            <q-card-actions align="right" class="text-primary" v-if="!this.new.test">
+                <q-btn flat label="Cancel" v-close-popup />
+                <q-btn 
+                    label="Submit" 
+                    type="submit" 
+                    color="primary" 
+                    class="q-ml-sm" 
+                    @click="formSubmit()"
+                />
+            </q-card-actions>
+            <q-card-actions align="center" v-else>
+                <q-btn 
+                    class="prompts"
+                    label="Go to exercise" 
+                    type="submit" 
+                    color="secondary" 
+                    @click="formSubmit()"
+                />
+            </q-card-actions>
         </q-card>
     </q-dialog>
 </template>
@@ -147,7 +183,8 @@ export default {
                 weight: undefined,
                 injuries: undefined,
                 injuredSide: undefined,
-                injuredBodyPart: undefined
+                injuredBodyPart: undefined,
+                test: false
             },
             physiotherapistEmail: undefined,
             mode: 'new',
@@ -187,7 +224,8 @@ export default {
                 weight: this.new.weight ? +this.new.weight : null,
                 injuries: this.new.injuries ? this.new.injuries : '',
                 injuredSide: '',
-                injuredBodyPart: ''
+                injuredBodyPart: '',
+                test: this.new.test
             }
             if (this.hasInjury) {
                 userSubmitted.injuredSide = this.new.injuredSide ? patientEnums.typeToDesc(this.new.injuredSide) : '',
@@ -208,6 +246,7 @@ export default {
                 this.new.height = +this.user.height
                 this.new.weight = +this.user.weight
                 this.new.injuries = this.user.injuries
+                this.new.test = false
                 if (this.user.injuredBodyPart || this.user.injuredSide) {
                     this.hasInjury = true
                     this.new.injuredBodyPart = patientEnums.typeToAsc(this.user.injuredBodyPart)
@@ -226,6 +265,7 @@ export default {
             this.mode = 'new'
             this.physiotherapistEmail = undefined
             this.new = {}
+            this.new.test = false
         },
         dateRestrictions (qDate) {
             return nicers.formDatetimeValidation(qDate, 'patient')
