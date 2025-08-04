@@ -1,0 +1,19 @@
+{
+  "short_name": "POE assessment",
+  "name": "POE assessment",
+  "description": "POE AI based physiotherapy rehabilitation",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 512x512",
+      "type": "image/ico",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#1976D2",
+  "orientation": "portrait",
+  "background_color": "#ffffff"
+}

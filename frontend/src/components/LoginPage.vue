@@ -1,6 +1,7 @@
 <template>
   <q-layout>
     <q-page-container>
+      <q-btn v-if="installPrompt" color="primary" class="q-ma-md" label="Add to Home screen" no-caps @click="showInstallPrompt"/>
       <q-page class="flex flex-center">
         <q-form ref="loginForm" class="loginForm">
           <q-card flat class="q-py-sm">
@@ -69,9 +70,10 @@ export default {
   name: 'LoginPage',
   data () {
     return {
-        email: "",
-        password: "",
-        showPassword: false
+      email: "",
+      password: "",
+      showPassword: false,
+      installPrompt: null
     }
   },
   methods: {
@@ -124,7 +126,17 @@ export default {
       } catch (err) {
         return
       }
+    },
+    async showInstallPrompt () {
+      if (this.installPrompt) return this.installPrompt.prompt()
     }
+  },
+  created () {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.installPrompt = e;
+    })
+    window.addEventListener("appinstalled", () => this.installPrompt = null )
   }
 }
 </script>
