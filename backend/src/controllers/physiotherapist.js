@@ -1,6 +1,10 @@
 import * as Types from '../datamodel/modeljdocs.mjs'
 import physiotherapist from "../DOM/physiotherapistCollection.js"
+import sessions from "../DOM/physiotherapySessionCollection.js"
+import exercises from "../DOM/exercisesCollection.js"
+import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
+import files from '../utils/fileHandler.js'
 
 export default {
 
@@ -13,12 +17,35 @@ export default {
     */
     getPatients: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let patients
+        let patients, testPatientID
         try {
             if (req.user.role == 'admin') {
                 patients = await physiotherapist.getPatients()
             } else {
+                const assignedTo = await physiotherapist.getOneTherapistByEmail(req.user.email)
                 let results = await physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
+                
+                // Clear test suite
+                for (const p_test in results[0]) {
+                    if (results[0][p_test].names == `test_${assignedTo.id}`) {
+                        testPatientID = results[0][p_test].patientID
+                        const session = await sessions.getOneSessionByPatientID(testPatientID)
+                        const exercise = await exercises.getExercisesInSessionByEmail(session.id, assignedTo.email)
+
+                        for (const e of exercise) {
+                            if (!e) continue
+                            if (e.videoFile) await files.deleteVideo(session.id, e.id, e.videoFile)
+                            await poe.deletePOEForExerciseByID(e.id)
+                            await exercises.deleteOneExercise(e.id)
+                        }
+
+                        await files.closeDirectory(session.id)
+                        await sessions.deleteOneSession(session.id)
+                        await physiotherapist.deleteOnePatient(assignedTo.id, testPatientID)
+                        logger.info({ patientID: testPatientID }, 'deleted temporary patient and associated data: ')
+                    }
+                }
+                results = await physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
                 patients = { patients: results[0], maxPageNo: results[results.length - 1][0].maxPage }
             }
             res.send(patients)
@@ -94,11 +121,22 @@ export default {
                 results = await physiotherapist.getOneTherapistByEmail(req.query.physiotherapistEmail)
                 if (!results) return res.status(404).send('No physiotherapist with given email')
             }
+
+            if (patient.isTestPatient && results) patient.fullName = `test_${results.id}`
             const addedPatient = await physiotherapist.createPatient(patient, results.id)
+            let patientData = { patient: addedPatient }
+
+            if (patient.isTestPatient && addedPatient) {
+                // Create temporary test suite
+                const session = await sessions.createSession(addedPatient.id)
+                const exercise = await exercises.createExercise(session.id, { type: patient.injuries.injuredBodyPart, notes: '' })
+                logger.info({ patientID: addedPatient }, 'temporary test setup created: ')
+                patientData = { patient: addedPatient, sessionID: session.id, exerciseID: exercise.id, testSession: patient.isTestPatient }
+            }
 
             logger.info({ data: addedPatient }, `assigned ${addedPatient.id} to test leader ${results.email}`)
             return res.status(201).json({
-                status: 'created', data: { patient: addedPatient }
+                status: 'created', data: patientData
             })
         }
         catch (err) {
