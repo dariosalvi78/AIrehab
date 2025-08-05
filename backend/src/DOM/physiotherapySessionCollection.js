@@ -91,6 +91,22 @@ export default {
     },
 
     /**
+    * Get one session for a specific patient based on id
+    * @param {Types.Patient["id"]} patientID 
+    * @returns {Promise<Types.PhysiotherapySession>}
+    */
+    getOneSessionByPatientID: async function (patientID) {
+        const response = await db.query(`
+            SELECT s.*, p.names AS patientName FROM [physiotherapy_session] s
+            INNER JOIN [patient] p ON p.id = s.patientId
+            INNER JOIN [user] u ON p.physiotherapistId = u.id
+            WHERE p.id = '${patientID}'
+            ORDER BY s.startTimestamp DESC;
+        `)
+        return response.recordset[0]
+    },
+
+    /**
      * Creates a new physiotherapy session for a patient
      * @param {Types.Patient["id"]} patientID 
      * @returns {Promise<Types.PhysiotherapySession>}
