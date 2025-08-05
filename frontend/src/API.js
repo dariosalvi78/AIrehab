@@ -70,8 +70,8 @@ let API = {
     return response.data
   },
 
-  async addPatient (fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail) {
-    let response = await axios.post('/patients', { fullName, dateOfBirth, height, weight, injuries: { description: injuries.description, injuredSide: injuries.side, injuredBodyPart: injuries.bodyPart } }, { params: { physiotherapistEmail } })
+  async addPatient (fullName, dateOfBirth, height, weight, injuries, physiotherapistEmail, isTestPatient) {
+    let response = await axios.post('/patients', { fullName, dateOfBirth, height, weight, injuries: { description: injuries.description, injuredSide: injuries.side, injuredBodyPart: injuries.bodyPart }, isTestPatient }, { params: { physiotherapistEmail } })
     return response.data
   },
 
