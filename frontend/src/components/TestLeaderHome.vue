@@ -58,7 +58,7 @@
       </div>
       <div v-if="panel == 'main'">
         <q-separator />
-        <sessions-list :selectedPatient="selectedPatient" />
+        <sessions-list v-if="!isLoadingPatients" :selectedPatient="selectedPatient" />
       </div>
     </q-page-container>
   </q-layout>
@@ -103,9 +103,17 @@ export default {
   methods: {
      async addNewUser (newUser) {
       try {
-        const { fullName, dateOfBirth, height, weight, injuries, injuredSide, injuredBodyPart } = newUser
-        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, { description: injuries, side: injuredSide, bodyPart: injuredBodyPart })
+        const { fullName, dateOfBirth, height, weight, injuries, injuredSide, injuredBodyPart, isTestPatient } = newUser
+        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, { description: injuries, side: injuredSide, bodyPart: injuredBodyPart }, null, isTestPatient)
         if (resp.data) {
+          if (resp.data.testSession) {
+            this.$q.notify({
+              type: 'positive',
+              position: 'top',
+              message: 'Created test exercise',
+            })
+            return this.goToTestExercise(resp.data.sessionID, resp.data.exerciseID)
+          }
           this.$q.notify({
             type: 'positive',
             position: 'top',
@@ -166,7 +174,10 @@ export default {
         : this.pagination[selectedType].sortOrder = 'DESC'
 
       await this.getPatients()
-    }
+    },
+    async goToTestExercise (sessionID, exerciseID) {
+      return this.$router.push('home/sessions/' + sessionID + '/exercise/' + exerciseID)
+    },
   }
 }
 </script>

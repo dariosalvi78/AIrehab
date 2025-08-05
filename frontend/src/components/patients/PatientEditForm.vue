@@ -16,7 +16,7 @@
                 </div>
             </q-card-section>
             <q-form class="q-px-sm">
-                <div class="q-pt-md" v-if="mode == 'new' || mode == 'adminNew'">
+                <div class="q-pt-md" v-if="mode == 'new'">
                     <div class="q-px-sm text-body2">Type of patient</div>
                     <q-list v-for="item in [
                             { type: 'real', name: 'Real patient', desc: 'Create a real patient' }, 
@@ -24,7 +24,7 @@
                         ]" :key="item.type">
                         <q-item tag="label" v-ripple>
                             <q-item-section avatar>
-                                <q-radio v-model="this.new.test" :type="item.type" :val="item.type == 'mock' ? true : false" />
+                                <q-radio v-model="this.testPatient" :type="item.type" :val="item.type == 'mock' ? true : false" />
                             </q-item-section>
                             <q-item-section>
                                 <q-item-label>{{item.name}}</q-item-label>
@@ -35,7 +35,7 @@
                         </q-item>
                     </q-list>
                 </div>
-                <q-tab-panels v-model="this.new.test" animated>
+                <q-tab-panels v-model="this.testPatient" animated>
                     <q-tab-panel :name="true" class="q-pa-sm">
                         <div class="q-py-sm text-body2">You can create a temporary test patient to test the POE video assessment.</div>
                         <div class="q-py-sm text-body2">The test patient and all associated data will be deleted once its no longer in use.</div>
@@ -143,7 +143,7 @@
                     </q-tab-panel>
                 </q-tab-panels>
             </q-form>
-            <q-card-actions align="right" class="text-primary" v-if="!this.new.test">
+            <q-card-actions align="right" class="text-primary" v-if="!this.testPatient">
                 <q-btn flat label="Cancel" v-close-popup />
                 <q-btn 
                     label="Submit" 
@@ -154,12 +154,24 @@
                 />
             </q-card-actions>
             <q-card-actions align="center" v-else>
+                <q-select
+                    ref="qInputExerciseType"
+                    class="q-mb-lg full-width"
+                    filled
+                    clearable
+                    behavior="menu"
+                    v-model="this.testExercise.selected"
+                    :options="this.testExercise.types"
+                    label="Type of exercise"
+                    hint="Exercise that will be used for evaluation"
+                    :rules="[type => !!type  || 'Please enter the type of exercise']"
+                />
                 <q-btn 
                     class="prompts"
                     label="Go to exercise" 
                     type="submit" 
                     color="secondary" 
-                    @click="formSubmit()"
+                    @click="formSubmitMockPatient()"
                 />
             </q-card-actions>
         </q-card>
@@ -168,6 +180,7 @@
 
 <script>
 import patientEnums from '../../utils/types/patientTypesEnum'
+import exerciseEnums from '../../utils/types/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers'
 
 export default {
@@ -184,13 +197,14 @@ export default {
                 injuries: undefined,
                 injuredSide: undefined,
                 injuredBodyPart: undefined,
-                test: false
             },
             physiotherapistEmail: undefined,
             mode: 'new',
             hasInjury: false,
             bodyParts: [],
-            sides: []
+            sides: [],
+            testExercise: { selected: undefined, types: [] },
+            testPatient: false
         }
     },
     async mounted () {
@@ -202,6 +216,9 @@ export default {
     watch: {
         async user () {
             await this.populateEdit()
+        },
+        testPatient (testSelected) {
+            if (testSelected) for (const e in exerciseEnums.types.exercise) this.testExercise.types[e] = exerciseEnums.typeToAsc(exerciseEnums.types.exercise[e])
         }
     },
     methods: {
@@ -225,7 +242,6 @@ export default {
                 injuries: this.new.injuries ? this.new.injuries : '',
                 injuredSide: '',
                 injuredBodyPart: '',
-                test: this.new.test
             }
             if (this.hasInjury) {
                 userSubmitted.injuredSide = this.new.injuredSide ? patientEnums.typeToDesc(this.new.injuredSide) : '',
@@ -238,6 +254,31 @@ export default {
             this.resetForm()
             return
         },
+        formSubmitMockPatient () {
+            this.$refs.qInputExerciseType.validate()
+             if (this.$refs.qInputExerciseType.hasError) {
+                return this.$q.notify({
+                    color: 'negative',
+                    position: 'top',
+                    message: 'Please review fields and try again',
+                    icon: 'report_problem'
+                })
+            }
+            let userSubmitted = {
+                fullName: 'test_patient',
+                dateOfBirth: new Date().toISOString(),
+                height: null,
+                weight: null,
+                injuries: '',
+                injuredSide: '',
+                injuredBodyPart: exerciseEnums.typeToDesc(this.testExercise.selected),
+                isTestPatient: this.testPatient
+            }
+            this.$emit('addNewPatient', userSubmitted)
+            this.$refs.qDialog.hide()
+            this.resetForm()
+            return
+        },
         populateEdit () {
             this.mode = this.formMode
             if (this.mode == 'edit' || this.mode == 'adminEdit' && this.user) {
@@ -246,7 +287,7 @@ export default {
                 this.new.height = +this.user.height
                 this.new.weight = +this.user.weight
                 this.new.injuries = this.user.injuries
-                this.new.test = false
+                this.testPatient = false
                 if (this.user.injuredBodyPart || this.user.injuredSide) {
                     this.hasInjury = true
                     this.new.injuredBodyPart = patientEnums.typeToAsc(this.user.injuredBodyPart)
@@ -265,7 +306,7 @@ export default {
             this.mode = 'new'
             this.physiotherapistEmail = undefined
             this.new = {}
-            this.new.test = false
+            this.testPatient = false
         },
         dateRestrictions (qDate) {
             return nicers.formDatetimeValidation(qDate, 'patient')
