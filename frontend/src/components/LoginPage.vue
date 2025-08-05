@@ -5,9 +5,11 @@
       <q-page class="flex flex-center">
         <q-form ref="loginForm" class="loginForm">
           <q-card flat class="q-py-sm">
-            <q-card-section class="q-px-sm">
-              <div class="text-h4">POE Assessment</div>
-              <div class="text-h5">Sign-in</div>
+            <q-card-section class="q-px-sm text-center">
+              <q-avatar size="250px" square style="height:150px;" class="q-mb-xl">
+                <q-img src="logos/POE_logo_noframe.png"/>
+              </q-avatar>
+              <div class="text-h5 text-left">Sign-in</div>
             </q-card-section>
             <q-card-section class="q-px-sm">
               <form autocomplete="on">
@@ -146,5 +148,9 @@ export default {
 .loginForm {
   width: 90%;
   max-width: 500px;
+  display: flex;
+  height: 100%;
+  align-self: flex-start;
+  flex-direction: column;
 }
 </style>
