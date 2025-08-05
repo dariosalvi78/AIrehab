@@ -4,16 +4,36 @@
   "description": "POE AI based physiotherapy rehabilitation",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 512x512",
+      "src": "icons/favicon-maskable.ico",
+      "sizes": "48x48 72x72 192x192 256x256 320x320 512x512",
       "type": "image/ico",
-      "purpose": "any"
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/favicon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
     }
   ],
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#1976D2",
+  "theme_color": "#ffffff",
   "orientation": "portrait",
   "background_color": "#ffffff"
 }
