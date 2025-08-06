@@ -183,13 +183,19 @@ export default {
     */
     editPatient: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let patient = req.body
+        let patient = req.body, newParticipationStatus = req.query.activationStatus
         try {
             const isAssignedTo = await physiotherapist.getOnePatientByID(req.params.patientID)
             if (req.user.role == 'physiotherapist' && req.user.email !== isAssignedTo.physiotherapistEmail) return res.sendStatus(403)
 
-            if (!patient.fullName || !patient.dateOfBirth) {
+            if ((!patient.fullName || !patient.dateOfBirth) && !req.query) {
                 return res.status(400).send('Please enter required fields')
+            }
+
+            if (newParticipationStatus) {
+                await physiotherapist.updateOnePatientParticipation(newParticipationStatus, req.params.patientID)
+                logger.info({ patientID: req.params.patientID, status: newParticipationStatus }, 'updated patient participation status')
+                return res.send({ status: 'updated', status: newParticipationStatus })
             }
 
             await physiotherapist.updateOnePatient(patient, req.params.patientID)
