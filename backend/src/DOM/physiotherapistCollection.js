@@ -179,4 +179,20 @@ export default {
         `)
         return response
     },
+
+    /**
+     * Updates one patient participation status
+     * @param {Types.Patient} patient
+     * @param {Types.Patient['activated']} status
+     * @param {Types.User["id"]} patientID 
+     */
+    updateOnePatientParticipation: async function (status, patientID) {
+        const response = await db.query(`
+            UPDATE p SET 
+                p.activated = '${status}'
+            FROM [patient] p
+                WHERE p.id = '${patientID}';
+        `)
+        return response
+    },
 }
