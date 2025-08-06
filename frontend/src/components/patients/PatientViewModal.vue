@@ -16,6 +16,12 @@
         <div class="text-body2" style="right:2px;position:relative;">
           <q-icon style="bottom: 2px;" size="sm" name="calendar_month"/>
           {{ formatDate(selectedPatient.createdTimestamp) }}
+          <div class="text-body2">
+            <q-badge class="q-my-sm" :color="selectedPatient.activated ? 'positive' : 'negative'">
+              {{selectedPatient.activated ? 'Patient has given consent' : 'Patient has not given consent' }} 
+            </q-badge>
+          </div>
+          <q-btn v-if="!selectedPatient.activated" icon-right="open_in_new" size="sm" label="Activate patient" type="submit" color="primary" class="q-my-sm" v-close-popup  @click="openPatientModal = !openPatientModal"/>
         </div>
       </q-card-section>
       <q-separator inset />
@@ -60,6 +66,28 @@
       formMode="edit" v-model="openUserEditPrompt" 
       @editPatient="editPatient" 
     />
+    <q-dialog v-model="openPatientModal">
+      <q-card>
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Activate patient</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+        <q-card-section>
+          <div class="text-body2 q-py-sm">
+            Your patient needs to consent in order to participate in this study. Start by letting your patient scan the QR-code below.
+          </div>
+          <q-separator />
+          <div class="qr-code flex flex-center q-ma-sm">
+            <qrcode-svg :value="qr.value" :size="qr.size" :level="qr.lvl" render-as="svg" />
+          </div>
+          <q-separator />
+          <div class="text-center q-my-md">
+            <q-btn label="Click here if code is not working" @click="this.goToPatientPage" no-caps flat round dense />
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -68,21 +96,39 @@ import API from '../../API.js'
 import nicers from '../../utils/nicers'
 import PatientEditForm from './PatientEditForm.vue'
 import patientTypesEnum from '../../utils/types/patientTypesEnum.js'
+import { QrcodeSvg } from 'qrcode.vue'
 
 export default {
   name: 'PatientViewModal',
   props: { selectedPatient: Object },
   emits: ['openView', 'panelFormGoBack'],
-  components: { PatientEditForm },
+  components: { PatientEditForm, QrcodeSvg },
   data () {
     return {
-      openUserEditPrompt: false
+      openUserEditPrompt: false,
+      openPatientModal: false,
+      qr: {
+        value: "",
+        size: 300,
+        lvl: 'H'
+      }
     }
   },
-  mounted () { },
+  mounted () {
+    this.openPatientModal = false
+    this.getPatientPageURL()
+  },
   methods: {
     async startNewSession (selectedPatient) {
       try {
+        if (!this.selectedPatient.activated) {
+          return this.$q.notify({
+            type: 'negative',
+            position: 'top',
+            message: 'Patient needs to consent to research study before creating session',
+            icon: 'report_problem'
+          })
+        }
         this.$q.loading.show()
         let resp = await API.addSession(selectedPatient.id)
         await nicers.delay(500)
@@ -168,6 +214,15 @@ export default {
     },
     navigateToSession (sessionID) {
       return this.$router.push('home/sessions/' + sessionID)
+    },
+    goToPatientPage () {
+      const url = this.getPatientPageURL()
+      return this.$router.push(url)
+    },
+    getPatientPageURL () {
+      let patientURL = '/patient/' + this.selectedPatient.id + '/profile'
+      this.qr.value = window.origin + patientURL
+      return patientURL
     },
     formatDate (date) {
       return nicers.formattedDate(date)
