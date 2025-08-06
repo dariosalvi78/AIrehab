@@ -23,7 +23,8 @@ BEGIN
         injuries text,
         injuredSide varchar(10),
         injuredBodyPart varchar(50),
-        createdTimestamp datetime
+        createdTimestamp datetime,
+        activated bit NOT NULL DEFAULT 'false'
     )
     ALTER TABLE patient ADD CONSTRAINT patient_physiotherapist_id_fk FOREIGN KEY (physiotherapistId) REFERENCES [user] (id);
 END
