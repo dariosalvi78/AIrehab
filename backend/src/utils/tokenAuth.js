@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 import config from './config.js'
 import users from '../DOM/usersCollection.js'
 import logger from './logger.js'
+import cookies from './cookies.js'
 
 /**
  * Sign new access token for user
@@ -18,15 +19,11 @@ const signResetPwdToken = async (email) => {
     return jwt.sign({ email }, config.JWT.SECRET_KEY, { expiresIn: '1h' })
 }
 
-const session_cookie = {
-    name: '__Host-session.id',
-    options: {
-        sameSite: 'lax',
-        secure: true,
-        httpOnly: true,
-        path: '/'
-    }
+const signPatientAccessToken = async (patient) => {
+    return jwt.sign({ patient }, config.JWT.SECRET_KEY, { expiresIn: '20s' })
 }
+
+const session_cookie = cookies.session, patient_cookie = cookies.patient
 
 /**
  * Middleware method for authenticating user,
@@ -34,7 +31,10 @@ const session_cookie = {
  */
 const authenticateToken = async (req, res, next) => {
     const headers = req.headers
-    const token = req.cookies[session_cookie.name]
+    const type = req.cookies[session_cookie.name]
+        ? { name: 'user', cookie: session_cookie }
+        : { name: 'patient', cookie: patient_cookie }
+    const token = req.cookies[type.cookie.name]
     try {
         if (!token || !headers["x-poe-api"]) {
             logger.debug({ data: headers }, 'blocking unauthorized request')
@@ -42,10 +42,10 @@ const authenticateToken = async (req, res, next) => {
         }
         jwt.verify(token, config.JWT.SECRET_KEY, (err, data) => {
             if (err) {
-                res.clearCookie(session_cookie.name, session_cookie.options)
+                res.clearCookie(type.cookie.name, type.cookie.options)
                 return res.status(401).send('Session has expired, please log in again')
             }
-            req.user = data.user
+            req[type.name] = data[type.name]
             next()
         })
     } catch (err) {
@@ -55,13 +55,13 @@ const authenticateToken = async (req, res, next) => {
 }
 
 /**
- * Verify reset password token
+ * Verify JWT token
  * @returns {Types.User}
  */
-const authenticateResetPWDToken = async (resetToken) => {
+const verifyAuthToken = async (authToken) => {
     return new Promise((resolve, reject) => {
         try {
-            const token = resetToken
+            const token = authToken
             jwt.verify(token, config.JWT.SECRET_KEY, (err, data) => {
                 if (err) {
                     return reject({ reason: err.message, expiredAt: err.expiredAt })
@@ -69,7 +69,7 @@ const authenticateResetPWDToken = async (resetToken) => {
                 resolve(data)
             })
         } catch (err) {
-            console.error('cant authenticate reset password token: ', err)
+            console.error('cant authenticate token: ', err)
             return reject(err)
         }
     })
@@ -97,7 +97,9 @@ export {
     signAccessToken,
     signResetPwdToken,
     authenticateToken,
-    authenticateResetPWDToken,
+    verifyAuthToken,
     createAdmin,
-    session_cookie
+    signPatientAccessToken,
+    session_cookie,
+    patient_cookie
 }
