@@ -1,7 +1,7 @@
 
 import * as Types from '../datamodel/modeljdocs.mjs'
 import bcrypt from 'bcrypt'
-import { signAccessToken, signResetPwdToken, authenticateResetPWDToken, session_cookie } from "../utils/tokenAuth.js"
+import { signAccessToken, signResetPwdToken, verifyAuthToken, session_cookie } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"
 import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
@@ -206,7 +206,7 @@ export default {
     resetPassword: async (req, res) => {
         let newPassword = req.body.newPassword, token = req.body.token
         try {
-            const data_decoded = await authenticateResetPWDToken(token)
+            const data_decoded = await verifyAuthToken(token)
 
             const user = await users.getUserByEmail(data_decoded.email)
             const isSamePWD = await bcrypt.compare(newPassword, user.hashedPassword)
