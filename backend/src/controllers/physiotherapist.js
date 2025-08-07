@@ -5,6 +5,7 @@ import exercises from "../DOM/exercisesCollection.js"
 import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
 import files from '../utils/fileHandler.js'
+import { signPatientAccessToken, patient_cookie, verifyAuthToken } from "../utils/tokenAuth.js"
 
 export default {
 
@@ -182,20 +183,20 @@ export default {
      * @param {Object} res - express response
     */
     editPatient: async (req, res) => {
-        if (!req.user) return res.sendStatus(403)
-        let patient = req.body, newParticipationStatus = req.query.activationStatus
+        if (!req.user && req.query.newStatus == undefined) return res.sendStatus(403)
+        let patient = req.body, newParticipationStatus = req.query.newStatus
         try {
-            const isAssignedTo = await physiotherapist.getOnePatientByID(req.params.patientID)
-            if (req.user.role == 'physiotherapist' && req.user.email !== isAssignedTo.physiotherapistEmail) return res.sendStatus(403)
-
-            if ((!patient.fullName || !patient.dateOfBirth) && !req.query) {
-                return res.status(400).send('Please enter required fields')
-            }
-
             if (newParticipationStatus) {
                 await physiotherapist.updateOnePatientParticipation(newParticipationStatus, req.params.patientID)
                 logger.info({ patientID: req.params.patientID, status: newParticipationStatus }, 'updated patient participation status')
                 return res.send({ status: 'updated', status: newParticipationStatus })
+            }
+            
+            const isAssignedTo = await physiotherapist.getOnePatientByID(req.params.patientID)
+            if (req.user.role == 'physiotherapist' && req.user.email !== isAssignedTo.physiotherapistEmail) return res.sendStatus(403)
+
+            if (!patient.fullName || !patient.dateOfBirth) {
+                return res.status(400).send('Please enter required fields')
             }
 
             await physiotherapist.updateOnePatient(patient, req.params.patientID)
@@ -207,5 +208,77 @@ export default {
             res.sendStatus(500)
             return
         }
-    }
+    },
+
+    /**
+     * Assign patient with authentication to physiotherapist
+     * @param {Object} req - express request
+     * @param {Object} req.body - new patient data
+     * @param {Object} req.params - patientID
+     * @param {Object} res - express response
+    */
+    assignPatient: async (req, res) => {
+        if (!req.params.patientID || !req.query.assignedToID) return res.sendStatus(403)
+        let patientID = req.params.patientID, assignedToID = req.query.assignedToID
+        try {
+            const patient = await physiotherapist.getOnePatientByID(patientID)
+            if (assignedToID !== patient.physiotherapistId) return res.sendStatus(403)
+            const { id, names, physiotherapistId, createdTimestamp } = patient
+
+            const token = await signPatientAccessToken({ id, names, physiotherapistId, createdTimestamp })
+            res.cookie(patient_cookie.name, token, patient_cookie.options)
+            logger.info({ patientID, assignedTo: assignedToID }, 'patient has authenticated to physiotherapist')
+            return res.send({ token: token, message: `
+                This patient has now been authenticated.
+                You can now bookmark this webpage to view your results, or change your preferences.
+                <br><br>If you need to authenticate again, contact your physiotherapist to scan the QR-code or send verification link.
+                <br><br>Clearing browser cookies will make you lose access to this page, and you will need to authenticate again.
+            `}).status(200)
+        }
+        catch (err) {
+            logger.error({ error: err }, 'patient cannot authenticate: ')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    /**
+     * Get info about authenticated patient
+     * @param {Object} req - express request
+     * @param {Object} req.params - patientID
+     * @param {Object} res - express response
+     * @returns {Promise<Types.User>}
+     */
+    getInfo: async (req, res) => {
+        if (!req.params.patientID) return res.sendStatus(403)
+        let patientID = req.params.patientID
+        try {
+            const cookie = req.cookies[patient_cookie.name]
+            if (!cookie) {
+                const supportEmail = (await import('../utils/config.js')).default.admin.username 
+                return res.status(403).send({ 
+                    message: `
+                        Could not authenticate patient to physiotherapist.
+                        <br><br>Contact your physiotherapist to scan the QR-code again or tell them to send verification link.
+                        <br><br>If you need verification link right now, please contact <a href="mailto:${supportEmail}">${supportEmail}</a> 
+                    `
+                })
+            }
+            let data = await verifyAuthToken(cookie)
+            const patient = await physiotherapist.getOnePatientByID(data.patient.id)
+            if (patient.id !== patientID) return res.sendStatus(404)
+
+            return res.send(patient)
+        } catch (err) {
+            if ((err.expiredAt * 1000) >= new Date().getTime()) {
+                const token = await signPatientAccessToken({ id: patientID })
+                res.cookie(patient_cookie.name, token, patient_cookie.options)
+                logger.info({ patientID }, 'refreshed patient authentication')
+                return res.send({ token: token })
+            }
+            logger.error({ error: err }, 'error getting patient info')
+            res.sendStatus(500)
+            return
+        }
+    },
 }
