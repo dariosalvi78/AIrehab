@@ -11,6 +11,7 @@ const API_PREFIX = '/api'
 
 /**
  * Setup for routes
+ * @param {import('express').Express} app
  */
 export default async (app, isAuth) => {
     console.info('Setting up routes')
@@ -35,6 +36,8 @@ export default async (app, isAuth) => {
     app.post(`${API_PREFIX}/patients`, isAuth, physiotherapists.addNewPatient)
     app.delete(`${API_PREFIX}/patients/:patientID`, isAuth, physiotherapists.deletePatient)
     app.put(`${API_PREFIX}/patients/:patientID`, isAuth, physiotherapists.editPatient)
+    app.post(`${API_PREFIX}/patients/:patientID/activate`, physiotherapists.assignPatient)
+    app.get(`${API_PREFIX}/patient/:patientID/info`, physiotherapists.getInfo)
 
     app.get(`${API_PREFIX}/sessions`, isAuth, sessions.getSessions)
     app.get(`${API_PREFIX}/sessions/:sessionID`, isAuth, sessions.getSession)

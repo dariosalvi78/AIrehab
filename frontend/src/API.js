@@ -80,8 +80,19 @@ let API = {
     return response.data
   },
 
-  async editPatient (fullName, dateOfBirth, height, weight, injuries, patientID) {
-    let response = await axios.put('/patients/' + patientID, { fullName, dateOfBirth, height, weight, injuries: { description: injuries.description, injuredSide: injuries.side, injuredBodyPart: injuries.bodyPart } })
+  async editPatient (fullName, dateOfBirth, height, weight, injuries, patientID, activationStatus) {
+    let response = await axios.put('/patients/' + patientID, { fullName, dateOfBirth, height, weight, injuries: { description: injuries.description, injuredSide: injuries.side, injuredBodyPart: injuries.bodyPart } }, { params: { newStatus: activationStatus } })
+    return response.data
+  },
+  
+  async updateActivationStatus (patientID, physiotherapistId) {
+    console.log(patientID, physiotherapistId)
+    let response = await axios.post('/patients/' + patientID + '/activate', {}, { params: { assignedToID: physiotherapistId } })
+    return response.data
+  },
+
+  async getPatientInfo (patientID) {
+    let response = await axios.get('/patient/'+ patientID +'/info')
     return response.data
   },
 
