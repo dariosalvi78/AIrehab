@@ -28,6 +28,12 @@ const routes = [
     ]
   },
   {
+    path: '/patient',
+    children: [
+      { path: ':patientID/profile', component: () => import('components/patients/PatientHome.vue'), props: true }
+    ]
+  },
+  {
     path: '/about',
     children: [
       { path: '', component: () => import('components/About.vue') }

@@ -16,7 +16,11 @@ export default {
   beforeMount () {
     console.debug(`[Quasar app: ${this.$q.version}]`)
 
-    if (!store.getLoginStatus() && !window.location.href.includes('resetpassword')) {
+    if (
+      !store.getLoginStatus() 
+      && !window.location.href.includes('resetpassword') 
+      && !window.location.href.includes('patient')
+    ) {
       this.$router.push('login')
     }
 
@@ -26,7 +30,7 @@ export default {
       if (err.response.status === 401 && !err.config.url.includes('login')) {
         await API.logout()
         store.removeLoginStatus()
-        this.$router.push('login')
+        this.$router.push('/login')
         this.$q.notify({
           color: 'secondary',
           position: 'top',
