@@ -21,7 +21,7 @@
               {{selectedPatient.activated ? 'Patient has given consent' : 'Patient has not given consent' }} 
             </q-badge>
           </div>
-          <q-btn v-if="!selectedPatient.activated" icon-right="open_in_new" size="sm" label="Activate patient" type="submit" color="primary" class="q-my-sm" v-close-popup  @click="openPatientModal = !openPatientModal"/>
+          <q-btn icon-right="open_in_new" size="sm" label="Show activation code" type="submit" color="primary" class="q-my-sm" v-close-popup  @click="openPatientModal = !openPatientModal"/>
         </div>
       </q-card-section>
       <q-separator inset />
@@ -83,7 +83,7 @@
           </div>
           <q-separator />
           <div class="text-center q-my-md">
-            <q-btn label="Click here if code is not working" @click="this.goToPatientPage" no-caps flat round dense />
+            <q-btn icon-right="content_copy" label="Copy verification link if code is not working" @click="this.copyPatientVerificationURL" no-caps flat dense />
           </div>
         </q-card-section>
       </q-card>
@@ -215,14 +215,21 @@ export default {
     navigateToSession (sessionID) {
       return this.$router.push('home/sessions/' + sessionID)
     },
-    goToPatientPage () {
+    copyPatientVerificationURL () {
       const url = this.getPatientPageURL()
-      return this.$router.push(url)
+      navigator.clipboard.writeText(url)
+      this.$q.notify({
+        color: 'info',
+        position: 'top',
+        message: 'Verification link copied to clipboard',
+        icon: 'info'
+      })
+      return
     },
     getPatientPageURL () {
-      let patientURL = '/patient/' + this.selectedPatient.id + '/profile'
+      let patientURL = '/patient/' + this.selectedPatient.id + '/profile?assignedTo=' + this.selectedPatient.physiotherapistId
       this.qr.value = window.origin + patientURL
-      return patientURL
+      return this.qr.value
     },
     formatDate (date) {
       return nicers.formattedDate(date)
