@@ -6,7 +6,7 @@
           <img src="/icons/favicon-maskable.ico">
         </q-avatar>
         <q-toolbar-title>Home</q-toolbar-title>
-        <q-chip outline square size="md" class="q-mx-md text-white">
+        <q-chip v-show="authenticated" outline square size="md" class="q-mx-md text-white">
           {{patient.names}}
         </q-chip>
       </q-toolbar>
@@ -30,7 +30,7 @@
           <q-checkbox
             right-label
             size="lg"
-            v-model="activationStatus"
+            v-model="participationStatus"
             label="I agree to the terms in the information letter"
             checked-icon="task_alt"
             unchecked-icon="highlight_off"
@@ -60,38 +60,94 @@ export default {
   components: { PatientTermsModal },
   data () {
     return {
-      patient: undefined,
-      activationStatus: false,
-      openConsentModal: false
+      patient: {},
+      participationStatus: false,
+      openConsentModal: false,
+      authenticated: undefined
     }
   },
   async beforeMount () {
     this.openConsentModal = false
-    await this.getPatientInfo()
+    this.authenticated = false
+    if (this.patientID && this.$route.query.assignedTo) await this.setPatientActivation()
+    this.participationStatus = await this.getPatientInfo()
   },
   methods: {
     async getPatientInfo() {
       try {
-        let response = await API.getPatient(this.patientID)
+        let response = await API.getPatientInfo(this.patientID)
         if (response) {
+          this.authenticated = true
+          if (response.token) return await this.getPatientInfo()
           this.patient = response
-          this.activationStatus = response.activated
+          return response.activated
         }
       } catch (err) {
-        return this.$q.notify({
+        let errMsg = err
+        this.authenticated = false
+        if (err.response.data.message) {
+          errMsg = err.response.data.message
+          this.$q.dialog({
+            color: 'primary',
+            title: 'Authentication not possible',
+            message: errMsg,
+            ok: { color: 'primary' },
+            position: 'top',
+            cancel: true,
+            html: true
+          })
+        } else {
+            this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: 'Could not retrieve patient: ' + errMsg,
+            icon: 'report_problem'
+          })
+        }
+        return this.participationStatus
+      }
+    },
+    async setPatientActivation () {
+      try {
+        const assignedTo = this.$route.query.assignedTo || null
+        this.$router.replace({ 'query': null })
+        this.$q.loading.show()
+        await nicers.delay(200)
+        let response = await API.updateActivationStatus(this.patientID, assignedTo)
+        if (response.token && response.message) {
+          this.authenticated = true
+          this.$q.dialog({
+            color: 'primary',
+            title: 'Patient is authenticated',
+            message: response.message,
+            ok: { color: 'primary' },
+            position: 'top',
+            cancel: true,
+            html: true
+          })
+        }
+      } catch (err) {
+        this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Could not retrieve patient: ' + err,
+          message: 'Not possible to authenticate patient',
           icon: 'report_problem'
         })
       }
+      this.$q.loading.hide()
+      return
     },
     async updateParticipationStatus () {
       try {
+        const status = this.participationStatus
+        await this.getPatientInfo()
+        if (!this.authenticated) return this.participationStatus = false
+
         this.$q.loading.show()
         await nicers.delay(200)
-        let response = await API.editPatient(undefined, undefined, undefined, undefined, {}, this.patient.id, this.activationStatus)
+        let response = await API.editPatient(undefined, undefined, undefined, undefined, {}, this.patient.id, status)
         if (response) {
+          this.participationStatus = status
           this.$q.notify({
             color: 'info',
             position: 'top',
@@ -100,14 +156,13 @@ export default {
           })
         }
       } catch (err) {
-        console.log(err)
         this.$q.notify({
           color: 'negative',
           position: 'top',
           message: 'Could not update participation: ' + err,
           icon: 'report_problem'
         })
-        this.activationStatus = false
+        this.participationStatus = false
       }
       this.$q.loading.hide()
       return
