@@ -80,7 +80,7 @@ export default {
     */
     getSessionByID: async function (sessionID, therapistEmail) {
         const response = await db.query(`
-            SELECT s.*, p.names AS patientName FROM [physiotherapy_session] s
+            SELECT s.*, p.names AS patientName, p.activated FROM [physiotherapy_session] s
             INNER JOIN [patient] p ON p.id = s.patientId
             INNER JOIN [user] u ON p.physiotherapistId = u.id
             WHERE u.email = '${therapistEmail}'
