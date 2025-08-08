@@ -83,6 +83,7 @@ export default {
             if (req.user.role == 'physiotherapist') {
                 const sessionAssignedTo = await sessions.getSessionByID(exercise.sessionID, req.user.email)
                 if (sessionAssignedTo.id !== exercise.sessionID) return res.sendStatus(403)
+                else if (!sessionAssignedTo.activated) return res.sendStatus(400)
             }
 
             if (!exercise || !exercise.sessionID) return res.status(400).send('Please enter required fields')

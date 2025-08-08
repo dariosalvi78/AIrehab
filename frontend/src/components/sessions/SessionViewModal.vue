@@ -130,6 +130,14 @@ export default {
       return
     },
     openExerciseModal (formMode, editData) {
+      if (!this.session.activated) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Patient has not consented to be part of exercise',
+          icon: 'warning'
+        })
+      }
       if (formMode == 'edit') this.selectedExercise = editData
       this.exerciseModalPrompt = !this.exerciseModalPrompt
       this.exerciseForm = formMode
