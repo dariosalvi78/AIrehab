@@ -12,7 +12,7 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <q-card flat class="q-my-lg">
+      <q-card flat bordered class="q-my-lg q-ma-md">
         <q-card-section>
           <div class="text-h6">Patient consent</div>
         </q-card-section>
@@ -38,6 +38,40 @@
           />
         </q-card-actions>
       </q-card>
+      <q-card flat bordered class="q-my-lg q-ma-md">
+        <q-card-section>
+          <div class="text-h6">Exercises</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+            <div class="text-body2">Here you can see your exercise results</div>
+        </q-card-section>
+        <q-separator />
+        <q-card-section class="q-pa-none">
+          <div v-if="!results.length" class="text-body2 text-center q-pa-md">
+            No exercise results found
+          </div>
+          <q-list v-else-if="results.length" v-for="exercise in results" :key="exercise.id">
+            <q-expansion-item
+              icon="accessibility"
+              :label="exercise.type"
+              :caption="exercise.startTimestamp"
+              class="q-py-sm text-body1"
+            >
+              <div class="col q-ma-md text-body2">
+                <div style="margin-left:-2px;" class="text-capitalize">
+                  <q-icon style="bottom:2px;" size="sm" name="schedule" />
+                  {{ exercise.startTimestamp }}
+                  - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
+                </div>
+              </div>
+              <poe-view-modal v-if="exercise.poe.length" :assessmentResults="exercise.poe"/>
+              <div v-else class="q-ma-md text-body2">
+                No POE assessment available
+              </div>
+            </q-expansion-item>
+          </q-list>
+        </q-card-section>
+      </q-card>
     </q-page-container>
     <patient-terms-modal :openModal="openConsentModal"/>
   </q-layout>
@@ -53,17 +87,20 @@
 import API from '../../API'
 import nicers from '../../utils/nicers'
 import PatientTermsModal from './PatientTermsModal.vue'
+import PoeViewModal from '../exercises/PoeViewModal.vue'
+import exerciseType from '../../utils/types/exerciseTypesEnum'
 
 export default {
   name: 'PatientHome',
   props: { patientID: String },
-  components: { PatientTermsModal },
+  components: { PatientTermsModal, PoeViewModal },
   data () {
     return {
       patient: {},
       participationStatus: false,
       openConsentModal: false,
-      authenticated: undefined
+      authenticated: undefined,
+      results: []
     }
   },
   async beforeMount () {
@@ -79,8 +116,9 @@ export default {
         if (response) {
           this.authenticated = true
           if (response.token) return await this.getPatientInfo()
-          this.patient = response
-          return response.activated
+          this.patient = response.patient
+          this.results = await this.formatExerciseData(response.results)
+          return response.patient.activated
         }
       } catch (err) {
         let errMsg = err
@@ -166,7 +204,36 @@ export default {
       }
       this.$q.loading.hide()
       return
-    }
+    },
+    async formatExerciseData (exercises) {
+      let results = exercises
+      for (const e in results) {
+        let exercise = exercises[e]
+        exercise.type = exerciseType.typeToAsc(exercise.type)
+        exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
+        exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
+        
+        // TODO: This should be moved to PoeViewModal
+        for (const p in exercise.poe) {
+          let poe = exercise.poe[p], confidences = []
+
+          poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
+          poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
+          poe["repetition"] = poe["repetition"] === 0 ? 'Summative evaluation' : poe["repetition"]
+
+          for (let i = 0; i < 3; i++) {
+            confidences.push({score: poe['scoreConfidence_'+ i] = parseFloat((poe['scoreConfidence_'+ i]*100)).toFixed(0), text: nicers.formattedScoreToText(i)})
+            poe['confidences'] = confidences
+            delete poe['scoreConfidence_'+ i]
+          }
+          poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
+        }
+      }
+      return results
+    },
+    formatDate (date) {
+      return nicers.formattedDayOfMonth(date)
+    } 
   }
 }
 </script>
