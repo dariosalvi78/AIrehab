@@ -264,11 +264,19 @@ export default {
                     `
                 })
             }
-            let data = await verifyAuthToken(cookie)
+            let data = await verifyAuthToken(cookie), pExercises = []
             const patient = await physiotherapist.getOnePatientByID(data.patient.id)
-            if (patient.id !== patientID) return res.sendStatus(404)
 
-            return res.send(patient)
+            if (patient.id !== patientID) return res.sendStatus(404)
+            if (patient.sessionID) {
+                pExercises = await exercises.getExercisesInSessionByEmail(patient.sessionID, patient.physiotherapistEmail)
+                for (const e in pExercises) {
+                    let exercise = pExercises[e]
+                    let poe_results = await poe.getEvaluationsFromID(exercise.id)
+                    exercise.poe = poe_results
+                }
+            }
+            return res.send({ patient: patient, results: pExercises })
         } catch (err) {
             if ((err.expiredAt * 1000) >= new Date().getTime()) {
                 const token = await signPatientAccessToken({ id: patientID })
