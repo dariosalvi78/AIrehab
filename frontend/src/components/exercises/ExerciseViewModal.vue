@@ -5,8 +5,8 @@
       <div v-if="!videoFile">
         <exercise-instructions class="q-mb-md"/>
         <q-tabs v-model="deviceTab" dense class="text-grey" active-color="primary" indicator-color="primary" align="justify" narrow-indicator>
-          <q-tab name="phone" label="Upload" />
-          <q-tab name="app" label="Record" />
+          <q-tab name="phone" label="Upload existing video" no-caps />
+          <q-tab name="app" label="Record new video" no-caps/>
         </q-tabs>
         <q-separator />
         <q-tab-panels keep-alive v-model="deviceTab" animated>
@@ -45,11 +45,21 @@
                 <q-btn :disabled="isRecording" label="Start recording" color="positive" size="md" icon-right="camera" @click="videoCapture" />
                 <q-btn :disabled="!isRecording" label="Stop recording" color="secondary" size="md" icon-right="camera" @click="stopVideoCapture" />
               </q-card-section>
-              <div class="video-container col">
+              <div class="video-container col text-center">
                 <video v-if="isRecording" ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
                   <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
                 </video>
+                <div v-show="showPreview">
+                  <div class="text-h6 q-my-md">Video preview</div>
+                  <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
+                  <div class="q-mt-md text-body2" v-if="uploadedFile">
+                    Size: {{getUploadedFileSize}}
+                  </div>
+                  <div class="text-body2 q-my-md">You can press "Start recording" again if you are not satisfied with the video</div>
+                  <div class="text-body2 q-my-md">When you are done, press "Upload video" to start evaluation</div>
+                  <q-btn :disabled="!uploadedFile" class="q-my-md" label="Upload video" color="secondary" size="md" icon-right="upload" @click="saveVideo" />
+                </div>
               </div>
             </q-card>
           </q-tab-panel>
@@ -73,63 +83,10 @@
               <div class="text-body1">Results from recorded exercise video</div>
             </q-card-section>
             <q-separator />
-            <q-list bordered class="rounded-borders" :key="res.posturalOrientation" v-for="res in poe">
-              <q-expansion-item
-                class="q-py-sm"
-                expand-separator
-              >
-                <template v-slot:header>
-                <q-item-section class="text-subtitle2">
-                  {{ res.posturalOrientation }}
-                </q-item-section>
-                <q-item-section side>
-                  <q-chip
-                    outline
-                    :clickable="false" 
-                    :ripple="false" 
-                    :text-color="`${ 
-                      res.score === 0 ? 'positive' 
-                      : res.score === 1 ? 'warning' 
-                      : 'negative'
-                    }`" 
-                  >
-                    {{ res.scoreToText }}
-                  </q-chip>
-                </q-item-section>
-                </template>
-                <q-card>
-                  <q-card-section>
-                    <div class="text-subtitle2">Evaluation</div>
-                    <div class="text-body2 q-mb-sm">Highest confidence score: <b>{{ res.scoreToText }}</b></div>
-                    <div class="text-body2">Predicted confidence in this score: <b>{{ res.highestPredictedConfidence }} %</b></div>
-                    <q-list dense class="rounded-borders">
-                      <q-expansion-item
-                        class="q-pt-sm q-pr-lg text-subtitle2"
-                        label="Score"
-                        caption="See all scores for evaluation"
-                        header-style="padding:0;"
-                      >
-                        <q-item-section class="q-mx-md q-pa-none">
-                          <div class="q-py-sm" v-for="confidence in res.confidences" :key="confidence">
-                            <q-item-label caption><b>{{confidence.text}}</b> · {{ confidence.score }} % confidence</q-item-label>
-                          </div>
-                        </q-item-section>
-                      </q-expansion-item>
-                    </q-list>
-                  </q-card-section>
-                  <q-separator inset />
-                  <q-card-section>
-                    <div class="text-subtitle2">Postural orientation</div>
-                    <div class="text-body2">{{ res.posturalOrientation }}</div>
-                  </q-card-section>
-                  <q-separator inset />
-                  <q-card-section>
-                    <div class="text-subtitle2">Repetition</div>
-                    <div class="text-body2">{{ res.repetition }}</div>
-                  </q-card-section>
-                </q-card>
-              </q-expansion-item>
-            </q-list>
+            <poe-view-modal 
+              :assessmentResults="poe" 
+              class="q-mt-sm"
+            />
           </q-card>
         </transition>
         <div class="q-pa-lg video-container">
@@ -149,9 +106,10 @@
 import API from '../../API'
 import nicers from '../../utils/nicers'
 import ExerciseInstructions from './ExerciseInstructions.vue'
+import PoeViewModal from './PoeViewModal.vue'
 
 export default {
-  components: { ExerciseInstructions },
+  components: { ExerciseInstructions, PoeViewModal },
   name: 'ExerciseViewModal',
   props: {
     sessionID: String,
@@ -163,12 +121,12 @@ export default {
       videoChunks: [],
       hasVideoDevice: false,
       isRecording: false,
-      hasPermissions: false,
       uploadedFile: undefined,
       videoFile: undefined,
       poe: undefined,
       isGettingPOEStatus: true,
-      deviceTab: 'phone'
+      showPreview: false,
+      deviceTab: 'app'
     }
   },
   async beforeMount () {
@@ -181,7 +139,8 @@ export default {
   },
   methods: {
     async checkForVideoSupport () {
-      if (navigator.mediaDevices) {
+      try {
+        if (!navigator.mediaDevices?.enumerateDevices) console.error("Not possible to list input devices")
         let devices = await navigator.mediaDevices.enumerateDevices()
         for (const input in devices) {
           if (devices[input].kind.includes('videoinput')) {
@@ -190,13 +149,22 @@ export default {
           }
         }
         return this.hasVideoDevice
+      } catch (err) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Video not available: '+ err.message,
+          icon: 'report_problem'
+        })
       }
+
     },
     async videoCapture () {
       this.isRecording = true
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } }, audio: false })
+      this.showPreview = false
+      this.videoChunks = []
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
         .then((stream) => {
-          this.hasPermissions = true
           this.$refs.videoOutput.srcObject = stream
 
           this.mediaRecorder = new MediaRecorder(stream)
@@ -207,7 +175,6 @@ export default {
         })
         .catch((err) => {
           this.isRecording = false
-          this.hasPermissions = false
           console.error(err)
           return this.$q.notify({
             color: 'negative',
@@ -219,19 +186,25 @@ export default {
     },
     async stopVideoCapture () {
       this.isRecording = false
+      this.showPreview = true
       this.mediaRecorder.stop()
 
       let blob = new Blob(this.videoChunks, { type: "video/webm" });
       let mediaBlobUrl = URL.createObjectURL(blob);
-      this.$refs.videoOutput.src = mediaBlobUrl
+      let file = new File([blob], 'exercise_' + this.exerciseID + '.webm', { type: 'video/webm' })
+      const output = this.$refs.uploadedVideoPreview
+
+      this.uploadedFile = file
+      output.style.display = 'block'
+      output.src = URL.createObjectURL(file)
 
       // saves video directly on phone,
-      let a = document.createElement('a')
-      a.style = 'display: none'
-      a.href = mediaBlobUrl
-      a.download = 'exercise_' + this.exerciseID + '.webm'
-      a.click()
-      URL.revokeObjectURL(mediaBlobUrl)
+      // let a = document.createElement('a')
+      // a.style = 'display: none'
+      // a.href = mediaBlobUrl
+      // a.download = 'exercise_' + this.exerciseID + '.webm'
+      // a.click()
+      URL.revokeObjectURL(file)
     },
     uploadedRecordedVideo(e) {
       const output = this.$refs.uploadedVideoPreview

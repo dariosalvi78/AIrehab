@@ -145,7 +145,7 @@ export default {
       } catch (err) {
         let errMsg = err
         if (err.response && err.response.status == 400) errMsg = err.response.data
-        return this.$q.notify({
+        this.$q.notify({
           color: 'negative',
           position: 'top',
           message: 'Creating new exercise failed: ' + errMsg,
