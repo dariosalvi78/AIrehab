@@ -91,6 +91,7 @@ docker run -i \
 -e MAIL_PASSWORD=password \
 -e POE_BASE_URL=airehabpoe \
 -e POE_PORT=3000 \
+-e POE_device=cpu \
 -e POE_RUN_MODEL=true \
 airehabbackend 
 ```
