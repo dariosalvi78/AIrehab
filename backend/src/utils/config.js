@@ -36,6 +36,7 @@ const config = {
     poe: {
         base_url: process.env.POE_BASE_URL,
         port: process.env.POE_PORT,
+        device: process.env.POE_DEVICE,
         runModel: process.env.POE_RUN_MODEL
     },
     certs: {
