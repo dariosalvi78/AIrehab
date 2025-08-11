@@ -23,9 +23,10 @@ export default {
         if (config.poe.runModel === 'true') {
             const SESSION_DIR = 'session_' + sessionID + '/exercise_' + exerciseID
             const VIDEO_PATH = SESSION_DIR + '/vid_' + videoFilename
+            const DEVICE_TYPE = config.poe.device
             try {
-                let leg = exerciseType == 'singleLeggedSquatLeft' ? 'L' : 'R'
-                let response = await axios.post(`${POE_SERVER_URL}/analyse_video?path=${VIDEO_PATH}&leg=${leg}`,
+                const leg = this.mapExerciseTypeDesc(exerciseType)
+                let response = await axios.post(`${POE_SERVER_URL}/analyse_video?path=${VIDEO_PATH}&leg=${leg}&device=${DEVICE_TYPE}`,
                     {
                         headers: { "Content-Type": 'application/json' }
                     })
@@ -113,5 +114,17 @@ export default {
         } else if (orient.toLowerCase() == 'kmfp') {
             return 'kneeMedialToFootPosition'
         } else return 'Unknown'
+    },
+
+    /**
+     * @param {Types.Exercise['type']} type exercise type
+     * @returns {String}
+     */
+    mapExerciseTypeDesc (type) {
+        if (type === 'singleLeggedSquatLeft') {
+            return 'L'
+        } else if (type === 'singleLeggedSquatRight') {
+            return 'R'
+        } else return undefined
     }
 }
