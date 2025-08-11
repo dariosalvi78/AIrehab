@@ -174,6 +174,7 @@ describe('getPatients access:', function () {
     })
 
     it('physiotherapist can get assigned patients', async function () {
+        spyOn(physiotherapistCollection, 'getOneTherapistByEmail').and.returnValue(this.physiotherapist)
         spyOn(physiotherapistCollection, 'getPatientsByEmail').and.returnValue([this.patient, [{ maxPage: 1 }]])
         await physiotherapist.getPatients({
             user: { role: 'physiotherapist', email: this.physiotherapist.email },
@@ -183,12 +184,14 @@ describe('getPatients access:', function () {
                 expect(data instanceof Object).toBe(true)
                 expect(data.patients).toBeDefined()
                 expect(data.maxPageNo).toEqual(1)
+                expect(physiotherapistCollection.getOneTherapistByEmail).toHaveBeenCalled()
                 expect(physiotherapistCollection.getPatientsByEmail).toHaveBeenCalled()
             }
         })
     })
 
     it('physiotherapist error on invalid email', async function () {
+        spyOn(physiotherapistCollection, 'getOneTherapistByEmail').and.returnValue(undefined)
         spyOn(physiotherapistCollection, 'getPatientsByEmail').and.returnValue(undefined)
         await physiotherapist.getPatients({
             user: { role: 'physiotherapist', email: 'email@notexist.com' },
@@ -196,6 +199,7 @@ describe('getPatients access:', function () {
         }, {
             sendStatus(status) {
                 expect(status).toBe(500)
+                expect(physiotherapistCollection.getOneTherapistByEmail).toHaveBeenCalled()
                 expect(physiotherapistCollection.getPatientsByEmail).toHaveBeenCalled()
             }
         })
@@ -378,7 +382,7 @@ describe('deletePatient access:', function () {
 
 describe('editPatient access:', function () {
     it('get edit patient requires authentication', async function () {
-        await physiotherapist.editPatient({ user: undefined }, {
+        await physiotherapist.editPatient({ user: undefined, query: { newStatus: undefined } }, {
             sendStatus(status) {
                 expect(status).toBe(403)
             }
@@ -390,7 +394,7 @@ describe('editPatient access:', function () {
         await physiotherapist.editPatient({
             user: { role: 'admin' },
             body: { fullName: patient.names, dateOfBirth: undefined },
-            params: { patientID: patient.id }
+            params: { patientID: patient.id }, query: { newStatus: undefined }
         }, {
             status(status) {
                 expect(status).toBe(400)
@@ -408,7 +412,7 @@ describe('editPatient access:', function () {
         await physiotherapist.editPatient({
             user: this.physiotherapist,
             body: { fullName: patient.names, dateOfBirth: new Date().toISOString() },
-            params: { patientID: patient.id }
+            params: { patientID: patient.id }, query: { newStatus: undefined }
         }, {
             sendStatus(status) {
                 expect(status).toBe(403)
@@ -423,7 +427,7 @@ describe('editPatient access:', function () {
         await physiotherapist.editPatient({
             user: { role: 'admin' },
             body: { fullName: patient.names, dateOfBirth: new Date().toISOString() },
-            params: { patientID: patient.id }
+            params: { patientID: patient.id }, query: { newStatus: undefined }
         }, {
             sendStatus(status) {
                 expect(status).toBe(204)
@@ -439,7 +443,7 @@ describe('editPatient access:', function () {
         await physiotherapist.editPatient({
             user: therapist,
             body: { fullName: patient.names, dateOfBirth: new Date().toISOString() },
-            params: { patientID: patient.id }
+            params: { patientID: patient.id }, query: { newStatus: undefined }
         }, {
             sendStatus(status) {
                 expect(status).toBe(204)
