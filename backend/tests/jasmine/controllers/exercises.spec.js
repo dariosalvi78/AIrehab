@@ -228,7 +228,7 @@ describe('addNewExercise access:', function () {
     it('physiotherapist can create exercise for own patients', async function () {
         let therapist = this.physiotherapist, _session = this.sessions[0]
         spyOn(exercisesCollection, 'createExercise').and.returnValue(this.exercises[0])
-        spyOn(sessions, 'getSessionByID').and.returnValue({ id: _session.sessionID })
+        spyOn(sessions, 'getSessionByID').and.returnValue({ id: _session.sessionID, activated: true })
         await exercises.addNewExercise({
             user: therapist,
             body: { exercises: this.exercises[0], sessionID: _session.sessionID }
@@ -245,6 +245,22 @@ describe('addNewExercise access:', function () {
                 expect(created.data.exercise.videoFile).not.toBeDefined()
                 expect(sessions.getSessionByID).toHaveBeenCalled()
                 expect(exercisesCollection.createExercise).toHaveBeenCalled()
+            }
+        })
+    })
+    it('cant create exercise if patient not activated', async function () {
+        let therapist = this.physiotherapist, _session = this.sessions[0]
+        spyOn(exercisesCollection, 'createExercise')
+        spyOn(sessions, 'getSessionByID').and.returnValue({ id: _session.sessionID, activated: false })
+        await exercises.addNewExercise({
+            user: therapist,
+            body: { exercises: this.exercises[0], sessionID: _session.sessionID }
+        }, {
+            sendStatus(status) {
+                console.log(status)
+                expect(status).toBe(400)
+                expect(sessions.getSessionByID).toHaveBeenCalled()
+                expect(exercisesCollection.createExercise).not.toHaveBeenCalled()
             }
         })
     })
