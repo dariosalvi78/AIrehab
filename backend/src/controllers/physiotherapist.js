@@ -179,19 +179,20 @@ export default {
      * Edit data for one specific patient
      * @param {Object} req - express request
      * @param {Object} req.body - new patient data
+     * @param {Object} req.query - newStatus (used by patient)
      * @param {Object} req.params - patientID
      * @param {Object} res - express response
     */
     editPatient: async (req, res) => {
-        if (!req.user && req.query.newStatus == undefined) return res.sendStatus(403)
-        let patient = req.body, newParticipationStatus = req.query.newStatus
+        let patient = req.body, newParticipationStatus = req.query.newStatus || undefined
         try {
-            if (newParticipationStatus) {
+            if (newParticipationStatus && req.patient) {
                 await physiotherapist.updateOnePatientParticipation(newParticipationStatus, req.params.patientID)
                 logger.info({ patientID: req.params.patientID, status: newParticipationStatus }, 'updated patient participation status')
                 return res.send({ status: 'updated', status: newParticipationStatus })
             }
             
+            if (!req.user) return res.sendStatus(403)
             const isAssignedTo = await physiotherapist.getOnePatientByID(req.params.patientID)
             if (req.user.role == 'physiotherapist' && req.user.email !== isAssignedTo.physiotherapistEmail) return res.sendStatus(403)
 
@@ -267,7 +268,7 @@ export default {
             let data = await verifyAuthToken(cookie), pExercises = []
             const patient = await physiotherapist.getOnePatientByID(data.patient.id)
 
-            if (patient.id !== patientID) return res.sendStatus(404)
+            if (patient == undefined || patient.id !== patientID) return res.sendStatus(404)
             if (patient.sessionID) {
                 pExercises = await exercises.getExercisesInSessionByEmail(patient.sessionID, patient.physiotherapistEmail)
                 for (const e in pExercises) {
