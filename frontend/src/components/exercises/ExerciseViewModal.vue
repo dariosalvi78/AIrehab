@@ -4,66 +4,70 @@
     <q-page class="q-py-md">
       <div v-if="!videoFile">
         <exercise-instructions class="q-mb-md"/>
-        <q-tabs v-model="deviceTab" dense class="text-grey" active-color="primary" indicator-color="primary" align="justify" narrow-indicator>
-          <q-tab name="phone" label="Upload existing video" no-caps />
-          <q-tab name="app" label="Record new video" no-caps/>
-        </q-tabs>
         <q-separator />
-        <q-tab-panels keep-alive v-model="deviceTab" animated>
-          <q-tab-panel class="device-panel" name="phone">
-            <q-card flat class="q-ma-md">
-              <q-card-section class="column items-center q-pa-sm">
-                <q-file class="q-mb-sm" ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" label="Open camera" 
-                  v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="camera" />
-                  </template>
-                </q-file>
-                <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
-                </form>
-                <div class="video-container col" v-show="uploadedFile">
-                  <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
-                </div>
-                <div class="q-mt-md text-body2" v-if="uploadedFile">
-                  Recorded: {{formatModifiedDate}}<br/>
-                  Size: {{getUploadedFileSize}}
-                </div>
-                <q-btn :disabled="!uploadedFile" class="q-my-md" label="Save video" color="secondary" size="md" icon-right="camera" @click="saveVideo" />
-              </q-card-section>
-            </q-card>
-          </q-tab-panel>
-          <q-tab-panel class="device-panel" name="app">
-            <q-card flat class="q-pa-lg">
-              <q-card-section v-if="!hasVideoDevice" class="flex column items-center">
-                <div class="text-h6 col">Device has no video inputs</div>
-                <div class="col">
-                  <q-btn label="Reconnect" color="secondary" size="md" @click="checkForVideoSupport" />
-                </div>
-              </q-card-section>
-              <q-card-section v-else class="flex flex-center q-gutter-md">
-                <q-btn :disabled="isRecording" label="Start recording" color="positive" size="md" icon-right="camera" @click="videoCapture" />
-                <q-btn :disabled="!isRecording" label="Stop recording" color="secondary" size="md" icon-right="camera" @click="stopVideoCapture" />
-              </q-card-section>
+        <q-card flat class="q-ma-md">
+          <q-card-section v-show="!uploadedFile" class="column items-center q-pa-sm">
+            <div class="text-body2 text-center q-my-md">Record new exercise for POE assessment</div>
+            <q-btn v-if="hasVideoDevice" class="q-mb-md q-pa-sm full-width" label="Open camera" color="secondary" icon-right="camera" @click="openRecordingModal" />
+            <div v-else class="flex column items-center full-width">
+              <q-badge class="col q-mb-md" outline color="negative" label="Device has no video inputs" />
+              <q-btn class="col q-mb-md q-py-sm full-width" label="Reconnect video" color="secondary" icon="refresh" @click="checkForVideoSupport" no-caps />
+            </div>
+          </q-card-section>
+          <q-separator />
+          <q-card-section class="column items-center q-pa-sm">
+            <div v-show="!uploadedFile" class="text-body2 text-center q-my-md">Upload video that you have already recorded</div>
+            <q-file class="q-mb-sm full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" label="Upload exercise video" 
+              v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload"
+            >
+              <template v-slot:prepend>
+                <q-icon name="attach_file" />
+              </template>
+              <template v-if="uploadedFile" v-slot:append>
+                <q-icon name="cancel" @click.stop.prevent="uploadedFile = null" class="cursor-pointer" />
+              </template>
+            </q-file>
+            <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
+            </form>
+            <div class="video-container col" v-show="uploadedFile">
+              <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
+            </div>
+            <div class="q-mt-md text-body2" v-if="uploadedFile">
+              Recorded: {{formatModifiedDate}}<br/>
+              Size: {{getUploadedFileSize}}
+            </div>
+            <q-btn v-show="uploadedFile" class="q-my-md full-width" label="Begin exercise assessment" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
+          </q-card-section>
+        </q-card>
+        <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal">
+          <q-card class="full-width">
+            <q-card-section class="flex justify-between">
+              <div class="text-body1">Record exercise video</div>
+              <q-btn class="q-pa-none q-pb-sm" flat label="Close" v-close-popup />
+            </q-card-section>
+            <q-separator />
+            <q-card-section class="flex flex-center column">
               <div class="video-container col text-center">
-                <video v-if="isRecording" ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
+                <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
                   <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
                 </video>
-                <div v-show="showPreview">
-                  <div class="text-h6 q-my-md">Video preview</div>
-                  <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
-                  <div class="q-mt-md text-body2" v-if="uploadedFile">
-                    Size: {{getUploadedFileSize}}
-                  </div>
-                  <div class="text-body2 q-my-md">You can press "Start recording" again if you are not satisfied with the video</div>
-                  <div class="text-body2 q-my-md">When you are done, press "Upload video" to start evaluation</div>
-                  <q-btn :disabled="!uploadedFile" class="q-my-md" label="Upload video" color="secondary" size="md" icon-right="upload" @click="saveVideo" />
-                </div>
               </div>
-            </q-card>
-          </q-tab-panel>
-        </q-tab-panels>
+            </q-card-section>
+            <q-separator />
+            <q-card-section>
+              <div class="col q-mb-md flex flex-center">
+                <q-btn v-show="!isRecording" padding="md" round color="white" size="xl" push @click="startRecording">
+                  <q-icon size="xl" name="photo_camera" color="negative"/>
+                </q-btn>
+                <q-btn v-show="isRecording" round push @click="stopVideoCapture">
+                  <q-icon size="84px" name="stop" color="negative"/>
+                </q-btn>
+              </div>
+              <div class="text-subtitle2 text-center q-mt-md">{{!isRecording ? 'Start recording': 'Stop recording'}}</div>
+            </q-card-section>
+          </q-card>
+        </q-dialog>
       </div>
       <div v-else>
         <q-card v-if="!poe" flat class="q-pa-lg flex flex-center">
@@ -126,7 +130,7 @@ export default {
       poe: undefined,
       isGettingPOEStatus: true,
       showPreview: false,
-      deviceTab: 'app'
+      openRecordModal: false
     }
   },
   async beforeMount () {
@@ -160,18 +164,12 @@ export default {
 
     },
     async videoCapture () {
-      this.isRecording = true
       this.showPreview = false
       this.videoChunks = []
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
         .then((stream) => {
           this.$refs.videoOutput.srcObject = stream
-
           this.mediaRecorder = new MediaRecorder(stream)
-
-          this.mediaRecorder.start(1000)
-
-          this.mediaRecorder.ondataavailable = (e) => this.videoChunks.push(e.data)
         })
         .catch((err) => {
           this.isRecording = false
@@ -185,6 +183,8 @@ export default {
         })
     },
     async stopVideoCapture () {
+      this.$q.loading.show()
+      await nicers.delay(200)
       this.isRecording = false
       this.showPreview = true
       this.mediaRecorder.stop()
@@ -205,6 +205,14 @@ export default {
       // a.download = 'exercise_' + this.exerciseID + '.webm'
       // a.click()
       URL.revokeObjectURL(file)
+      this.$refs.qRecordDialog.hide()
+      this.$q.loading.hide()
+    },
+    async startRecording () {
+      this.isRecording = true
+      this.$refs.videoOutput.classList.toggle('recording')
+      this.mediaRecorder.start(1000)
+      this.mediaRecorder.ondataavailable = (e) => this.videoChunks.push(e.data)
     },
     uploadedRecordedVideo(e) {
       const output = this.$refs.uploadedVideoPreview
@@ -332,6 +340,11 @@ export default {
         icon: 'report_problem'
       })
       this.$refs.uploader.removeFile(this.uploadedFile)
+    },
+    async openRecordingModal () {
+      this.openRecordModal = !this.openRecordModal
+      await nicers.delay(500)
+      if (this.$refs.videoOutput) await this.videoCapture()
     }
   },
   computed: {
@@ -368,6 +381,20 @@ export default {
 }
 .device-panel {
   min-height: 300px;
+}
+.videoPlaceholder {
+  margin: 0 auto;
+  height: 400px;
+  width: 300px;
+  max-width: 100%;
+}
+#recordModal .video-container {
+  display: flex;
+  min-height: 400px;
+  max-width: 100%;
+}
+.recording {
+  outline: 2px solid var(--q-negative);
 }
 
 @media only screen and (max-width: 550px) {
