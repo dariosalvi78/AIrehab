@@ -40,11 +40,12 @@
           </q-card-section>
         </q-card>
         <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal">
-          <q-card class="full-width">
-            <q-card-section class="flex justify-between">
+          <q-card class="full-width" style="maxHeight:100%">
+            <q-card-section  class="q-pb-none flex justify-between">
               <div class="text-body1">Record exercise video</div>
               <q-btn class="q-pa-none q-pb-sm" flat label="Close" v-close-popup />
             </q-card-section>
+            <q-checkbox class="q-mx-md q-mb-md text-weight-light" dense v-model="saveVideoToDevice" label="(Optional) Save video to device" />
             <q-separator />
             <q-card-section class="flex flex-center column">
               <div class="video-container col text-center">
@@ -130,7 +131,8 @@ export default {
       poe: undefined,
       isGettingPOEStatus: true,
       showPreview: false,
-      openRecordModal: false
+      openRecordModal: false,
+      saveVideoToDevice: false
     }
   },
   async beforeMount () {
@@ -189,21 +191,24 @@ export default {
       this.showPreview = true
       this.mediaRecorder.stop()
 
+      const filename = 'exercise_' + this.exerciseID + '.webm'
       let blob = new Blob(this.videoChunks, { type: "video/webm" });
       let mediaBlobUrl = URL.createObjectURL(blob);
-      let file = new File([blob], 'exercise_' + this.exerciseID + '.webm', { type: 'video/webm' })
+      let file = new File([blob], filename, { type: 'video/webm' })
       const output = this.$refs.uploadedVideoPreview
 
       this.uploadedFile = file
       output.style.display = 'block'
       output.src = URL.createObjectURL(file)
 
-      // saves video directly on phone,
-      // let a = document.createElement('a')
-      // a.style = 'display: none'
-      // a.href = mediaBlobUrl
-      // a.download = 'exercise_' + this.exerciseID + '.webm'
-      // a.click()
+      // saves video directly on device
+      if (this.saveVideoToDevice) {
+        let a = document.createElement('a')
+        a.style = 'display: none'
+        a.href = mediaBlobUrl
+        a.download = filename
+        a.click()
+      }
       URL.revokeObjectURL(file)
       this.$refs.qRecordDialog.hide()
       this.$q.loading.hide()
