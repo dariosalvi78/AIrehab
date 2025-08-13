@@ -70,10 +70,19 @@
                 <q-item-label caption>Change information for {{props.row.email}}</q-item-label>
               </q-item-section>
             </q-item>
+            <q-item v-show="props.row.role == 'patient'" clickable v-close-popup @click="onRowClick('copy', props.row)">
+              <q-item-section avatar>
+                <q-avatar icon="content_copy" size="lg"/>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Verification</q-item-label>
+                <q-item-label caption>Copy verification link to clipboard</q-item-label>
+              </q-item-section>
+            </q-item>
           </q-btn-dropdown>
           </q-td>
           <q-td key="username" name="Username" :props="props">
-            {{ props.row.email }}
+            {{ props.row.email }} <q-chip v-show="props.row.role == 'patient'" outline :label="props.row.activated ? 'Consented' : 'No consent'" size="sm" :color="props.row.activated ? 'positive' : 'negative'" />
           </q-td>
           <q-td key="role" name="role" :props="props" class="text-capitalize">
             {{ getFormattedUserRole(props.row.role) }}
@@ -191,7 +200,7 @@ export default {
         patient["lastLoginTimestamp"] = 'N/A'
         delete patient["names"]
       })
-      
+
       let allUsers = users.concat(patients)
 
       allUsers.map((user) => {
@@ -225,6 +234,9 @@ export default {
       } else if (prompt == 'add' && this.selectedUser.role === 'physiotherapist') {
         this.openPatientForm = { status: !this.openPatientForm.status, form: 'adminNew' }        
         this.selectedUser.physiotherapistEmail = this.selectedUser.email
+      } else if (prompt == 'copy' && this.selectedUser.role === 'patient') {
+        const url = window.origin + '/patient/' + this.selectedUser.id + '/profile?assignedTo=' + this.selectedUser.physiotherapistId
+        await nicers.copyTextToClipboard(url)
       }
       else return
     },

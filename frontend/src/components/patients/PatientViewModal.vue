@@ -215,16 +215,9 @@ export default {
     navigateToSession (sessionID) {
       return this.$router.push('home/sessions/' + sessionID)
     },
-    copyPatientVerificationURL () {
+    async copyPatientVerificationURL () {
       const url = this.getPatientPageURL()
-      navigator.clipboard.writeText(url)
-      this.$q.notify({
-        color: 'info',
-        position: 'top',
-        message: 'Verification link copied to clipboard',
-        icon: 'info'
-      })
-      return
+      await nicers.copyTextToClipboard(url)
     },
     getPatientPageURL () {
       let patientURL = '/patient/' + this.selectedPatient.id + '/profile?assignedTo=' + this.selectedPatient.physiotherapistId
