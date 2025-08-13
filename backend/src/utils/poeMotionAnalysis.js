@@ -89,7 +89,7 @@ export default {
         for (const type in returned_poe_obj) {
             console.log(returned_poe_obj[type])
             returnedValue.push({
-                posturalOrientation: this.mapPosturalOrientation(type), //'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
+                posturalOrientation: this.mapPosturalOrientation(type), // 'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition', 'femurMedialToShank'
                 repetition: 0, // summative or "combined"
                 score: returned_poe_obj[type].pred, // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
                 scoreConfidence_0: returned_poe_obj[type].conf[0], // score is based on index with highest confidence
@@ -102,18 +102,18 @@ export default {
     },
 
     /**
+     * @param {String} orient exercise type from POE model
      * @returns {Types.POEEvaluation["posturalOrientation"]}
      */
-    mapPosturalOrientation (orient) {
-        if (orient.toLowerCase() == 'femval') {
-            return 'femoralValgus'
-        } else if (orient.toLowerCase() == 'trunk') {
-            return 'trunk'
-        } else if (orient.toLowerCase() == 'hip') {
-            return 'hip'
-        } else if (orient.toLowerCase() == 'kmfp') {
-            return 'kneeMedialToFootPosition'
-        } else return 'Unknown'
+    mapPosturalOrientation(orient) {
+        const orientations = [
+            { name: 'femval', value: 'femoralValgus' },
+            { name: 'trunk', value: 'trunk' },
+            { name: 'hip', value: 'hip' },
+            { name: 'kmfp', value: 'kneeMedialToFootPosition' },
+            { name: 'fms', value: 'femurMedialToShank' }
+        ]
+        for (const o in orientations) if (orientations[o].name == orient.toLowerCase()) return orientations[o].value
     },
 
     /**
