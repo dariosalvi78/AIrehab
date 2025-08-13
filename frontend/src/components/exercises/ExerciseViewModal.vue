@@ -40,15 +40,15 @@
           </q-card-section>
         </q-card>
         <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal">
-          <q-card class="full-width" style="maxHeight:100%">
-            <q-card-section  class="q-pb-none flex justify-between">
+          <q-card class="full-width fixed-center">
+            <q-card-section class="q-pb-none flex justify-between">
               <div class="text-body1">Record exercise video</div>
               <q-btn class="q-pa-none q-pb-sm" flat label="Close" v-close-popup />
             </q-card-section>
             <q-checkbox class="q-mx-md q-mb-md text-weight-light" dense v-model="saveVideoToDevice" label="(Optional) Save video to device" />
             <q-separator />
             <q-card-section class="flex flex-center column">
-              <div class="video-container col text-center">
+              <div class="video-container col text-center flex flex-center">
                 <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
                   <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
@@ -56,8 +56,8 @@
               </div>
             </q-card-section>
             <q-separator />
-            <q-card-section>
-              <div class="col q-mb-md flex flex-center">
+            <q-card-section class="q-pa-md">
+              <div class="col flex flex-center">
                 <q-btn v-show="!isRecording" padding="md" round color="white" size="xl" push @click="startRecording">
                   <q-icon size="xl" name="photo_camera" color="negative"/>
                 </q-btn>
@@ -65,7 +65,7 @@
                   <q-icon size="84px" name="stop" color="negative"/>
                 </q-btn>
               </div>
-              <div class="text-subtitle2 text-center q-mt-md">{{!isRecording ? 'Start recording': 'Stop recording'}}</div>
+              <div class="text-subtitle2 text-center q-mt-sm">{{!isRecording ? 'Start recording': 'Stop recording'}}</div>
             </q-card-section>
           </q-card>
         </q-dialog>
@@ -394,12 +394,20 @@ export default {
   max-width: 100%;
 }
 #recordModal .video-container {
-  display: flex;
+  max-height: 400px;
   min-height: 400px;
   max-width: 100%;
 }
+
+#recordModal .video-container > #videoPreview {
+  max-height: 100%;
+  height: fit-content;
+  margin: 0 auto;
+}
+
 .recording {
   outline: 2px solid var(--q-negative);
+  box-shadow: 0px 0px 5px 1px var(--q-negative)
 }
 
 @media only screen and (max-width: 550px) {
