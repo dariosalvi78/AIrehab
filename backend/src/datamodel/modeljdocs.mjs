@@ -32,7 +32,7 @@
  * @property {!string} id - unique identifier
  * @property {number} repetition - repetition number, null or 0 means that this is a summative evaluation
  * @property {!number} score - can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt)
- * @property {!string} posturalOrientation - 'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition'
+ * @property {!string} posturalOrientation - 'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition', 'femurMedialToShank'
  * @property {number} confidence0 - confidence value for score 0
  * @property {number} confidence1 - confidence value for score 1
  * @property {number} confidence2 - confidence value for score 2
