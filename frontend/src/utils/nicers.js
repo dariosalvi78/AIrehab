@@ -1,4 +1,4 @@
-import { date } from 'quasar'
+import { date, Notify } from 'quasar'
 const { formatDate } = date
 
 export default {
@@ -41,10 +41,12 @@ export default {
             return 'Femoral valgus'
         } else if (orientation == 'trunk') {
             return 'Trunk'
-        } else if (orientation== 'hip') {
-            return 'Hip'
+        } else if (orientation == 'hip') {
+            return 'Pelvis'
         } else if (orientation == 'kneeMedialToFootPosition') {
             return 'Knee medial to foot position'
+        } else if (orientation == 'femurMedialToShank') {
+            return 'Femur medial to shank'
         } else return 'Unknown'
     },
 
@@ -53,5 +55,21 @@ export default {
         for (const score in scores) {
             if (scores[score].point == point) return scores[score].text
         }
+    },
+    
+    /**
+     * @param {String} value any type of text to copy
+     */
+    async copyTextToClipboard (value) {
+        const clipboard = window.navigator.clipboard
+        await clipboard.writeText(value)
+
+        Notify.create({
+            color: 'info',
+            position: 'top',
+            message: 'Verification link copied to clipboard',
+            icon: 'info'
+        })
+        return
     }
 }
