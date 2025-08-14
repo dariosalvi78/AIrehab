@@ -132,7 +132,18 @@ export default {
       isGettingPOEStatus: true,
       showPreview: false,
       openRecordModal: false,
-      saveVideoToDevice: false
+      saveVideoToDevice: false,
+      /** @type {MediaStreamConstraints} */
+      constraints: {
+        video: {
+          facingMode: 'environment',
+          aspectRatio: 9/16,
+          width: { min: 1024, ideal: 1280, max: 1920 },
+          height: { min: 576, ideal: 720, max: 1080 },
+          frameRate: { min: 15, ideal: 25, max: 30 }
+        },
+        audio: false
+      }
     }
   },
   async beforeMount () {
@@ -166,9 +177,11 @@ export default {
 
     },
     async videoCapture () {
+      const MEDIA_CONSTRAINTS = this.constraints
       this.showPreview = false
       this.videoChunks = []
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+
+      navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
         .then((stream) => {
           this.$refs.videoOutput.srcObject = stream
           this.mediaRecorder = new MediaRecorder(stream)
