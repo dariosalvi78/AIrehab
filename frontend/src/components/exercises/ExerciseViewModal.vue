@@ -17,7 +17,7 @@
           <q-separator />
           <q-card-section class="column items-center q-pa-sm">
             <div v-show="!uploadedFile" class="text-body2 text-center q-my-md">Upload video that you have already recorded</div>
-            <q-file class="q-mb-sm full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" capture="environment" color="secondary" label="Upload exercise video" 
+            <q-file class="q-mb-sm full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" color="secondary" label="Upload exercise video" 
               v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload"
             >
               <template v-slot:prepend>
@@ -30,7 +30,10 @@
             <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
             </form>
             <div class="video-container col" v-show="uploadedFile">
-              <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline />
+              <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline>
+                <source src="" type="video/mp4">
+                Your browser does not support HTML5 video.
+              </video>
             </div>
             <div class="q-mt-md text-body2" v-if="uploadedFile">
               Recorded: {{formatModifiedDate}}<br/>
@@ -39,15 +42,15 @@
             <q-btn v-show="uploadedFile" class="q-my-md full-width" label="Begin exercise assessment" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
           </q-card-section>
         </q-card>
-        <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal">
-          <q-card class="full-width fixed-center">
+        <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal" maximized>
+          <q-card class="full-width">
             <q-card-section class="q-pb-none flex justify-between">
               <div class="text-body1">Record exercise video</div>
               <q-btn class="q-pa-none q-pb-sm" flat label="Close" v-close-popup />
             </q-card-section>
             <q-checkbox class="q-mx-md q-mb-md text-weight-light" dense v-model="saveVideoToDevice" label="(Optional) Save video to device" />
             <q-separator />
-            <q-card-section class="flex flex-center column">
+            <q-card-section class="flex flex-center column q-px-xl">
               <div class="video-container col text-center flex flex-center">
                 <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
                   <source src="" type="video/mp4">
@@ -61,11 +64,11 @@
                 <q-btn v-show="!isRecording" padding="md" round color="white" size="xl" push @click="startRecording">
                   <q-icon size="xl" name="photo_camera" color="negative"/>
                 </q-btn>
-                <q-btn v-show="isRecording" round push @click="stopVideoCapture">
+                <q-btn v-show="isRecording" round push @click="stopRecording">
                   <q-icon size="84px" name="stop" color="negative"/>
                 </q-btn>
               </div>
-              <div class="text-subtitle2 text-center q-mt-sm">{{!isRecording ? 'Start recording': 'Stop recording'}}</div>
+              <div class="text-subtitle2 text-center">{{!isRecording ? 'Start recording': 'Stop recording'}}</div>
             </q-card-section>
           </q-card>
         </q-dialog>
@@ -137,13 +140,15 @@ export default {
       constraints: {
         video: {
           facingMode: 'environment',
-          aspectRatio: 9/16,
+          aspectRatio: 16/9,
           width: { min: 1024, ideal: 1280, max: 1920 },
-          height: { min: 576, ideal: 720, max: 1080 },
-          frameRate: { min: 15, ideal: 25, max: 30 }
+          height: { min: 400, ideal: 720, max: 1080 },
+          frameRate: { min: 25, ideal: 30, max: 60 },
+          bits: 2500000
         },
-        audio: false
-      }
+        audio: false,
+        codec: 'video/mp4; codecs="vp9"'
+      },
     }
   },
   async beforeMount () {
@@ -183,8 +188,24 @@ export default {
 
       navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
         .then((stream) => {
+          if (!MediaRecorder.isTypeSupported(this.constraints.codec)) throw new Error('Browser does not support .mp4 web recording, upload video instead.')
           this.$refs.videoOutput.srcObject = stream
-          this.mediaRecorder = new MediaRecorder(stream)
+          const mediaRecorder = new MediaRecorder(stream, { mimeType: this.constraints.codec, videoBitsPerSecond: this.constraints.bits  })
+          this.mediaRecorder = mediaRecorder
+
+          this.mediaRecorder.ondataavailable = (e) => {
+            this.videoChunks.push(e.data)
+          }
+          this.mediaRecorder.onerror = (err) => {
+            console.error(err)
+            this.$q.notify({
+              color: 'negative',
+              position: 'top',
+              message: 'Recording error: ' + err,
+              icon: 'report_problem'
+            })
+          }
+          this.mediaRecorder.onstop = (e) => this.stopVideoCapture()
         })
         .catch((err) => {
           this.isRecording = false
@@ -192,7 +213,7 @@ export default {
           return this.$q.notify({
             color: 'negative',
             position: 'top',
-            message: 'Rear-facing camera not available',
+            message: 'Rear-facing camera not available: ' + err,
             icon: 'report_problem'
           })
         })
@@ -200,14 +221,12 @@ export default {
     async stopVideoCapture () {
       this.$q.loading.show()
       await nicers.delay(200)
-      this.isRecording = false
-      this.showPreview = true
-      this.mediaRecorder.stop()
 
-      const filename = 'exercise_' + this.exerciseID + '.webm'
-      let blob = new Blob(this.videoChunks, { type: "video/webm" });
-      let mediaBlobUrl = URL.createObjectURL(blob);
-      let file = new File([blob], filename, { type: 'video/webm' })
+      const filename = 'exercise_' + this.exerciseID + '.mp4'
+      let blob = new Blob(this.videoChunks, { type: this.mediaRecorder.mimeType })
+      let mediaBlobUrl = URL.createObjectURL(blob)
+
+      let file = new File([blob], filename, { type: this.mediaRecorder.mimeType })
       const output = this.$refs.uploadedVideoPreview
 
       this.uploadedFile = file
@@ -226,11 +245,15 @@ export default {
       this.$refs.qRecordDialog.hide()
       this.$q.loading.hide()
     },
+    async stopRecording () {
+      this.isRecording = false
+      this.showPreview = true
+      this.mediaRecorder.stop()
+    },
     async startRecording () {
       this.isRecording = true
       this.$refs.videoOutput.classList.toggle('recording')
       this.mediaRecorder.start(1000)
-      this.mediaRecorder.ondataavailable = (e) => this.videoChunks.push(e.data)
     },
     uploadedRecordedVideo(e) {
       const output = this.$refs.uploadedVideoPreview
@@ -404,11 +427,6 @@ export default {
   margin: 0 auto;
   height: 400px;
   width: 300px;
-  max-width: 100%;
-}
-#recordModal .video-container {
-  max-height: 400px;
-  min-height: 400px;
   max-width: 100%;
 }
 
