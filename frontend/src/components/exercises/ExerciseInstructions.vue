@@ -2,6 +2,9 @@
   <q-list bordered class="rounded-borders q-ma-sm">
     <q-expansion-item expand-separator label="Exercise instructions" icon="accessibility">
       <q-card>
+        <q-card-section>
+          <q-btn label="Watch exercise demonstration" @click="openExerciseTestVideo" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none"/>
+        </q-card-section>
         <q-separator />
         <q-card-section>
           <div class="text-subtitle2">How to perform exercise:</div>
@@ -30,7 +33,23 @@
 
 <script>
 export default {
-    name: 'ExerciseInstructions'
+    name: 'ExerciseInstructions',
+    methods: {
+      async openExerciseTestVideo () {
+        let video = ''
+        if (!process.env.DEV) video = await import('../../../public/exercise_test_demonstration.mp4')
+        return this.$q.dialog({
+          title: 'Exercise demonstration',
+          message: `
+            <video ref="output" class="full-width" controls autoplay playsinline webkit-playsinline>
+              <source src="${video.default}" type="video/mp4">
+              Your browser does not support HTML5 video.
+            </video>
+          `,
+          html: true
+        })
+      }
+    }
 }
 </script>
 
