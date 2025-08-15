@@ -45,7 +45,7 @@ export default {
                     let file = files.uploaded_file[0]
 
                     let fileType = await fileTypeFromFile(file.filepath)
-                    if (fileType.mime !== file.mimetype) return reject({ exerciseID, httpCode: 400, reason: 'Could not parse uploaded file type' })
+                    if (fileType.mime !== file.mimetype.split(';')[0]) return reject({ exerciseID, httpCode: 400, reason: 'Could not parse uploaded file type' })
 
                     filename = file.newFilename + '_' + Date.now() + '.' + fileType.ext
                     const exercise_file_path = SESSION_DIR + '/vid_' + filename
