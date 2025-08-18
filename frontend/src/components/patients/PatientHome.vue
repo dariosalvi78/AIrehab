@@ -43,7 +43,7 @@
           <div class="text-h6">Exercises</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-            <div class="text-body2">Here you can see your exercise results</div>
+          <div class="text-body2">Here you can see your exercise results</div>
         </q-card-section>
         <q-separator />
         <q-card-section class="q-pa-none">
@@ -74,6 +74,30 @@
       </q-card>
     </q-page-container>
     <patient-terms-modal :openModal="openConsentModal"/>
+    <q-dialog ref="qDialogAuth" position="top">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Patient is authenticated</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <span v-html="$refs.qDialogAuth.data" />
+        </q-card-section>
+        <q-expansion-item
+          icon="bookmark"
+          label="Bookmark instructions"
+        >
+          <q-card-section>
+            <div class="text-subtitle2">Chrome</div>
+            Tap More <q-icon class="q-ml-sm" name="more_verts"/><q-icon name="chevron_right"/> and then "Add to Bookmarks" <q-icon name="star_outline"/>
+            <div class="text-subtitle2 q-mt-sm">Safari</div>
+            Tap the bookmark icon <q-icon name="import_contacts" /> to add bookmark
+          </q-card-section>
+        </q-expansion-item>
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-layout>
   <div v-else class="q-ma-md flex flex-center">
     <q-spinner-dots
@@ -154,15 +178,8 @@ export default {
         let response = await API.updateActivationStatus(this.patientID, assignedTo)
         if (response.token && response.message) {
           this.authenticated = true
-          this.$q.dialog({
-            color: 'primary',
-            title: 'Patient is authenticated',
-            message: response.message,
-            ok: { color: 'primary' },
-            position: 'top',
-            cancel: true,
-            html: true
-          })
+          this.$refs.qDialogAuth.data = response.message
+          this.$refs.qDialogAuth.show()
         }
       } catch (err) {
         this.$q.notify({
