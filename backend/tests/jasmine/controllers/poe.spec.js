@@ -69,11 +69,11 @@ describe('getPOEEvaluation access:', function () {
         })
     })
     it('get latest poe results after video is done processing', async function () {
-        let exercise = this.exercises[1], physiotherapist = this.physiotherapist, patient = this.patient
+        let exercise = this.exercises[1], physiotherapist = this.physiotherapist, patient = this.patient, results = this.poe_results
         spyOn(poeCollection, 'getEvaluationsFromID').and.returnValue([])
         spyOn(exercisesCollection, 'getOneExerciseByEmail').and.returnValue({ patientID: patient.id, ...exercise })
         spyOn(poeMotionAnalysis, 'isEvaluationOngoing').and.returnValue({ status: 201 })
-        spyOn(fileHandler, 'getAnalysedVideo').and.returnValue(this.poe_results)
+        spyOn(fileHandler, 'getAnalysedVideo').and.returnValue(results)
         spyOn(poeCollection, 'updateEvaluationResults')
         await poe.getPOEEvaluation({
             user: physiotherapist,
@@ -93,7 +93,7 @@ describe('getPOEEvaluation access:', function () {
                 expect(poeCollection.getEvaluationsFromID).toHaveBeenCalledWith(exercise.id)
                 expect(exercisesCollection.getOneExerciseByEmail).toHaveBeenCalledWith(exercise.id, physiotherapist.email)
                 expect(poeMotionAnalysis.isEvaluationOngoing).toHaveBeenCalledWith(exercise.physiotherapySessionId, exercise.id, exercise.videoFile)
-                expect(poeCollection.updateEvaluationResults).toHaveBeenCalledTimes(4)
+                expect(poeCollection.updateEvaluationResults).toHaveBeenCalledTimes(Object.keys(results).length)
             }
         })
     })
