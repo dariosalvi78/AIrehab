@@ -6,6 +6,7 @@ import config from './config.js'
 import users from '../DOM/usersCollection.js'
 import logger from './logger.js'
 import cookies from './cookies.js'
+import crypto from 'node:crypto'
 
 /**
  * Sign new access token for user
@@ -93,6 +94,23 @@ const createAdmin = async () => {
     }
 }
 
+/**
+ * Generate a cryptographically random string 
+ * @returns {Promise<String>}
+ */
+const generateRandomSecret = async () => {
+    return new Promise((resolve, reject) => {
+        crypto.randomBytes(32, (err, buffer) => {
+            if (err) {
+                logger.error({ error: err }, 'could not generate random secret')
+                return reject(rer)
+            }
+            const secret = buffer.toString('hex')
+            return resolve(secret)
+        })
+    })
+}
+
 export {
     signAccessToken,
     signResetPwdToken,
@@ -100,6 +118,7 @@ export {
     verifyAuthToken,
     createAdmin,
     signPatientAccessToken,
+    generateRandomSecret,
     session_cookie,
     patient_cookie
 }
