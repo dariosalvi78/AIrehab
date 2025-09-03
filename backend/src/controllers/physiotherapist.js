@@ -5,7 +5,7 @@ import exercises from "../DOM/exercisesCollection.js"
 import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
 import files from '../utils/fileHandler.js'
-import { signPatientAccessToken, patient_cookie, verifyAuthToken } from "../utils/tokenAuth.js"
+import { signPatientAccessToken, patient_cookie, verifyAuthToken, generateRandomSecret } from "../utils/tokenAuth.js"
 
 export default {
 
@@ -75,9 +75,11 @@ export default {
                     return res.sendStatus(403)
                 }
                 patient = await physiotherapist.getOnePatientByEmail(req.user.email, req.params.patientID)
+
             } else if (req.user.role == 'admin') {
                 patient = await physiotherapist.getOnePatientByID(req.params.patientID)
             }
+            patient.access = await generateRandomSecret()
             if (!patient) return res.sendStatus(404)
             else if (!patient["sessionID"]) delete patient.sessionID
 
@@ -219,21 +221,27 @@ export default {
      * @param {Object} res - express response
     */
     assignPatient: async (req, res) => {
-        if (!req.params.patientID || !req.query.assignedToID) return res.sendStatus(403)
-        let patientID = req.params.patientID, assignedToID = req.query.assignedToID
+        if (!req.params.patientID || !req.query.secret) return res.sendStatus(403)
+        let patientID = req.params.patientID, secret = req.query.secret
         try {
             const patient = await physiotherapist.getOnePatientByID(patientID)
-            if (assignedToID !== patient.physiotherapistId) return res.sendStatus(403)
             const { id, names, physiotherapistId, createdTimestamp } = patient
 
-            const token = await signPatientAccessToken({ id, names, physiotherapistId, createdTimestamp })
+            // Check if patient is already authenticated
+            const cookie = req.cookies[patient_cookie.name]
+            if (cookie) {
+                const data_decoded = await verifyAuthToken(cookie)
+                if (data_decoded) return res.sendStatus(200)
+            }
+
+            const token = await signPatientAccessToken({ id, names, physiotherapistId, createdTimestamp, secret })
             res.cookie(patient_cookie.name, token, patient_cookie.options)
-            logger.info({ patientID, assignedTo: assignedToID }, 'patient has authenticated to physiotherapist')
+            logger.info({ patientID, assignedTo: physiotherapistId }, 'patient has authenticated to physiotherapist')
             return res.send({ token: token, message: `
                 This patient has now been authenticated.
-                You can now bookmark this webpage to view your results, or change your preferences.
+                <br><br>Once you have decided to consent, we will send you an email so you can keep this page private.
+                <br><br>You can also bookmark this page if you prefer to view your results, or change your preferences.
                 <br><br>If you need to authenticate again, contact your physiotherapist to scan the QR-code or send verification link.
-                <br><br>Clearing browser cookies will make you lose access to this page, and you will need to authenticate again.
             `}).status(200)
         }
         catch (err) {
@@ -251,8 +259,8 @@ export default {
      * @returns {Promise<Types.User>}
      */
     getInfo: async (req, res) => {
-        if (!req.params.patientID) return res.sendStatus(403)
-        let patientID = req.params.patientID
+        if (!req.params.patientID || !req.query.secret) return res.sendStatus(403)
+        let patientID = req.params.patientID, secret = req.query.secret
         try {
             const cookie = req.cookies[patient_cookie.name]
             if (!cookie) {
@@ -265,10 +273,14 @@ export default {
                     `
                 })
             }
-            let data = await verifyAuthToken(cookie), pExercises = []
-            const patient = await physiotherapist.getOnePatientByID(data.patient.id)
+            const decoded_data = await verifyAuthToken(cookie), pExercises = []
+            const patient = await physiotherapist.getOnePatientByID(decoded_data.patient.id)
 
-            if (patient == undefined || patient.id !== patientID) return res.sendStatus(404)
+            if (
+                patient == undefined 
+                || secret !== decoded_data.patient.secret 
+                || patient.id !== patientID
+            ) return res.sendStatus(404)
             if (patient.sessionID) {
                 pExercises = await exercises.getExercisesInSessionByEmail(patient.sessionID, patient.physiotherapistEmail)
                 for (const e in pExercises) {
@@ -280,7 +292,7 @@ export default {
             return res.send({ patient: patient, results: pExercises })
         } catch (err) {
             if ((err.expiredAt * 1000) >= new Date().getTime()) {
-                const token = await signPatientAccessToken({ id: patientID })
+                const token = await signPatientAccessToken({ id: patientID, secret })
                 res.cookie(patient_cookie.name, token, patient_cookie.options)
                 logger.info({ patientID }, 'refreshed patient authentication')
                 return res.send({ token: token })
