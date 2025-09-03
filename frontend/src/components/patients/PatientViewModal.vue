@@ -110,7 +110,7 @@ export default {
       qr: {
         value: "",
         size: 300,
-        lvl: 'H'
+        lvl: 'L'
       }
     }
   },
@@ -216,13 +216,25 @@ export default {
       return this.$router.push('home/sessions/' + sessionID)
     },
     async copyPatientVerificationURL () {
-      const url = this.getPatientPageURL()
+      const url = await this.getPatientPageURL()
       await nicers.copyTextToClipboard(url)
     },
-    getPatientPageURL () {
-      let patientURL = '/patient/' + this.selectedPatient.id + '/profile?assignedTo=' + this.selectedPatient.physiotherapistId
-      this.qr.value = window.origin + patientURL
-      return this.qr.value
+    async getPatientPageURL () {
+      try {
+        let response = await API.getPatient(this.selectedPatient.id)
+        if (response.access) {
+          let patientURL = '/patient/' + this.selectedPatient.id + '/profile?access=' + response.access
+          this.qr.value = window.origin + patientURL
+          return this.qr.value
+        }
+      } catch (err) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: `Cannot generate patient url: ${err}`,
+          icon: 'warning'
+        })
+      }
     },
     formatDate (date) {
       return nicers.formattedDate(date)

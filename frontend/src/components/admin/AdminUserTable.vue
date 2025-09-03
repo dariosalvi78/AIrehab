@@ -235,8 +235,11 @@ export default {
         this.openPatientForm = { status: !this.openPatientForm.status, form: 'adminNew' }        
         this.selectedUser.physiotherapistEmail = this.selectedUser.email
       } else if (prompt == 'copy' && this.selectedUser.role === 'patient') {
-        const url = window.origin + '/patient/' + this.selectedUser.id + '/profile?assignedTo=' + this.selectedUser.physiotherapistId
-        await nicers.copyTextToClipboard(url)
+        let response = await API.getPatient(this.selectedUser.id)
+        if (response) {
+          const url = window.origin + '/patient/' + response.id + '/profile?access=' + response.access
+          await nicers.copyTextToClipboard(url)
+        }
       }
       else return
     },
