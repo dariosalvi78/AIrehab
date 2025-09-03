@@ -25,6 +25,7 @@ BEGIN
         injuredBodyPart varchar(50),
         createdTimestamp datetime,
         activated bit NOT NULL DEFAULT 'false'
+        email varchar(100) DEFAULT NULL,
     )
     ALTER TABLE patient ADD CONSTRAINT patient_physiotherapist_id_fk FOREIGN KEY (physiotherapistId) REFERENCES [user] (id);
 END

@@ -25,6 +25,7 @@
  * @property {?string} injuredSide - side of the body that is injured, 'left', 'right' or 'both'
  * @property {?string} injuredBodyPart - body part that is injured. 'foot', 'knee', 'hip', 'back'
  * @property {!boolean} activated - if patient has given consent and agreed to the research study
+ * @property {?string} email - email address of the patient, to send out personal access link and reminders
  */
 
 /**
