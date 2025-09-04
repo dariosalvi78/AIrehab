@@ -182,7 +182,6 @@ export default {
 
     /**
      * Updates one patient participation status
-     * @param {Types.Patient} patient
      * @param {Types.Patient['activated']} status
      * @param {Types.User["id"]} patientID 
      */
@@ -190,6 +189,21 @@ export default {
         const response = await db.query(`
             UPDATE p SET 
                 p.activated = '${status}'
+            OUTPUT Inserted.activated
+            FROM [patient] p
+                WHERE p.id = '${patientID}';
+        `)
+        return response.recordset[0]
+    },
+    /**
+     * Updates one patient email
+     * @param {Types.Patient['email']} newEmail
+     * @param {Types.User["id"]} patientID 
+     */
+    updateOnePatientEmail: async function (newEmail, patientID) {
+        const response = await db.query(`
+            UPDATE p SET 
+                p.email = '${newEmail}'
             FROM [patient] p
                 WHERE p.id = '${patientID}';
         `)

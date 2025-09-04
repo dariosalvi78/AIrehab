@@ -5,7 +5,9 @@ import exercises from "../DOM/exercisesCollection.js"
 import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
 import files from '../utils/fileHandler.js'
-import { signPatientAccessToken, patient_cookie, verifyAuthToken, generateRandomSecret } from "../utils/tokenAuth.js"
+import { signPatientAccessToken, patient_cookie, verifyAuthToken } from "../utils/tokenAuth.js"
+import mailer from '../utils/mailer.js'
+import bcrypt from 'bcrypt'
 
 export default {
 
@@ -68,18 +70,18 @@ export default {
     getPatient: async (req, res) => {
         if (!req.user || !req.params.patientID) return res.sendStatus(403)
         try {
-            let patient
+            let patient, patientID = req.params.patientID
             if (req.user.role == 'physiotherapist') {
-                const isAssignedTo = await physiotherapist.getOnePatientByID(req.params.patientID)
+                const isAssignedTo = await physiotherapist.getOnePatientByID(patientID)
                 if (isAssignedTo.physiotherapistEmail !== req.user.email) {
                     return res.sendStatus(403)
                 }
-                patient = await physiotherapist.getOnePatientByEmail(req.user.email, req.params.patientID)
+                patient = await physiotherapist.getOnePatientByEmail(req.user.email, patientID)
 
             } else if (req.user.role == 'admin') {
-                patient = await physiotherapist.getOnePatientByID(req.params.patientID)
+                patient = await physiotherapist.getOnePatientByID(patientID)
             }
-            patient.access = await generateRandomSecret()
+            patient.access = bcrypt.hashSync(patient.physiotherapistId, 8)
             if (!patient) return res.sendStatus(404)
             else if (!patient["sessionID"]) delete patient.sessionID
 
@@ -189,8 +191,11 @@ export default {
         let patient = req.body, newParticipationStatus = req.query.newStatus || undefined
         try {
             if (newParticipationStatus && req.patient) {
-                await physiotherapist.updateOnePatientParticipation(newParticipationStatus, req.params.patientID)
+                const patient = req.patient
+                let response = await physiotherapist.updateOnePatientParticipation(newParticipationStatus, req.params.patientID)
                 logger.info({ patientID: req.params.patientID, status: newParticipationStatus }, 'updated patient participation status')
+
+                if (!response.activated) physiotherapist.updateOnePatientEmail('', patient.id)
                 return res.send({ status: 'updated', status: newParticipationStatus })
             }
             
@@ -225,7 +230,11 @@ export default {
         let patientID = req.params.patientID, secret = req.query.secret
         try {
             const patient = await physiotherapist.getOnePatientByID(patientID)
-            const { id, names, physiotherapistId, createdTimestamp } = patient
+            if (
+                !patient 
+                || patient && !bcrypt.compareSync(patient.physiotherapistId, secret)
+                || patientID !== patient.id
+            ) return res.sendStatus(403)
 
             // Check if patient is already authenticated
             const cookie = req.cookies[patient_cookie.name]
@@ -234,6 +243,7 @@ export default {
                 if (data_decoded) return res.sendStatus(200)
             }
 
+            const { id, names, physiotherapistId, createdTimestamp } = patient
             const token = await signPatientAccessToken({ id, names, physiotherapistId, createdTimestamp, secret })
             res.cookie(patient_cookie.name, token, patient_cookie.options)
             logger.info({ patientID, assignedTo: physiotherapistId }, 'patient has authenticated to physiotherapist')
@@ -245,6 +255,12 @@ export default {
             `}).status(200)
         }
         catch (err) {
+            if ((err.expiredAt * 1000) >= new Date().getTime()) {
+                const token = await signPatientAccessToken({ id: patientID, secret })
+                res.cookie(patient_cookie.name, token, patient_cookie.options)
+                logger.info({ patientID }, 'refreshed patient authentication')
+                return res.send({ token: token, status: 'refreshed' })
+            }
             logger.error({ error: err }, 'patient cannot authenticate: ')
             res.sendStatus(500)
             return
@@ -273,7 +289,7 @@ export default {
                     `
                 })
             }
-            const decoded_data = await verifyAuthToken(cookie), pExercises = []
+            let decoded_data = await verifyAuthToken(cookie), pExercises = []
             const patient = await physiotherapist.getOnePatientByID(decoded_data.patient.id)
 
             if (
@@ -289,15 +305,31 @@ export default {
                     exercise.poe = poe_results
                 }
             }
+            delete patient.email
+            delete patient.physiotherapistEmail
+            delete patient.dateofbirth
             return res.send({ patient: patient, results: pExercises })
         } catch (err) {
-            if ((err.expiredAt * 1000) >= new Date().getTime()) {
-                const token = await signPatientAccessToken({ id: patientID, secret })
-                res.cookie(patient_cookie.name, token, patient_cookie.options)
-                logger.info({ patientID }, 'refreshed patient authentication')
-                return res.send({ token: token })
-            }
-            logger.error({ error: err }, 'error getting patient info')
+            logger.error({ patientID, error: err }, 'error getting patient info')
+            res.sendStatus(500)
+            return
+        }
+    },
+    sendPatientConsentEmail: async (req, res) => {
+        if (!req.body.patientEmail || !req.body.patientID || !req.query.secret) return res.sendStatus(403)
+        let patientEmail = req.body.patientEmail, patientID = req.body.patientID, secret = req.query.secret
+        try {
+            const patient = await physiotherapist.getOnePatientByID(patientID)
+            if (!patient || patientID !== patient.id) return res.sendStatus(204)
+
+            await mailer.sendPatientAccessLink(patientEmail, patient.id, secret)
+            logger.debug({ patient: patientID }, 'patient consent email sent')
+
+            await physiotherapist.updateOnePatientEmail(patientEmail, patientID)
+            logger.info({ patient: patientID }, 'updated patient email')
+            return res.send({ email: patientEmail }).status(204)
+        } catch (err) {
+            logger.error({ error: err }, 'error sending patient consent email: ')
             res.sendStatus(500)
             return
         }
