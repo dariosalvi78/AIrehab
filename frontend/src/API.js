@@ -85,14 +85,18 @@ let API = {
     return response.data
   },
   
-  async updateActivationStatus (patientID, physiotherapistId) {
-    console.log(patientID, physiotherapistId)
-    let response = await axios.post('/patients/' + patientID + '/activate', {}, { params: { assignedToID: physiotherapistId } })
+  async updateActivationStatus (patientID, secret) {
+    let response = await axios.post('/patients/' + patientID + '/activate', {}, { params: { secret: secret } })
     return response.data
   },
 
-  async getPatientInfo (patientID) {
-    let response = await axios.get('/patient/'+ patientID +'/info')
+  async getPatientInfo (patientID, secret) {
+    let response = await axios.get('/patient/' + patientID + '/info', { params: { secret: secret } })
+    return response.data
+  },
+
+  async sendPatientConsentEmail (patientEmail, patientID, secret) {
+    let response = await axios.post('/email/consent', { patientEmail, patientID }, { params: { secret: secret } })
     return response.data
   },
 
