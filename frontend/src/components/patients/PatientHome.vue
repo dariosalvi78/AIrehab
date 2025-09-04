@@ -34,7 +34,12 @@
             label="I agree to the terms in the information letter"
             checked-icon="task_alt"
             unchecked-icon="highlight_off"
-            @click="updateParticipationStatus"
+            :disable="!this.authenticated"
+            @click=" 
+              !this.patient.email && !this.patient.activated  
+                ? this.sendPatientActivationLink()
+                : this.showWithdrawConsentDialog()
+            "
           />
         </q-card-actions>
       </q-card>
@@ -124,19 +129,22 @@ export default {
       participationStatus: false,
       openConsentModal: false,
       authenticated: undefined,
+      secret: undefined,
       results: []
     }
   },
   async beforeMount () {
     this.openConsentModal = false
     this.authenticated = false
-    if (this.patientID && this.$route.query.assignedTo) await this.setPatientActivation()
+    this.secret = this.$route.query.access || null
+
+    if (this.patientID && this.secret) await this.setPatientActivation()
     this.participationStatus = await this.getPatientInfo()
   },
   methods: {
     async getPatientInfo() {
       try {
-        let response = await API.getPatientInfo(this.patientID)
+        let response = await API.getPatientInfo(this.patientID, this.secret)
         if (response) {
           this.authenticated = true
           if (response.token) return await this.getPatientInfo()
@@ -169,13 +177,62 @@ export default {
         return this.participationStatus
       }
     },
+    async sendPatientActivationLink () {
+      try {
+        if (!this.authenticated) return
+        this.$q.dialog({
+          color: 'primary',
+          title: 'Email is required',
+          message: `
+            Before you can consent to participate in the study, you will need to provide an email so we can send important reminders.
+            <br><br>
+            <b>- By pressing 'Consent', you agree to the terms found in the information letter</b>
+            <br><br>
+            Please provide your email address below.
+          `,
+          prompt: {
+            model: '',
+            isValid: val => val.length >= 8, 
+            type: 'text'
+          },
+          ok: { color: 'primary', label: 'Consent' },
+          persistent: true,
+          cancel: true,
+          html: true
+        }).onOk(async (email) => {
+          this.$q.loading.show()
+          await nicers.delay(200)
+          const patientID = this.patientID, secret = this.secret
+          let response = await API.sendPatientConsentEmail(email.toLowerCase(), patientID, secret)
+          if (response) {
+            this.$q.notify({
+              color: 'secondary',
+              position: 'top',
+              message: 'Patient information has been sent to the provided email',
+              icon: 'info'
+            })
+            this.updateParticipationStatus()
+          }
+        }).onCancel(() => {
+          this.participationStatus = !this.participationStatus
+        })
+      } catch (err) {
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Not possible to send patient access link',
+          icon: 'report_problem'
+        })
+      }
+      this.$q.loading.hide()
+      return
+    },
     async setPatientActivation () {
       try {
-        const assignedTo = this.$route.query.assignedTo || null
-        this.$router.replace({ 'query': null })
+        const secret = this.secret
         this.$q.loading.show()
         await nicers.delay(200)
-        let response = await API.updateActivationStatus(this.patientID, assignedTo)
+        let response = await API.updateActivationStatus(this.patientID, secret)
         if (response.token && response.message) {
           this.authenticated = true
           this.$refs.qDialogAuth.data = response.message
@@ -209,6 +266,7 @@ export default {
             message: 'Updated participation status',
             icon:'info'
           })
+          await this.getPatientInfo()
         }
       } catch (err) {
         this.$q.notify({
@@ -221,6 +279,32 @@ export default {
       }
       this.$q.loading.hide()
       return
+    },
+    async showWithdrawConsentDialog () {
+      if (!this.authenticated) return
+      this.$q.dialog({
+        color: 'primary',
+        title: 'Withdraw consent',
+        message: `
+          You are about to withdraw your consent from the study.
+          Withdrawing means but not limited to:
+          <br>
+          <br>- <b>No further data will be collected from you</b>
+          <br>- <b>Your email will be removed</b>
+          <br><br>
+          More details can be found in the information letter.
+          <br><br>
+          Press the 'Withdraw consent' button to remove your consent from the study.
+        `,
+        ok: { color: 'primary', label: 'Withdraw consent' },
+        persistent: true,
+        cancel: true,
+        html: true
+      }).onOk(() => {
+        this.updateParticipationStatus()
+      }).onCancel(() => {
+        this.participationStatus = !this.participationStatus
+      })
     },
     async formatExerciseData (exercises) {
       let results = exercises
