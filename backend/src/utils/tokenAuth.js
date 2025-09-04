@@ -94,23 +94,6 @@ const createAdmin = async () => {
     }
 }
 
-/**
- * Generate a cryptographically random string 
- * @returns {Promise<String>}
- */
-const generateRandomSecret = async () => {
-    return new Promise((resolve, reject) => {
-        crypto.randomBytes(32, (err, buffer) => {
-            if (err) {
-                logger.error({ error: err }, 'could not generate random secret')
-                return reject(rer)
-            }
-            const secret = buffer.toString('hex')
-            return resolve(secret)
-        })
-    })
-}
-
 export {
     signAccessToken,
     signResetPwdToken,
@@ -118,7 +101,6 @@ export {
     verifyAuthToken,
     createAdmin,
     signPatientAccessToken,
-    generateRandomSecret,
     session_cookie,
     patient_cookie
 }

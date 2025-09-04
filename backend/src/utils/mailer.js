@@ -60,12 +60,10 @@ export default {
       subject: 'Account created • POE Assessment',
       html: `
         Account created details:
-        <br/>
-        <br/>
+        <br/><br/>
         Email: ${recipient}</br>
         Password: ${password}
-        <br/>
-        <br/>
+        <br/><br/>
         Visit this <a href="${domain}/login">link</a> to login
       `
     }
@@ -80,9 +78,26 @@ export default {
       subject: 'Password reset • POE Assessment',
       html: `
         You have requested a new password
-        <br/>
-        <br/>
+        <br/><br/>
         Proceed to this <a href="${domain}/resetpassword?token=${resetToken}&email=${recipient}">link</a>
+      `
+    }
+
+    await sendEmail(options)
+  },
+  sendPatientAccessLink: async (recipient, patientID, accessToken) => {
+
+    const options = {
+      from: config.mailer.from_address,
+      to: recipient,
+      subject: 'Patient consent • POE Assessment',
+      html: `
+        You have consented to participate in the study. Save this email to have access to your personal page
+        <br/><br/>
+        Your personal page can be used to view your POE results or change your preferences.
+        <br/><br/>
+        Click <a href="${domain}/patient/${patientID}/profile?access=${accessToken}">here</a> to view your personal page
+        <br/><br/>
       `
     }
 
