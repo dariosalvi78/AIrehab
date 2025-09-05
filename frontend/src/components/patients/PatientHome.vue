@@ -118,6 +118,7 @@ import nicers from '../../utils/nicers'
 import PatientTermsModal from './PatientTermsModal.vue'
 import PoeViewModal from '../exercises/PoeViewModal.vue'
 import exerciseType from '../../utils/types/exerciseTypesEnum'
+import poeTypesEnum from '../../utils/types/poeTypesEnum'
 
 export default {
   name: 'PatientHome',
@@ -315,20 +316,23 @@ export default {
         exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
         
         // TODO: This should be moved to PoeViewModal
+        let sumOfScores = 0
         for (const p in exercise.poe) {
           let poe = exercise.poe[p], confidences = []
 
-          poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
-          poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
+          sumOfScores += poe.score
+          poe["posturalOrientation"] = poe.posturalOrientation
+          poe["scoreToText"] = poeTypesEnum.formattedScoreToText(poe.score)
           poe["repetition"] = poe["repetition"] === 0 ? 'Summative evaluation' : poe["repetition"]
 
           for (let i = 0; i < 3; i++) {
-            confidences.push({score: poe['scoreConfidence_'+ i] = parseFloat((poe['scoreConfidence_'+ i]*100)).toFixed(0), text: nicers.formattedScoreToText(i)})
+            confidences.push({score: poe['scoreConfidence_'+ i] = parseFloat((poe['scoreConfidence_'+ i]*100)).toFixed(0), text: poeTypesEnum.formattedScoreToText(i)})
             poe['confidences'] = confidences
             delete poe['scoreConfidence_'+ i]
           }
           poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
         }
+        exercise.poe.sumOfScores = (sumOfScores / 10) * 100
       }
       return results
     },

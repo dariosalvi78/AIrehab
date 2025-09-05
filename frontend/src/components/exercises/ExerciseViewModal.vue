@@ -78,6 +78,7 @@
           <q-card-section>
             <div class="text-h6 flex flex-center">Processing video</div>
             <div class="text-subtitle2 q-mb-md">Retrieving results from analysed video</div>
+            <q-btn label="Preview recorded exercise" @click="openExerciseVideoDialog" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none q-mt-sm"/>
             <q-separator />
             <div class="q-mt-md flex flex-center">
               <q-spinner-dots color="primary" size="3em" />
@@ -89,22 +90,25 @@
             <q-card-section>
               <div class="text-h6">Video Evaluation</div>
               <div class="text-body1">Results from recorded exercise video</div>
+              <q-btn label="Review recorded exercise" @click="openExerciseVideoDialog" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none q-mt-sm"/>
             </q-card-section>
             <q-separator />
-            <poe-view-modal 
-              :assessmentResults="poe" 
+            <poe-view-modal
+              :assessmentResults="poe"
               class="q-mt-sm"
             />
           </q-card>
         </transition>
-        <div class="q-pa-lg video-container">
-          <div v-if="uploadedFile == 'missing'" class="q-ma-md flex flex-center">
-            <q-chip size="md" color="warning" icon="warning" text-color="black">Exercise video was not found</q-chip>
-          </div>
-          <video v-else ref="videoPreview" id="videoPreview" autoplay playsinline webkit-playsinline controls>
-            Your browser does not support HTML5 video.
-          </video>
-        </div>
+        <q-dialog class="q-pa-lg video-container" v-model="openExerciseVideo">
+          <q-card class="full-width q-pa-md">
+            <div v-if="uploadedFile == 'missing'" class="q-ma-md flex flex-center">
+              <q-chip size="md" color="warning" icon="warning" text-color="black">Exercise video was not found</q-chip>
+            </div>
+            <video v-else ref="videoPreview" id="videoPreview" autoplay playsinline webkit-playsinline controls>
+              Your browser does not support HTML5 video.
+            </video>
+          </q-card>
+        </q-dialog>
       </div>
     </q-page>
   </q-page-container>
@@ -113,6 +117,7 @@
 <script>
 import API from '../../API'
 import nicers from '../../utils/nicers'
+import poeTypesEnum from '../../utils/types/poeTypesEnum'
 import ExerciseInstructions from './ExerciseInstructions.vue'
 import PoeViewModal from './PoeViewModal.vue'
 
@@ -136,6 +141,7 @@ export default {
       showPreview: false,
       openRecordModal: false,
       saveVideoToDevice: false,
+      openExerciseVideo: false,
       /** @type {MediaStreamConstraints} */
       constraints: {
         video: {
@@ -337,21 +343,23 @@ export default {
           try {
             let resp = await API.getPOE(this.exerciseID)
             if (resp && resp._results) {
-              let poe_results = resp._results
+              let poe_results = resp._results, sumOfScores = 0
               poe_results.map((poe, i) => {
                 let confidences = []
-                poe["posturalOrientation"] = nicers.formattedPosturalOrientation(poe.posturalOrientation)
-                poe["scoreToText"] = nicers.formattedScoreToText(poe.score)
+                sumOfScores += poe.score
+                poe["posturalOrientation"] = poe.posturalOrientation
+                poe["scoreToText"] = poeTypesEnum.formattedScoreToText(poe.score)
                 poe["repetition"] = poe["repetition"] === 0 ? 'Summative evaluation' : poe["repetition"]
 
                 for (let i = 0; i < 3; i++) {
-                  confidences.push({score: poe['scoreConfidence_'+ i] = parseFloat((poe['scoreConfidence_'+ i]*100)).toFixed(0), text: nicers.formattedScoreToText(i)})
+                  confidences.push({score: poe['scoreConfidence_'+ i] = parseFloat((poe['scoreConfidence_'+ i]*100)).toFixed(0), text: poeTypesEnum.formattedScoreToText(i)})
                   poe['confidences'] = confidences
                   delete poe['scoreConfidence_'+ i]
                 }
                 poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
               })
               this.poe = poe_results
+              this.poe.sumOfScores = (sumOfScores / 10) * 100
               return
             } else if (resp && !resp._results) {
               await nicers.delay(10000)
@@ -386,6 +394,11 @@ export default {
       this.openRecordModal = !this.openRecordModal
       await nicers.delay(500)
       if (this.$refs.videoOutput) await this.videoCapture()
+    },
+    async openExerciseVideoDialog () {
+      this.uploadedFile = true
+      this.openExerciseVideo = !this.openExerciseVideo
+      await this.getVideoPathForExercise()
     }
   },
   computed: {
@@ -399,6 +412,7 @@ export default {
   },
   unmounted () {
     this.isGettingPOEStatus = false
+    this.openExerciseVideo = false
   }
 }
 </script>
