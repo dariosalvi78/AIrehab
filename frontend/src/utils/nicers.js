@@ -35,27 +35,6 @@ export default {
     delay (ms) {
         return new Promise(res => setTimeout(res, ms))
     },
-
-    formattedPosturalOrientation (orientation) {
-        if (orientation == 'femoralValgus') {
-            return 'Femoral valgus'
-        } else if (orientation == 'trunk') {
-            return 'Trunk'
-        } else if (orientation == 'hip') {
-            return 'Pelvis'
-        } else if (orientation == 'kneeMedialToFootPosition') {
-            return 'Knee medial to foot position'
-        } else if (orientation == 'femurMedialToShank') {
-            return 'Femur medial to shank'
-        } else return 'Unknown'
-    },
-
-    formattedScoreToText(point) {
-        let scores = [{ point: 0, text: 'Good', }, { point: 1, text: 'Fair' }, { point: 2, text: 'Poor' }]
-        for (const score in scores) {
-            if (scores[score].point == point) return scores[score].text
-        }
-    },
     
     /**
      * @param {String} value any type of text to copy
