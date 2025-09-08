@@ -1,10 +1,12 @@
+import exercisesEN from './exercises/en.js'
+import exercisesSV from './exercises/sv.js'
 
 const messages = {
     en: {
-        exercises: (await import('./exercises/en.js')).default
+        exercises: exercisesEN
     },
     sv: {
-        exercises: (await import('./exercises/sv.js')).default
+        exercises: exercisesSV
     }
 }
 
