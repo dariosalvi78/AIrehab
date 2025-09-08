@@ -360,6 +360,7 @@ export default {
               })
               this.poe = poe_results
               this.poe.sumOfScores = (sumOfScores / 10) * 100
+              this.poe.maxScore = (poeTypesEnum.scores.POOR.point * this.poe.length) * 10
               return
             } else if (resp && !resp._results) {
               await nicers.delay(10000)

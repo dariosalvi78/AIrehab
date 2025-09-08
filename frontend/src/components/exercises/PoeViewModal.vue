@@ -12,14 +12,17 @@
     </q-tabs>
     <q-tab-panels v-model="panel" animated ref="panelForm">
       <q-tab-panel name="results" class="">
-        <div class="text-subtitle1 q-my-md">Your POE evaulation score</div>
+        <div class="text-h6 q-mt-md">Your total POE evaulation score</div>
+        <div class="text-body2 q-mb-xl">You can inspect individual scores below</div>
         <div class="poe-score full-width">
           <q-item class="q-pa-none">
             <q-item-section avatar class="row" >
               <q-icon class="q-mb-md material-symbols-outlined" :color="overallScore.theme" size="52px" :name="getProgressIcon" />
             </q-item-section>
             <q-item-section>
-              <q-linear-progress :value="progressResults" rounded track-color="grey-4" size="xl" :color="overallScore.theme" class="q-my-sm" />
+              <q-slider v-model="progressResults" rounded readonly label-always :label-value="progressResults + ` (${overallScore.text})`"
+                :min="0" :max="assessmentResults.maxScore" track-size="12px" track-color="grey-1" :color="overallScore.theme" class="q-my-sm"
+              />
               <div class="poe-indicator row justify-between">
                 <div class="score" :key="score" v-for="score in getPOEScores">
                   <q-chip
@@ -39,12 +42,15 @@
             <q-card-section class="q-pa-none">
               <div class="poe-figure">
                 <q-avatar square class="full-width full-height">
-                  <q-img src="/exercise_poe.png" >
-                    <q-icon :class="`poe-item-info all-pointer-events ${poe.posturalOrientation}`" :key="poe.posturalOrientation" v-for="poe in assessmentResults" 
-                      :color="getPOEScoreToTheme(poe.score)" name="info"
+                  <q-img src="/exercise_poe.png" :ratio="9/16">
+                    <q-icon @click="handleTPChange(poe.posturalOrientation)" :class="`poe-item-info all-pointer-events ${poe.posturalOrientation}`"
+                      :key="poe.posturalOrientation" v-for="poe in assessmentResults" :color="getPOEScoreToTheme(poe.score)" name="info"
                     >
-                      <q-tooltip class="text-subtitle2">
-                        {{ formatPosturalOrientation(poe.posturalOrientation) }} ({{ poe.scoreToText }})
+                      <q-tooltip :ref="`tp_${poe.posturalOrientation}`" class="bg-white text-black text-subtitle2 shadow-5">
+                        {{ formatPosturalOrientation(poe.posturalOrientation) }} 
+                        <span :class="`text-${getPOEScoreToTheme(poe.score)}`">
+                          ({{ poe.scoreToText }})
+                        </span>
                       </q-tooltip>
                     </q-icon>
                   </q-img>
@@ -138,11 +144,14 @@ export default {
           }
       },
       getPOESumScoreBar() {
-        return this.assessmentResults.sumOfScores / 100
+        return this.assessmentResults.sumOfScores
       },
       formatPosturalOrientation (posturalOrientation) {
         return poeTypesEnum.formattedPosturalOrientation(posturalOrientation)
-      } 
+      },
+      handleTPChange (posturalOrientation) {
+        this.$refs[`tp_${posturalOrientation}`][0].show()
+      }
     },
     computed: {
       getPOEScores () {
@@ -164,28 +173,32 @@ export default {
 </script>
 
 <style scoped>
+  .poe-figure {
+    max-width: 300px;
+    margin: 0 auto;
+  }
   .poe-item-info {
     position: absolute;
     font-size: 32px;
   }
   .kneeMedialToFootPosition {
-    top: 23rem;
-    left: 177px;
+    top: 20rem;
+    left: 142px;
   }
   .femurMedialToShank {
-    top: 26rem;
-    left: 175px;
+    top: 23rem;
+    left: 140px;
   }
   .femoralValgus {
-    top: 20rem;
-    left: 188px;
+    top: 278px;
+    left: 153px;
   }
   .trunk {
-    top: 14rem;
-    left: 173px;
+    top: 12rem;
+    left: 140px;
   }
   .hip {
-    top: 265px;
-    left: 210px;
+    top: 235px;
+    left: 167px;
   }
 </style>

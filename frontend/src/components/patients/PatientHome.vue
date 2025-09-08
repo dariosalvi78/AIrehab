@@ -333,6 +333,7 @@ export default {
           poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
         }
         exercise.poe.sumOfScores = (sumOfScores / 10) * 100
+        exercise.poe.maxScore = (poeTypesEnum.scores.POOR.point * exercise.poe.length) * 10
       }
       return results
     },
