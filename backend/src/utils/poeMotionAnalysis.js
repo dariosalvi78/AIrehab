@@ -86,15 +86,16 @@ export default {
         let returnedValue = []
 
         // adapt returned results from the API into the POEEvaluation
-        for (const type in returned_poe_obj) {
-            console.log(returned_poe_obj[type])
+        const formattedPOEData = this.mapPosturalOrientation(returned_poe_obj, false)
+
+        for (const type in formattedPOEData) {
             returnedValue.push({
-                posturalOrientation: this.mapPosturalOrientation(type), // 'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition', 'femurMedialToShank'
+                posturalOrientation: formattedPOEData[type].name, // 'trunk', 'hip', 'femoralValgus', 'kneeMedialToFootPosition', 'femurMedialToShank'
                 repetition: 0, // summative or "combined"
-                score: returned_poe_obj[type].pred, // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
-                scoreConfidence_0: returned_poe_obj[type].conf[0], // score is based on index with highest confidence
-                scoreConfidence_1: returned_poe_obj[type].conf[1],
-                scoreConfidence_2: returned_poe_obj[type].conf[2],
+                score: formattedPOEData[type].pred, // can be 0=good (bra), 1=fair (nedsatt), 2=poor (dåligt),
+                scoreConfidence_0: formattedPOEData[type].conf[0], // score is based on index with highest confidence
+                scoreConfidence_1: formattedPOEData[type].conf[1],
+                scoreConfidence_2: formattedPOEData[type].conf[2],
             })
         }
 
@@ -102,18 +103,36 @@ export default {
     },
 
     /**
-     * @param {String} orient exercise type from POE model
-     * @returns {Types.POEEvaluation["posturalOrientation"]}
+     * Take array containing POEs, formats them in the correct order
+     * @param {Array} poeDataToFormat poe data to be formatted
+     * @returns {Array<POEEvaluation>} formatted POEs
      */
-    mapPosturalOrientation(orient) {
+    mapPosturalOrientation(poeDataToFormat, inDB) {
+        let poe = poeDataToFormat, toFormat = []
+        for (const p in poe) {
+            let dataToAdd = { ...poe[p] }
+            if (!inDB) dataToAdd['name'] = p
+            toFormat.push(dataToAdd)
+        }
+
         const orientations = [
-            { name: 'femval', value: 'femoralValgus' },
             { name: 'trunk', value: 'trunk' },
             { name: 'hip', value: 'hip' },
+            { name: 'femval', value: 'femoralValgus' },
             { name: 'kmfp', value: 'kneeMedialToFootPosition' },
             { name: 'fms', value: 'femurMedialToShank' }
         ]
-        for (const o in orientations) if (orientations[o].name == orient.toLowerCase()) return orientations[o].value
+
+        let formatted = orientations.map(o => {
+            if (inDB) {
+                return toFormat.find(poe => poe.posturalOrientation === o.value)
+            } else {
+                return toFormat.find(poe => poe.name == o.name.toLowerCase())
+            }
+        })
+
+        for (const o in formatted) if (formatted[o] && formatted[o].name === orientations[o].name) formatted[o].name = orientations[o].value
+        return formatted
     },
 
     /**

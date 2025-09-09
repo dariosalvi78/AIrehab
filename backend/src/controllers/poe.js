@@ -20,7 +20,7 @@ export default {
         let exerciseID = req.params.exerciseID
         try {
             if (!exerciseID) return res.sendStatus(400)
-            const results = await poe.getEvaluationsFromID(exerciseID)
+            let results = await poe.getEvaluationsFromID(exerciseID)
             if (!results.length) {
                 const exercise = await exercises.getOneExerciseByEmail(exerciseID, req.user.email)
 
@@ -50,6 +50,7 @@ export default {
                     logger.error(null, 'No POE results available for user ' + exercise.patientID)
                 }
             } else {
+                results = poeMA.mapPosturalOrientation(results, true)
                 res.send({ _results: results })
                 return
             }
