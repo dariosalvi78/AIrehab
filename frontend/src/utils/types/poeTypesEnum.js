@@ -11,9 +11,9 @@ export default {
     },
 
     scores: {
-        GOOD: { point: 0, text: 'Good', theme: 'positive' },
-        FAIR: { point: 1, text: 'Fair', theme: 'warning' },
-        POOR: { point: 2, text: 'Poor', theme: 'negative' }
+        GOOD: { point: 0, text: 'good', theme: 'positive' },
+        FAIR: { point: 1, text: 'fair', theme: 'warning' },
+        POOR: { point: 2, text: 'poor', theme: 'negative' }
     },
 
     /**
