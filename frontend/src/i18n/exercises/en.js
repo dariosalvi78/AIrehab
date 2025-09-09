@@ -11,5 +11,10 @@ export default {
             <br><br>
             <b>Placement and recording</b><br>
             Record the participant from the front with a mobile phone/tablet in portrait mode, making sure the whole body is visible in the video. Ideally, place the phone/tablet on a stable surface while recording. 
-        `
+        `,
+    results: {
+        title: 'Video Evaluation',
+        description: 'Results from recorded exercise video',
+        review_video: 'Review recorded exercise'
+    },
 }

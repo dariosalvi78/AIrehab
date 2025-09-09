@@ -11,5 +11,10 @@ export default {
             <br><br>
             <b>Placering och filmning</b><br>
             Filma personen rakt framifrån med mobilen/läsplatta i stående format, se till så att hela kroppen kommer med i videon. Placera helst telefonen/läsplattan på något stabilt underlag när du spelar in filmen.
-        `
+        `,
+    results: {
+        title: 'Utvärdering av övning',
+        description: 'Resultat från inspelad träningsvideo',
+        review_video: 'Granska inspelad träningsvideo'
+    }
 }
