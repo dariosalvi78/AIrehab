@@ -7,20 +7,20 @@
       indicator-color="primary"
       align="justify"
     >
-      <q-tab name="results" label="Evaluation" icon="accessibility" no-caps />
-      <q-tab name="stats" label="See results" icon="more_horiz" no-caps />
+      <q-tab name="results" :label="$t('poe.evaluation')" icon="accessibility" no-caps />
+      <q-tab name="stats" :label="$t('poe.see_results')" icon="more_horiz" no-caps />
     </q-tabs>
     <q-tab-panels v-model="panel" animated ref="panelForm">
       <q-tab-panel name="results" class="">
-        <div class="text-h6 q-mt-md">Your total POE evaulation score</div>
-        <div class="text-body2 q-mb-xl">You can inspect individual scores below</div>
+        <div class="text-h6 q-mt-md">{{ $t('poe.results.title') }}</div>
+        <div class="text-body2 q-mb-xl">{{ $t('poe.results.description') }}</div>
         <div class="poe-score full-width">
           <q-item class="q-pa-none">
             <q-item-section avatar class="row" >
               <q-icon class="q-mb-md material-symbols-outlined" :color="overallScore.theme" size="52px" :name="getProgressIcon" />
             </q-item-section>
             <q-item-section>
-              <q-slider v-model="progressResults" rounded readonly label-always :label-value="progressResults + ` (${overallScore.text})`"
+              <q-slider v-model="progressResults" rounded readonly label-always :label-value="progressResults + ` (${$t(`poe.scores.${overallScore.text}`) })`"
                 :min="0" :max="assessmentResults.maxScore" track-size="12px" track-color="grey-1" :color="overallScore.theme" class="q-my-sm"
               />
               <div class="poe-indicator row justify-between">
@@ -32,7 +32,7 @@
                     size="md"
                     :class="`q-mb-md ${overallScore.theme == score.theme ? 'text-bold' : ''}`"
                     :text-color="score.theme">
-                    {{ score.text }}
+                    {{ $t(`poe.scores.${score.text}`) }}
                   </q-chip>
                 </div>
               </div>
@@ -46,10 +46,10 @@
                     <q-icon @click="handleTPChange(poe.posturalOrientation)" :class="`poe-item-info all-pointer-events ${poe.posturalOrientation}`"
                       :key="poe.posturalOrientation" v-for="poe in assessmentResults" :color="getPOEScoreToTheme(poe.score)" name="info"
                     >
-                      <q-tooltip :ref="`tp_${poe.posturalOrientation}`" class="bg-white text-black text-subtitle2 shadow-5">
-                        {{ formatPosturalOrientation(poe.posturalOrientation) }} 
+                      <q-tooltip :ref="`tp_${poe.posturalOrientation}`" max-width="300px" class="text-center bg-white text-black text-subtitle2 shadow-5">
+                        {{ $t(`poe.${poe.posturalOrientation}`) }} 
                         <span :class="`text-${getPOEScoreToTheme(poe.score)}`">
-                          ({{ poe.scoreToText }})
+                          ({{ $t(`poe.scores.${poe.scoreToText}`)  }})
                         </span>
                       </q-tooltip>
                     </q-icon>
@@ -68,7 +68,7 @@
           >
             <template v-slot:header>
             <q-item-section class="text-subtitle2">
-              {{ formatPosturalOrientation(poe.posturalOrientation) }}
+              {{ $t(`poe.${poe.posturalOrientation}`) }} 
             </q-item-section>
             <q-item-section side>
               <q-chip
@@ -76,25 +76,25 @@
                 :clickable="false" 
                 :ripple="false" 
                 :text-color="getPOEScoreToTheme(poe.score)">
-                {{ poe.scoreToText }}
+                {{ $t(`poe.scores.${poe.scoreToText}`) }}
               </q-chip>
             </q-item-section>
             </template>
             <q-card>
               <q-card-section>
-                <div class="text-subtitle2">Evaluation</div>
-                <div class="text-body2 q-mb-sm">Highest confidence score: <b>{{ poe.scoreToText }}</b></div>
-                <div class="text-body2">Predicted confidence in this score: <b>{{ poe.highestPredictedConfidence }} %</b></div>
+                <div class="text-subtitle2">{{ $t('poe.evaluation') }}</div>
+                <div class="text-body2 q-mb-sm">{{ $t('poe.results.highest_confidence') }}: <b>{{ $t(`poe.scores.${poe.scoreToText}`) }}</b></div>
+                <div class="text-body2">{{ $t('poe.results.predicted_confidence') }}: <b>{{ poe.highestPredictedConfidence }} %</b></div>
                 <q-list dense class="rounded-borders">
                   <q-expansion-item
                     class="q-pt-sm q-pr-lg text-subtitle2"
-                    label="Score"
-                    caption="See all scores for evaluation"
+                    :label="$t('poe.score')"
+                    :caption="$t('poe.results.see_all')"
                     header-style="padding:0;"
                   >
                     <q-item-section class="q-mx-md q-pa-none">
                       <div class="q-py-sm" v-for="confidence in poe.confidences" :key="confidence">
-                        <q-item-label caption><b>{{confidence.text}}</b> · {{ confidence.score }} % confidence</q-item-label>
+                        <q-item-label caption><b>{{ $t(`poe.scores.${confidence.text}`) }}</b> · {{ confidence.score }} % {{ $t('poe.confidence') }}</q-item-label>
                       </div>
                     </q-item-section>
                   </q-expansion-item>
@@ -102,12 +102,12 @@
               </q-card-section>
               <q-separator inset />
               <q-card-section>
-                <div class="text-subtitle2">Postural orientation</div>
-                <div class="text-body2">{{ formatPosturalOrientation(poe.posturalOrientation) }}</div>
+                <div class="text-subtitle2">{{ $t('poe.postural_orientation') }}</div>
+                <div class="text-body2">{{ $t(`poe.${poe.posturalOrientation}`) }}</div>
               </q-card-section>
               <q-separator inset />
               <q-card-section>
-                <div class="text-subtitle2">Repetition</div>
+                <div class="text-subtitle2">{{ $t('poe.repetition') }}</div>
                 <div class="text-body2">{{ poe.repetition }}</div>
               </q-card-section>
             </q-card>
@@ -150,7 +150,7 @@ export default {
         return poeTypesEnum.formattedPosturalOrientation(posturalOrientation)
       },
       handleTPChange (posturalOrientation) {
-        this.$refs[`tp_${posturalOrientation}`][0].show()
+        return this.$refs[`tp_${posturalOrientation}`][0].show()
       }
     },
     computed: {

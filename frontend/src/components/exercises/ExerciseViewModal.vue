@@ -88,14 +88,14 @@
         <transition v-else appear enter-active-class="animated fadeIn">
           <q-card flat class="q-ma-lg evaluation-card">
             <q-card-section>
-              <div class="text-h6">Video Evaluation</div>
-              <div class="text-body1">Results from recorded exercise video</div>
-              <q-btn label="Review recorded exercise" @click="openExerciseVideoDialog" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none q-mt-sm"/>
+              <div class="text-h6">{{ $t('exercises.results.title') }}</div>
+              <div class="text-body1">{{ $t('exercises.results.description') }}</div>
+              <q-btn :label="$t('exercises.results.review_video')" @click="openExerciseVideoDialog" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none q-mt-sm"/>
             </q-card-section>
             <q-separator />
             <poe-view-modal
               :assessmentResults="poe"
-              class="q-mt-sm"
+              class="q-mb-sm"
             />
           </q-card>
         </transition>
