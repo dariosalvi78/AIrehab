@@ -2,7 +2,7 @@
   <q-dialog ref="qDialog">
     <q-card class="q-pl-mx" style="min-width: 350px">
       <q-card-section>
-        <div class="text-h6"> {{this.formMode == 'new' ? 'Add exercise' : 'Edit exercise'}}</div>
+        <div class="text-h6"> {{this.formMode == 'new' ? $t('exercises.form.title_add') : $t('exercises.form.title_edit')}}</div>
       </q-card-section>
       <q-form class="q-px-sm">
         <q-select
@@ -11,35 +11,37 @@
           filled
           clearable
           behavior="menu"
+          emit-value
+          map-options
           v-model="this.exercise.type"
           :options="this.exerciseTypes"
-          label="Type of exercise"
-          hint="Exercise that will be used for evaluation"
-          :rules="[type => !!type  || 'Please enter the type of exercise']"
+          :label="$t('exercises.form.type')"
+          :hint="$t('exercises.form.type_hint')"
+          :rules="[type => !!type  || $t('exercises.form.type_error')]"
         />
         <q-input
           ref="qInputNotes"
           class="q-my-md"
           filled
           v-model="this.exercise.notes"
-          label="Notes"
+          :label="$t('exercises.form.notes')"
           type="textarea"
-          hint="Optional. Notes for exercise"
-          :rules="[notes => !notes ? true : notes.length <= 150 || 'Limit reached']"
+          :hint="$t('exercises.form.notes_hint')"
+          :rules="[notes => !notes ? true : notes.length <= 150 || $t('exercises.form.notes_error')]"
         />
         <q-input
           class="q-my-md"
           filled
           v-if="this.formMode == 'edit' && this.selectedExercise.videoFile"
           v-model="this.selectedExercise.videoFile"
-          label="Uploaded video"
+          :label="$t('exercises.form.uploaded')"
           readonly
         />
     </q-form>
       <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" v-close-popup @click="resetForm"/>
+          <q-btn flat :label="$t('common.cancel')" v-close-popup @click="resetForm"/>
           <q-btn 
-            label="Confirm" 
+            :label="$t('common.confirm')"
             type="submit" 
             color="primary" 
             class="q-ml-sm" 
@@ -77,7 +79,7 @@ export default {
     if (this.formMode == 'edit' ) await this.populateEdit()
 
     exerciseEnums.types.exercise.map((type, i) => {
-      this.exerciseTypes[i] = exerciseEnums.typeToAsc(type)
+      this.exerciseTypes[i] = { value: type, label: this.$i18n.t(`exercises.form.types.${type}`) }
     })
    },
    watch: {
@@ -98,7 +100,7 @@ export default {
         })
       }
       let submittedExercise  = {
-        type: this.exercise.type ? exerciseEnums.typeToDesc(this.exercise.type) : '',
+        type: this.exercise.type ? this.exercise.type : '',
         notes: this.exercise.notes ? this.exercise.notes.trim() : '',
         // startTimestamp: this.exercise.startTimestamp ? this.exercise.startTimestamp : null,
       }

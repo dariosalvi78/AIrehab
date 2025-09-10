@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="numOfExercises > 0" ref="exercises" class="text-h5 q-ml-md">Exercises {{getCountExercises}}</div>
+    <div v-if="numOfExercises > 0" ref="exercises" class="text-h5 q-ml-md">{{ $t('common.exercise', 2) }} {{getCountExercises}}</div>
       <div v-if="exercises.length >= 1 && pagination.maxPageNo >= 1">
         <div 
           v-for="exercise in exercises" 
@@ -10,15 +10,15 @@
             <q-card class="q-ma-md exercise-card">
               <q-card-section class="row">
                 <div class="col">
-                  <q-btn class="q-mb-sm q-mr-sm" :label="!exercise.videoFile ? 'Go to exercise' : 'Go to Evaluation'" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
-                  <q-btn class="q-mb-sm" label="Edit exercise" dense color="primary" size="sm" icon-right="edit" @click="$emit('openExerciseModal', exercise)"/>
-                  <div class="text-h6">{{ exercise.type ? exercise.type : 'Exercise' }}
+                  <q-btn class="q-mb-sm q-mr-sm" :label="!exercise.videoFile ? $t('exercises.go_exercise') : $t('exercises.go_evaluation')" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
+                  <q-btn class="q-mb-sm" :label="$t('exercises.edit_exercise')" dense color="primary" size="sm" icon-right="edit" @click="$emit('openExerciseModal', exercise)"/>
+                  <div class="text-h6">{{ exercise.type ? exercise.type : $t('common.exercise', 1) }}
                     <q-icon v-if="exercise.videoFile" size="sm" name="video_file" />
                   </div>
-                  <div style="margin-left:-2px;" class="text-capitalize">
+                  <div style="margin-left:-2px;">
                     <q-icon style="bottom:2px;" size="sm" name="schedule" />
                     {{ exercise.startTimestamp }}
-                    - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
+                    - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : $t('exercises.ongoing') }}
                   </div>
                 </div>
                 <q-btn style="height:fit-content;" dense color="negative" size="sm" icon="close" @click="closeExercise(exercise)"/>
@@ -57,14 +57,13 @@
         />
       </div>
       <div v-else-if="pagination.maxPageNo <= 0" class="flex flex-center column">
-        <div class="text-h6 q-pa-md text-weight-light">No exercises in session</div>
+        <div class="text-h6 q-pa-md text-weight-light">{{ $t('exercises.sessions.no_exercises_in_session') }}</div>
       </div>
   </div>
 </template>
 
 <script>
 import API from '../../API'
-import exerciseEnum from '../../utils/types/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers'
 
 export default {
@@ -105,7 +104,7 @@ export default {
         if (this.sessionID) {
           let resp = await API.getExercises(this.sessionID, this.pagination)
           resp.exercises.map((exercise) => {
-            exercise.type = exerciseEnum.typeToAsc(exercise.type)
+            exercise.type = this.$i18n.t(`exercises.form.types.${exercise.type}`)
             exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
             exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
           })

@@ -11,7 +11,7 @@
               <q-icon name="calendar_month" />
             </q-btn>
             <div class="list-line" />
-            <div class="text-subtitle2 line-desc q-mr-sm">Sessions</div>
+            <div class="text-subtitle2 line-desc q-mr-sm">{{ $t('common.session_list') }}</div>
           </div>
           <q-intersection
             v-for="session in sessions"
@@ -27,8 +27,14 @@
               <q-item-section>
                 <q-item-label class="text-body2">{{ session.names }}</q-item-label>
                 <q-item-label caption>Start: {{ formatDate(session.startTimestamp) }}</q-item-label>
-                <q-item-label caption>{{ session.endTimestamp ? `End: ${formatDate(session.endTimestamp)}` : 'No end date' }}</q-item-label>
-                <q-item-label caption>{{ session.numOfExercises ?  `${session.numOfExercises} exercise(s)` : 'No exercises' }}</q-item-label>
+                <q-item-label caption>{{ session.endTimestamp ? `End: ${formatDate(session.endTimestamp)}` : $t('exercises.sessions.no_end_date') }}</q-item-label>
+                <q-item-label caption>
+                  {{ 
+                    session.numOfExercises 
+                      ? `${session.numOfExercises} ${$t('exercises.sessions.exercise', session.numOfExercises == 1 ? 1 : 2)}` 
+                      : $t('exercises.sessions.no_exercises') 
+                  }}
+                </q-item-label>
               </q-item-section>
 
               <q-item-section side>
@@ -61,7 +67,7 @@
         />
     </div>
     <div v-else-if="pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
-      <q-chip outline :ripple="false" icon="accessibility" color="secondary" text-color="white" >No sessions found</q-chip>
+      <q-chip outline :ripple="false" icon="accessibility" color="secondary" text-color="white" >{{ $t('exercises.sessions.not_found') }}</q-chip>
     </div>
   </div>
 </template>

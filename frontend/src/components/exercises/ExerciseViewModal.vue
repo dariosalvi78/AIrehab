@@ -5,19 +5,19 @@
       <div v-if="!videoFile">
         <exercise-instructions class="q-mb-md"/>
         <q-separator />
-        <q-card flat class="q-ma-md">
+        <q-card flat class="q-mx-md">
           <q-card-section v-show="!uploadedFile" class="column items-center q-pa-sm">
-            <div class="text-body2 text-center q-my-md">Record new exercise for POE assessment</div>
-            <q-btn v-if="hasVideoDevice" class="q-mb-md q-pa-sm full-width" label="Open camera" color="secondary" icon-right="camera" @click="openRecordingModal" />
+            <div class="text-body2 text-center q-my-md">{{ $t('exercises.record.title') }}</div>
+            <q-btn v-if="hasVideoDevice" class="q-mb-md q-pa-sm full-width" :label="$t('exercises.record.open_camera')" color="secondary" icon-right="camera" @click="openRecordingModal" />
             <div v-else class="flex column items-center full-width">
-              <q-badge class="col q-mb-md" outline color="negative" label="Device has no video inputs" />
-              <q-btn class="col q-mb-md q-py-sm full-width" label="Reconnect video" color="secondary" icon="refresh" @click="checkForVideoSupport" no-caps />
+              <q-badge class="col q-mb-md" outline color="negative" :label="$t('exercises.record.no_device')" />
+              <q-btn class="col q-mb-md q-py-sm full-width" :label="$t('exercises.record.reconnect')" color="secondary" icon="refresh" @click="checkForVideoSupport" no-caps />
             </div>
           </q-card-section>
           <q-separator />
           <q-card-section class="column items-center q-pa-sm">
-            <div v-show="!uploadedFile" class="text-body2 text-center q-my-md">Upload video that you have already recorded</div>
-            <q-file class="q-mb-sm full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" color="secondary" label="Upload exercise video" 
+            <div v-show="!uploadedFile" class="text-body2 text-center q-my-md">{{ $t('exercises.record.upload_desc') }}</div>
+            <q-file class="q-mb-sm full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" color="secondary" :label="$t('exercises.record.upload')" 
               v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload"
             >
               <template v-slot:prepend>
@@ -36,19 +36,19 @@
               </video>
             </div>
             <div class="q-mt-md text-body2" v-if="uploadedFile">
-              Recorded: {{formatModifiedDate}}<br/>
-              Size: {{getUploadedFileSize}}
+              {{ $t('exercises.record.recorded') }}: {{formatModifiedDate}}<br/>
+              {{ $t('exercises.record.size') }}: {{getUploadedFileSize}}
             </div>
-            <q-btn v-show="uploadedFile" class="q-my-md full-width" label="Begin exercise assessment" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
+            <q-btn v-show="uploadedFile" class="q-my-md full-width" :label="$t('exercises.record.begin')" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
           </q-card-section>
         </q-card>
         <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal" maximized>
           <q-card class="full-width">
             <q-card-section class="q-pb-none flex justify-between">
-              <div class="text-body1">Record exercise video</div>
-              <q-btn class="q-pa-none q-pb-sm" flat label="Close" v-close-popup />
+              <div class="text-body1">{{ $t('exercises.record.dialog.title') }}</div>
+              <q-btn class="q-pa-none q-pb-sm" flat :label="$t('common.close')" v-close-popup />
             </q-card-section>
-            <q-checkbox class="q-mx-md q-mb-md text-weight-light" dense v-model="saveVideoToDevice" label="(Optional) Save video to device" />
+            <q-checkbox class="q-mx-md q-mb-md text-weight-light" dense v-model="saveVideoToDevice" :label="$t('exercises.record.dialog.save')" />
             <q-separator />
             <q-card-section class="flex flex-center column q-px-xl">
               <div class="video-container col text-center flex flex-center">
@@ -68,7 +68,7 @@
                   <q-icon size="84px" name="stop" color="negative"/>
                 </q-btn>
               </div>
-              <div class="text-subtitle2 text-center">{{!isRecording ? 'Start recording': 'Stop recording'}}</div>
+              <div class="text-subtitle2 text-center">{{!isRecording ? $t('exercises.record.dialog.start'): $t('exercises.record.dialog.stop')}}</div>
             </q-card-section>
           </q-card>
         </q-dialog>
@@ -76,9 +76,9 @@
       <div v-else>
         <q-card v-if="!poe" flat class="q-pa-lg flex flex-center">
           <q-card-section>
-            <div class="text-h6 flex flex-center">Processing video</div>
-            <div class="text-subtitle2 q-mb-md">Retrieving results from analysed video</div>
-            <q-btn label="Preview recorded exercise" @click="openExerciseVideoDialog" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none q-mt-sm"/>
+            <div class="text-h6 flex flex-center">{{ $t('exercises.results.processing') }}</div>
+            <div class="text-subtitle2 q-mb-md">{{ $t('exercises.results.retrieving') }}</div>
+            <q-btn :label="$t('exercises.results.preview_video')" @click="openExerciseVideoDialog" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none q-mt-sm"/>
             <q-separator />
             <div class="q-mt-md flex flex-center">
               <q-spinner-dots color="primary" size="3em" />
@@ -102,7 +102,7 @@
         <q-dialog class="q-pa-lg video-container" v-model="openExerciseVideo">
           <q-card class="full-width q-pa-md">
             <div v-if="uploadedFile == 'missing'" class="q-ma-md flex flex-center">
-              <q-chip size="md" color="warning" icon="warning" text-color="black">Exercise video was not found</q-chip>
+              <q-chip size="md" color="warning" icon="warning" text-color="black">{{ $t('exercises.results.recording_not_found') }}</q-chip>
             </div>
             <video v-else ref="videoPreview" id="videoPreview" autoplay playsinline webkit-playsinline controls>
               Your browser does not support HTML5 video.

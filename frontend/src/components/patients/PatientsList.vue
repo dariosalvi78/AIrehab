@@ -15,7 +15,7 @@
           <q-icon name="abc" size="md" style="height:24px;"/>
         </q-btn>
         <div class="list-line" />
-        <div class="text-subtitle2 line-desc q-mr-sm">Patients list</div>
+        <div class="text-subtitle2 line-desc q-mr-sm">{{ $t('common.patient_list') }}</div>
       </div>
       <q-intersection
         v-for="patient in patients"

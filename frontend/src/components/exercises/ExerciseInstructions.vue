@@ -1,23 +1,13 @@
 <template>
   <q-list bordered class="rounded-borders q-ma-sm">
-    <q-expansion-item expand-separator label="Exercise instructions" icon="accessibility">
+    <q-expansion-item expand-separator :label="$t('exercises.instructions.title')" icon="accessibility">
       <q-card>
         <q-card-section>
-          <q-btn label="Watch exercise demonstration" @click="openExerciseTestVideo" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none"/>
-          <q-select
-            v-model="locale"
-            :options="[
-              { value: 'en', label: 'English' },
-              { value: 'sv-SE', label: 'Svenska' }
-            ]"
-            label="Language"
-            emit-value
-            map-options
-          />
+          <q-btn :label="$t('exercises.instructions.watch')" @click="openExerciseTestVideo" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none"/>
         </q-card-section>
         <q-separator />
         <q-card-section>
-          <span v-html="$t('exercises.instructions')" />
+          <span v-html="$t('exercises.instructions.content')" />
         </q-card-section>
       </q-card>
     </q-expansion-item>
@@ -25,24 +15,14 @@
 </template>
 
 <script>
-import { useI18n } from 'vue-i18n'
-
 export default {
     name: 'ExerciseInstructions',
-    data () {
-      return {
-        locale: undefined
-      }
-    },
-    mounted () {
-      this.locale = this.getLocale()
-    },
     methods: {
       async openExerciseTestVideo () {
         let video = ''
         if (!process.env.DEV) video = await import('../../../public/exercise_test_demonstration.mp4')
         return this.$q.dialog({
-          title: 'Exercise demonstration',
+          title: this.$i18n.t('exercises.instructions.title'),
           message: `
             <video ref="output" class="full-width" controls autoplay playsinline webkit-playsinline>
               <source src="${video.default}" type="video/mp4">
@@ -51,9 +31,6 @@ export default {
           `,
           html: true
         })
-      },
-      getLocale () {
-        return useI18n({ useScope: 'global' }).locale
       }
     }
 }

@@ -5,15 +5,15 @@
        <q-card flat class="q-pb-lg q-mt-sm">
         <q-card-section>
           <div class="text-h6">
-            Session for {{session.patientName}}
+            {{ $t('exercises.sessions.title', { name: session.patientName }) }}
           </div>
           <div class="text-body2 q-mt-sm" style="marginLeft: -3px;">
             <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
-            {{ formatDate(session.startTimestamp) }} - {{ session.endTimestamp ? formatDate(session.endTimestamp) : 'No end date' }}
+            {{ formatDate(session.startTimestamp) }} - {{ session.endTimestamp ? formatDate(session.endTimestamp) : $t('exercises.sessions.no_end_date') }}
           </div>
           <div>
-            <q-btn dense class="q-mr-md" label="Delete session" color="negative" size="sm" icon="close" @click="closeSession"/>
-            <q-btn dense class="q-my-md" color="secondary" size="sm" label="Start new exercise" icon-right="chevron_right" @click="openExerciseModal('new')" />
+            <q-btn dense class="q-mr-md" :label="$t('common.delete_session')" color="negative" size="sm" icon="close" @click="closeSession"/>
+            <q-btn dense class="q-my-md" color="secondary" size="sm" :label="$t('common.start_exercise')" icon-right="chevron_right" @click="openExerciseModal('new')" />
           </div>
         </q-card-section>
         <q-separator />

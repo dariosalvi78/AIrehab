@@ -2,7 +2,7 @@
     <q-dialog ref="qDialog">
         <q-card class="q-pl-mx" style="min-width: 350px">
             <q-card-section>
-                <div class="text-h6">{{mode == 'new' || mode == 'adminNew' ? 'Add new patient' : 'Edit patient'}}</div>
+                <div class="text-h6">{{mode == 'new' || mode == 'adminNew' ? $t('patient.add') : $t('patient.edit') }}</div>
                 <!-- <div class="text-subtitle2">Send invitation to patient</div> -->
             </q-card-section>
             <q-card-section v-if="mode == 'adminEdit'">
@@ -17,10 +17,10 @@
             </q-card-section>
             <q-form class="q-px-sm">
                 <div class="q-pt-md" v-if="mode == 'new'">
-                    <div class="q-px-sm text-body2">Type of patient</div>
+                    <div class="q-px-sm text-body2">{{ $t('patient.form.type') }}</div>
                     <q-list v-for="item in [
-                            { type: 'real', name: 'Real patient', desc: 'Create a real patient' }, 
-                            { type: 'mock', name: 'Test patient', desc: 'Create a temporary mock patient for testing POE video assessment.' }
+                            { type: 'real', name: $t('patient.form.real'), desc: $t('patient.form.real_desc') }, 
+                            { type: 'mock', name: $t('patient.form.test'), desc: $t('patient.form.test_desc') }
                         ]" :key="item.type">
                         <q-item tag="label" v-ripple>
                             <q-item-section avatar>
@@ -37,8 +37,7 @@
                 </div>
                 <q-tab-panels v-model="this.testPatient" animated>
                     <q-tab-panel :name="true" class="q-pa-sm">
-                        <div class="q-py-sm text-body2">You can create a temporary test patient to test the POE video assessment.</div>
-                        <div class="q-py-sm text-body2">The test patient and all associated data will be deleted once its no longer in use.</div>
+                        <div class="q-py-sm text-body2" v-html="$t('patient.form.test_patient_desc')" />
                     </q-tab-panel>
                     <q-tab-panel :name="false" class="q-pa-none">
                         <q-input
@@ -58,22 +57,22 @@
                             hint="e.g. user@email.com"
                         /> -->
                         <q-input
-                            class="q-my-md"            
+                            class="q-my-md"
                             filled
                             v-model="this.new.fullName"
-                            label="Full name"
+                            :label="$t('patient.form.name')"
                             type="text"
-                            hint="Patient full name"
+                            :hint="$t('patient.form.name_hint')"
                         />
                         <q-input
                         ref="qDate"
                         class="q-my-md"            
                         filled
                         v-model="this.new.dateOfBirth"
-                        label="Date"
+                        :label="$t('patient.form.date')"
                         mask="####-##-##"
-                        :rules="[(date) => dateRestrictions(date) || 'Please enter valid date']"
-                        hint="Date of birth - in yyyy-mm-dd"
+                        :rules="[(date) => dateRestrictions(date) || $t('patient.form.date_error')]"
+                        :hint="$t('patient.form.date_hint') + ' - yyyy-mm-dd'"
                         >
                         <template v-slot:append>
                             <q-icon name="event" style="cursor:pointer;">
@@ -87,7 +86,7 @@
                                 >
                                 <template v-slot>
                                     <div class="row items-center justify-end q-gutter-sm">
-                                        <q-btn label="Confirm" color="primary" size="sm" v-close-popup />
+                                        <q-btn :label="$t('common.confirm')" color="primary" size="sm" v-close-popup />
                                     </div>
                                 </template>
                                 </q-date>
@@ -100,34 +99,34 @@
                             class="q-my-md"            
                             filled
                             v-model="this.new.height"
-                            label="Height (cm)"
+                            :label="$t('patient.form.height') + ' (cm)'"
                             type="number"
-                            hint="Optional. Patient height"
-                            :rules="[height => !height ? true : height <= 200 && height >= 0 || 'Enter valid height in cm']"
+                            :hint="$t('patient.form.height_hint')"
+                            :rules="[height => !height ? true : height <= 200 && height >= 0 || $t('patient.form.height_error')]"
                         />
                         <q-input
                             ref="qWeight"
                             class="q-my-md"            
                             filled
                             v-model="this.new.weight"
-                            label="Weight (kg)"
+                            :label="$t('patient.form.weight') + ' (kg)'"
                             type="number"
-                            hint="Optional. Patient weight"
-                            :rules="[weight => !weight ? true : weight <= 200 && weight >= 0 || 'Enter valid weight in kg']"
+                            :hint="$t('patient.form.weight_hint')"
+                            :rules="[weight => !weight ? true : weight <= 200 && weight >= 0 || $t('patient.form.weight_error')]"
                         />
                         <q-input
-                            class="q-my-md"            
+                            class="q-my-md"
                             filled
                             v-model="this.new.injuries"
-                            label="Notes"
+                            :label="$t('patient.profile.notes')"
                             type="textarea"
-                            hint="Optional. Description / list of injuries"
-                            :rules="[injuries => !injuries ? true : injuries.length <= 150 || 'Limit reached']"
+                            :hint="$t('patient.form.notes_hint')"
+                            :rules="[injuries => !injuries ? true : injuries.length <= 150 || $t('exercises.form.notes_error')]"
                         />
-                        <q-toggle class="text-body2" v-model="hasInjury" :label="!hasInjury ? 'Patient has no injuries' : 'Patient has injuries' " />
+                        <q-toggle class="text-body2" v-model="hasInjury" :label="!hasInjury ? $t('patient.form.no_injuries') : $t('patient.form.injuries') " />
                         <div class="q-my-md q-gutter-sm" v-if="hasInjury">
-                            <div class="q-px-sm text-body2">Side of the body that is injured</div>
-                            <q-radio v-for="side in this.sides" :key="side" v-model="this.new.injuredSide" :val="side" :label="side" />
+                            <div class="q-px-sm text-body2">{{ $t('patient.form.injured_side') }}</div>
+                            <q-radio v-for="side in this.sides" :key="side" v-model="this.new.injuredSide" :val="side" :label="$t(`patient.injuries.${side}`)" />
                         </div>
                         <q-select
                             v-if="hasInjury"
@@ -135,18 +134,20 @@
                             filled
                             clearable
                             behavior="menu"
+                            emit-value
+                            map-options
                             v-model="this.new.injuredBodyPart"
                             :options="this.bodyParts"
-                            label="Injured body part"
-                            hint="Part of the body that is injured"
+                            :label="$t('patient.form.injured_part')"
+                            :hint="$t('patient.form.injured_part_hint')"
                         />
                     </q-tab-panel>
                 </q-tab-panels>
             </q-form>
             <q-card-actions align="right" class="text-primary" v-if="!this.testPatient">
-                <q-btn flat label="Cancel" v-close-popup />
+                <q-btn flat :label="$t('common.cancel')" v-close-popup />
                 <q-btn 
-                    label="Submit" 
+                    :label="$t('common.confirm')" 
                     type="submit" 
                     color="primary" 
                     class="q-ml-sm" 
@@ -160,15 +161,17 @@
                     filled
                     clearable
                     behavior="menu"
+                    emit-value
+                    map-options
                     v-model="this.testExercise.selected"
                     :options="this.testExercise.types"
-                    label="Type of exercise"
-                    hint="Exercise that will be used for evaluation"
-                    :rules="[type => !!type  || 'Please enter the type of exercise']"
+                    :label="$t('exercises.form.type')"
+                    :hint="$t('exercises.form.type_hint')"
+                    :rules="[type => !!type  || $t('exercises.form.type_error')]"
                 />
                 <q-btn 
                     class="prompts"
-                    label="Go to exercise" 
+                    :label="$t('common.go_to_exercise')" 
                     type="submit" 
                     color="secondary" 
                     @click="formSubmitMockPatient()"
@@ -209,8 +212,8 @@ export default {
     },
     async mounted () {
         this.resetForm()
-        patientEnums.types.patient.map((type, i) => this.bodyParts[i] = patientEnums.typeToAsc(type))
-        patientEnums.types.sides.map((type, i) => this.sides[i] = patientEnums.typeToAsc(type))
+        patientEnums.types.patient.map((type, i) => this.bodyParts[i] = { value: type, label: this.$i18n.t(`patient.injuries.${type}`) })
+        patientEnums.types.sides.map((type, i) => this.sides[i] = type)
         if (this.formMode == 'edit' ) await this.populateEdit()
     },
     watch: {
@@ -218,7 +221,9 @@ export default {
             await this.populateEdit()
         },
         testPatient (testSelected) {
-            if (testSelected) for (const e in exerciseEnums.types.exercise) this.testExercise.types[e] = exerciseEnums.typeToAsc(exerciseEnums.types.exercise[e])
+            if (testSelected) for (const e in exerciseEnums.types.exercise) { 
+                this.testExercise.types[e] = { value: exerciseEnums.types.exercise[e], label: this.$i18n.t(`exercises.form.types.${exerciseEnums.types.exercise[e]}`) }
+            }
         }
     },
     methods: {
@@ -244,8 +249,8 @@ export default {
                 injuredBodyPart: '',
             }
             if (this.hasInjury) {
-                userSubmitted.injuredSide = this.new.injuredSide ? patientEnums.typeToDesc(this.new.injuredSide) : '',
-                userSubmitted.injuredBodyPart = this.new.injuredBodyPart ? patientEnums.typeToDesc(this.new.injuredBodyPart) : ''
+                userSubmitted.injuredSide = this.new.injuredSide ? this.new.injuredSide : '',
+                userSubmitted.injuredBodyPart = this.new.injuredBodyPart ? this.new.injuredBodyPart : ''
             }
             if (this.mode == 'adminNew') userSubmitted.physiotherapistEmail = this.physiotherapistEmail
             if (this.mode === 'new' || this.mode == 'adminNew') this.$emit('addNewPatient', userSubmitted)
@@ -271,7 +276,7 @@ export default {
                 weight: null,
                 injuries: '',
                 injuredSide: '',
-                injuredBodyPart: exerciseEnums.typeToDesc(this.testExercise.selected),
+                injuredBodyPart: this.testExercise.selected,
                 isTestPatient: this.testPatient
             }
             this.$emit('addNewPatient', userSubmitted)
@@ -290,8 +295,8 @@ export default {
                 this.testPatient = false
                 if (this.user.injuredBodyPart || this.user.injuredSide) {
                     this.hasInjury = true
-                    this.new.injuredBodyPart = patientEnums.typeToAsc(this.user.injuredBodyPart)
-                    this.new.injuredSide = patientEnums.typeToAsc(this.user.injuredSide)
+                    this.new.injuredBodyPart = this.user.injuredBodyPart
+                    this.new.injuredSide = this.user.injuredSide
                 }
             }
             else if (this.mode == 'adminNew' && this.user) {
