@@ -17,11 +17,16 @@ export default {
     console.debug(`[Quasar app: ${this.$q.version}]`)
 
     if (
-      !store.getLoginStatus() 
+      !store.getItem('isLoggedIn') 
       && !window.location.href.includes('resetpassword') 
       && !window.location.href.includes('patient')
     ) {
       this.$router.push('login')
+    }
+
+    if (store.getItem('locale')) {
+      const newLocale = store.getItem('locale')
+      this.$i18n.locale = newLocale
     }
 
     axios.interceptors.response.use((response) => {
@@ -29,7 +34,7 @@ export default {
     }, async (err) => {
       if (err.response.status === 401 && !err.config.url.includes('login')) {
         await API.logout()
-        store.removeLoginStatus()
+        store.removeItem('isLoggedIn')
         this.$router.push('/login')
         this.$q.notify({
           color: 'secondary',

@@ -16,8 +16,34 @@
                 </q-item-section>
               </q-item>
               <q-separator />
+              <q-item clickable>
+                <q-item-section>{{ $t('common.language') }}</q-item-section>
+                <q-item-section side>
+                  <q-icon name="chevron_right" />
+                </q-item-section>
+                <q-menu auto-close anchor="top end" self="top start">
+                  <q-list>
+                    <q-item
+                      v-for="lang in [
+                        { value: 'en', label: '🇬🇧 English' },
+                        { value: 'sv-SE', label: '🇸🇪 Svenska' }
+                      ]"
+                      :key="lang"
+                      dense
+                      clickable
+                    >
+                      <q-item-section 
+                        @click="changeLocale(lang.value)" 
+                        :class="lang.value == $i18n.locale ? 'text-subtitle2' : ''"
+                      >
+                        {{ lang.label }}
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-item>
               <q-item clickable to="/about" exact>
-                <q-item-section>About</q-item-section>
+                <q-item-section>{{ $t('common.about') }}</q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
                 </q-item-section>
@@ -29,7 +55,7 @@
           {{user.email}}
         </q-chip>
         <q-space />
-        <q-btn flat dense icon="logout" label="Logout" @click="logout()"/>
+        <q-btn flat dense icon="logout" :label="$t('common.logout')" no-caps @click="logout()"/>
       </q-toolbar>
     </q-header>
     <router-view />
@@ -62,7 +88,7 @@ export default {
     async logout () {
       try {
         await API.logout()
-        store.removeLoginStatus()
+        store.removeItem('isLoggedIn')
         this.$router.push('/login')        
       } catch (err) {
         console.info('Could not logout user: ', err.response.statusText)
@@ -77,6 +103,11 @@ export default {
         console.info('Could not retrieve logged in user: ', err.response.statusText)
         await this.logout()
       }
+    },
+    changeLocale (newLocale) {
+      store.setItem('locale', newLocale)
+      console.info('updated locale: ' + newLocale)
+      return this.$i18n.locale = newLocale
     }
   },
   computed: {

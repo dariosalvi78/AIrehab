@@ -1,26 +1,37 @@
 
-const storage = {
-  /**
-   * @returns {Boolean} login status
-   */
-  getLoginStatus () {
-    return JSON.parse(window.localStorage.getItem('isLoggedIn'))
-  },
+const storage = window.localStorage
 
-  /**
-   * set login status in storage
-   * @param {Boolean} loggedInStatus 
-   */
-  setLoginStatus (loggedInStatus) {
-    window.localStorage.setItem('isLoggedIn', JSON.stringify(loggedInStatus))
-  },
-
-  /**
-   * remove login status from storage
-   */
-  removeLoginStatus () {
-    window.localStorage.removeItem('isLoggedIn')
-  }
+/**
+ * get item from localstorage
+ * @param {String} key 
+ */
+function getItem(key) {
+    try {
+        return JSON.parse(storage.getItem(key))
+    } catch (err) {
+        console.error(err)
+    }
 }
 
-export default storage
+/**
+ * set item in localstorage
+ * @param {String} key 
+ * @param {Object} data 
+ */
+function setItem(key, data) {
+    return storage.setItem(key, JSON.stringify(data))
+}
+
+/**
+ * remove item from storage
+ * @param {String} key 
+ */
+function removeItem(key) {
+    return storage.removeItem(key)
+}
+
+export default {
+    getItem,
+    setItem,
+    removeItem
+}
