@@ -2,9 +2,9 @@
    <q-layout>
     <q-page-container>
       <q-card-actions class="flex flex-center">      
-        <q-btn class="prompts" padding="sm" color="accent" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+        <q-btn class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
           <q-icon left name="group_add"/>
-          <div>Add new Patient</div>
+          <div>{{ $t('patient.add') }}</div>
         </q-btn>
         <patient-edit-form
           :user="{}"
@@ -54,7 +54,7 @@
         />
       </div>
       <div v-else-if="pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
-        <q-chip outline :ripple="false" icon="people" color="primary" text-color="white" >No patients found</q-chip>
+        <q-chip outline :ripple="false" icon="people" color="primary" text-color="white" >{{ $t('patient.not_found') }}</q-chip>
       </div>
       <div v-if="panel == 'main'">
         <q-separator />

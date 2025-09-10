@@ -6,14 +6,14 @@
           <q-card flat class="q-pa-sm">
             <q-card-section>
               <div class="text-h4">POE Assessment</div>
-              <div class="text-h5">Password reset</div>
+              <div class="text-h5">{{ $t('common.password_reset.title') }}</div>
             </q-card-section>
             <q-card-section>
               <form autocomplete="on">
                 <q-input
                   class="q-my-md"            
                   v-model="this.email"
-                  label="Email"
+                  :label="$t('common.email')"
                   type="email"
                   readonly
                 />
@@ -22,10 +22,10 @@
                   class="q-my-md"
                   v-model.trim="password"
                   type="password"
-                  label="Password"
-                  :hint="`New password ${password ? getPwdFeedback: ''}`"
+                  :label="$t('common.password')"
+                  :hint="`${$t('common.password_reset.password_hint')} ${password ? getPwdFeedback: ''}`"
                   :rules="[ 
-                    (pwd) => !!pwd || 'Password is needed',
+                    (pwd) => !!pwd || $t('common.password_reset.password_hint'),
                     (pwd) => !getPwdStrength || getPwdStrength
                   ]"
                 />
@@ -34,15 +34,15 @@
                   class="q-my-md"
                   v-model.trim="passwordConfirm"
                   type="password"
-                  label="Confirm password"
-                  hint="Must be the same password"
-                  :rules="[(pwd) => pwd === this.password || 'Please enter the same password']"
+                  :label="$t('common.password_reset.password_confirm')"
+                  :hint="$t('common.password_reset.password_confirm_hint')"
+                  :rules="[(pwd) => pwd === this.password || $t('common.password_reset.password_confirm_error')]"
                 />
               </form>
             </q-card-section>
             <q-card-actions class="flex flex-center">
-              <q-btn size="md" label="Reset password" color="primary" @click="resetPassword()" />
-              <q-btn outline size="md" label="Go back" color="secondary" @click="$router.push('login')" />
+              <q-btn size="md" :label="$t('common.password_reset.reset')" color="primary" @click="resetPassword()" />
+              <q-btn outline size="md" :label="$t('common.password_reset.go_back')" color="secondary" @click="$router.push('login')" />
             </q-card-actions>
           </q-card>
         </q-form>
