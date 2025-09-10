@@ -6,10 +6,6 @@ export default {
     hip: 'Pelvis',
     kneeMedialToFootPosition: 'Knee medial to foot position',
     femurMedialToShank: 'Femur medial to shank',
-    intro: {
-        title: 'Video Evaluation',
-        description: 'Results from recorded exercise video'
-    },
     results: {
         title: 'Your total POE evaulation score',
         description: 'You can inspect individual scores below',
