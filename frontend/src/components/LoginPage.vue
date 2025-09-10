@@ -1,7 +1,7 @@
 <template>
   <q-layout>
     <q-page-container>
-      <q-btn v-if="installPrompt" color="primary" class="q-ma-md" label="Add to Home screen" no-caps @click="showInstallPrompt"/>
+      <q-btn v-if="installPrompt" color="primary" class="q-ma-md" :label="$t('common.add_to_homescreen')" no-caps @click="showInstallPrompt"/>
       <q-page class="flex flex-center">
         <q-form ref="loginForm" class="loginForm">
           <q-card flat class="q-py-sm">
@@ -9,7 +9,7 @@
               <q-avatar size="250px" square style="height:150px;" class="q-mb-xl">
                 <q-img src="logos/POE_logo_noframe.png"/>
               </q-avatar>
-              <div class="text-h5 text-left">Sign-in</div>
+              <div class="text-h5 text-left">{{ $t('common.signin') }}</div>
             </q-card-section>
             <q-card-section class="q-px-sm">
               <form autocomplete="on">
@@ -17,8 +17,8 @@
                   class="q-my-md"
                   v-model.trim="email"
                   type="email"
-                  label="Email"
-                  placeholder="e.g. email@email.com"
+                  :label="$t('common.email')"
+                  placeholder="e.g. user@email.com"
                   autocomplete="on"
                 >
                   <template v-slot:before>
@@ -29,7 +29,7 @@
                   class="q-my-md"
                   v-model.trim="password"
                   :type="(!showPassword) ? 'password' : 'text'"
-                  label="Password"
+                  :label="$t('common.password')"
                   autocomplete="on"
                   @keyup.enter="login()"
                 >
@@ -45,12 +45,12 @@
                 </template>
               </q-input>
               <div class="flex row justify-end">
-                <q-btn class="q-pr-none" flat size="sm" label="Forgot password" @click="resetPassword()" />
+                <q-btn class="q-pr-none" flat size="md" :label="$t('common.forgot_password')" @click="resetPassword()" no-caps />
               </div>
               </form>
             </q-card-section>
             <q-card-actions class="flex flex-center q-py-none">
-              <q-btn class="full-width" size="md" label="login" color="primary" @click="login()" />
+              <q-btn class="full-width" size="md" :label="$t('common.login')" color="primary" @click="login()" no-caps />
             </q-card-actions>
           </q-card>
         </q-form>
@@ -58,7 +58,7 @@
     </q-page-container>
     <q-footer class="bg-white text-black">
       <div class="flex justify-evenly q-pa-sm">
-        <q-btn flat dense no-caps label="About" @click="$router.push('/about')" />
+        <q-btn flat dense no-caps :label="$t('common.about')" @click="$router.push('/about')" />
       </div>
     </q-footer>
   </q-layout>
@@ -83,7 +83,7 @@ export default {
       try {
         const data = await API.login(this.email.toLowerCase(), this.password)
         if (data.user) {
-          store.setLoginStatus(true)
+          store.setItem('isLoggedIn', true)
           if (data.user.role == 'admin') this.$router.push('admin')
           else if (data.user.role == 'physiotherapist') this.$router.push('home')
         }
@@ -108,14 +108,11 @@ export default {
       } 
       this.$q.dialog({
         color: 'primary',
-        title: 'Password reset',
-        message: `
-          Password reset link will be sent to <b>${this.email}</b>.<br/> 
-          Follow the instructions in the email.
-        `,
-        ok: { color: 'primary', label: 'Send' },
+        title: this.$i18n.t('common.password_reset.title'),
+        message: this.$i18n.t('common.password_reset.desc', { email: this.email }),
+        ok: { color: 'primary', label: this.$i18n.t('common.send') },
+        cancel: { flat: true, label: this.$i18n.t('common.cancel') },
         persistent: true,
-        cancel: true,
         html: true
       }).onOk(async () => {
         await API.sendPasswordResetEmail(this.email.toLowerCase())

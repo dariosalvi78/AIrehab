@@ -29,5 +29,6 @@ export default {
     start_exercise: 'Start new exercise',
     go_to_exercise: 'Go to exercise',
     patient_list: 'Patients list',
-    session_list: 'Sessions'
+    session_list: 'Sessions',
+    add_to_homescreen: 'Add to Home screen'
 }

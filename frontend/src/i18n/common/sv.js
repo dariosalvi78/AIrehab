@@ -29,5 +29,6 @@ export default {
     start_exercise: 'Påbörja ny övning',
     go_to_exercise: 'Gå till övning',
     patient_list: 'Patient lista',
-    session_list: 'Sessioner'
+    session_list: 'Sessioner',
+    add_to_homescreen: 'Lägg till på Hemskärmen'
 }
