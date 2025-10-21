@@ -5,6 +5,7 @@ import exercises from "../DOM/exercisesCollection.js"
 import logger from "../utils/logger.js"
 import poeMA from '../utils/poeMotionAnalysis.js'
 import files from '../utils/fileHandler.js'
+import scheduler from '../utils/scheduler.js'
 
 export default {
 
@@ -70,13 +71,16 @@ export default {
      */
     sendVideoForPOEEvaluation: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let exercise, exerciseID = req.params.exerciseID
+        let exercise, exerciseID = req.params.exerciseID, email = req.user.email
         try {
             exercise = await exercises.getExerciseByID(exerciseID)
             if (!exercise) return res.status(404).send('Exercise does not exist')
             if (!exercise.videoFile) return res.status(400).send('Video does not exist')
             let response = await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type)
-            if (response) return res.sendStatus(200)
+            if (response) {
+                scheduler.startPOEEvaluationTask(email, exercise.type, exercise.id, exercise.physiotherapySessionId, exercise.videoFile)
+                return res.sendStatus(200)
+            }
         } catch (err) {
             if (exercise) {
                 await files.deleteVideo(exercise.physiotherapySessionId, exercise.id, exercise.videoFile)
