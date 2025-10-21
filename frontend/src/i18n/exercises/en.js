@@ -38,6 +38,7 @@ export default {
     },
     results: {
         processing: 'Processing video',
+        processing_info: 'The recording has been submitted for analysis. Please note that this may take some time.<br><br>When your results are ready, an email will be sent to you.',
         retrieving: 'Retrieving results from analysed video',
         title: 'Video Evaluation',
         description: 'Results from recorded exercise video',

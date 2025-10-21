@@ -74,7 +74,11 @@
         </q-dialog>
       </div>
       <div v-else>
-        <q-card v-if="!poe" flat class="q-pa-lg flex flex-center">
+        <q-card v-if="!poe" flat class="q-pa-lg flex flex-center column">
+          <q-card-section class="flex flex-center q-gutter-sm evaluation-card">
+            <q-icon name="info_outline" size="md" class="q-ml-xs" />
+            <div class="text-body2 text-center" v-html="$t('exercises.results.processing_info')"></div>
+          </q-card-section>
           <q-card-section>
             <div class="text-h6 flex flex-center">{{ $t('exercises.results.processing') }}</div>
             <div class="text-subtitle2 q-mb-md">{{ $t('exercises.results.retrieving') }}</div>
