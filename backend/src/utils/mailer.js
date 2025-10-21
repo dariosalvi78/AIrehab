@@ -103,6 +103,21 @@ export default {
 
     await sendEmail(options)
   },
+  sendPhysiotherapistPOEResults: async (recipient, type, sessionID, exerciseID) => {
+
+    const options = {
+      from: config.mailer.from_address,
+      to: recipient,
+      subject: 'POE results • POE Assessment',
+      html: `
+        Your POE results for exercise ${type} are ready
+        <br/><br/>
+        Click <a href="${domain}/home/sessions/${sessionID}/exercise/${exerciseID}">here</a> to view your exercise results
+      `
+    }
+
+    await sendEmail(options)
+  },
   /**
    * Send custom email
    * @param {String} recipient
