@@ -240,9 +240,39 @@ export default {
             return res.json({
                 email: user.email,
                 lastLoginTimestamp: user.lastLoginTimestamp,
+                activated: user.activated
             })
         } catch (err) {
             logger.error({ error: err }, 'error getting info')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    /**
+     * Update consent status for authenticated user
+     * @param {Object} req - express request
+     * @param {Object} req.body - updated consent status
+     * @param {Object} res - express response
+     * @returns {Promise<Types.User>}
+     */
+    updateParticipation: async (req, res) => {
+        if (!req.user) return res.sendStatus(401)
+        try {
+            const newStatus = req.body.updatedStatus
+            const user = await users.getUserByEmail(req.user.email)
+            delete user.hashedPassword
+
+            if (!newStatus || !user) return res.sendStatus(400)
+
+            const updatedStatus = await users.updateOneUserParticipation(newStatus, user.id)
+
+            return res.json({
+                updatedStatus,
+                role: user.role
+            })
+        } catch (err) {
+            logger.error({ error: err }, 'error updating participation status')
             res.sendStatus(500)
             return
         }

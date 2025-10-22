@@ -85,7 +85,7 @@ export default {
     getUserByEmail: async function (email) {
         const response = await db.query(`
             SELECT TOP 1 
-            id, email, hashedPassword, role, createdTimestamp, lastLoginTimestamp FROM [user]
+            id, email, hashedPassword, role, createdTimestamp, lastLoginTimestamp, activated FROM [user]
             WHERE email = '${email}';
         `)
         return response.recordset[0]
@@ -101,5 +101,21 @@ export default {
             WHERE u.id = '${userID}';
         `)
         return response
-    }
+    },
+
+    /**
+     * Updates one user participation status
+     * @param {Types.User['activated']} status
+     * @param {Types.User["id"]} userID 
+     */
+    updateOneUserParticipation: async function (status, userID) {
+        const response = await db.query(`
+            UPDATE u SET 
+                u.activated = '${status}'
+            OUTPUT Inserted.activated
+            FROM [user] u
+                WHERE u.id = '${userID}';
+        `)
+        return response.recordset[0]
+    },
 }
