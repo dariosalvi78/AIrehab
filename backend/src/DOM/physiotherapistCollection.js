@@ -99,7 +99,7 @@ export default {
             LEFT JOIN [patient] p ON p.physiotherapistId = u.id
             WHERE u.email = '${therapistEmail}'
             AND u.role = 'physiotherapist'
-            GROUP BY u.email, u.id, u.hashedPassword, u.role, u.createdTimestamp, u.lastloginTimestamp;
+            GROUP BY u.email, u.id, u.hashedPassword, u.role, u.createdTimestamp, u.lastloginTimestamp, u.activated;
         `)
         return response.recordset[0]
     },
