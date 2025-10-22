@@ -60,6 +60,11 @@ let API = {
     return response.data
   },
 
+  async updateUserActivation (updatedStatus) {
+    let response = await axios.put('/users/activate', { updatedStatus })
+    return response.data
+  },
+
   async getPatients (pagination) {
     let response = await axios.get('/patients', { params: { pagination: pagination } })
     return response.data
@@ -85,7 +90,7 @@ let API = {
     return response.data
   },
   
-  async updateActivationStatus (patientID, secret) {
+  async updatePatientActivation (patientID, secret) {
     let response = await axios.post('/patients/' + patientID + '/activate', {}, { params: { secret: secret } })
     return response.data
   },

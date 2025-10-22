@@ -2,7 +2,7 @@
    <q-layout>
     <q-page-container>
       <q-card-actions class="flex flex-center">      
-        <q-btn class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+        <q-btn v-if="panel !== 'consent'" class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
           <q-icon left name="group_add"/>
           <div>{{ $t('patient.add') }}</div>
         </q-btn>
@@ -46,6 +46,35 @@
             />
           </transition>
         </q-tab-panel>
+        <q-tab-panel name="consent" class="q-my-md">
+          <terms-modal v-model="openConsentModal" :isPatient="false"></terms-modal>
+          <transition appear enter-active-class="animated fadeIn">
+            <q-card flat class="q-ma-none">
+              <q-card-section>
+                <div class="text-h6 q-mb-md">{{ $t('common.consent.header') }}</div>
+              </q-card-section>
+              <q-card-section class="q-pt-none flex flex-center">
+                <div class="text-body2">{{ $t('common.consent.description') }}</div>
+                <q-btn class="q-py-lg" icon-right="open_in_new" :label="$t('common.consent.read_information')" @click="openConsentModal = !openConsentModal" no-caps flat dense />
+              </q-card-section>
+              <q-separator inset />
+              <q-card-section>
+                <div class="text-body2">{{ $t('common.consent.confirm_description') }}</div>
+              </q-card-section>
+              <q-card-actions vertical align="left" class="q-mx-none q-pa-none">
+                <q-checkbox
+                  right-label
+                  size="lg"
+                  v-model="participationStatus"
+                  :label="$t('common.consent.confirm_checkbox')"
+                  checked-icon="task_alt"
+                  unchecked-icon="highlight_off"
+                />
+              </q-card-actions>
+              <q-btn :disabled="!participationStatus" class="q-my-lg full-width" size="md" color="secondary" icon-right="chevron_right" :label="$t('common.continue')" @click="updateParticipationStatus" no-caps />
+            </q-card>
+          </transition>
+        </q-tab-panel>
       </q-tab-panels>
       <div v-if="isLoadingPatients" class="q-ma-md flex flex-center">
         <q-spinner-dots
@@ -70,10 +99,12 @@ import PatientEditForm from './patients/PatientEditForm.vue'
 import PatientsList from './patients/PatientsList.vue'
 import PatientViewModal from './patients/PatientViewModal.vue'
 import SessionsList from './sessions/SessionsList.vue'
+import TermsModal from './UserTermsModal.vue'
 
 export default {
   name: 'TestLeaderHome',
-  components: { PatientEditForm, SessionsList, PatientViewModal, PatientsList },
+  components: { PatientEditForm, SessionsList, PatientViewModal, PatientsList, TermsModal },
+  props: { user: Object },
   data () {
     return {
       newUserPrompt: false,
@@ -81,6 +112,8 @@ export default {
       users: [],
       selectedPatient: undefined,
       isLoadingPatients: true,
+      openConsentModal: false,
+      participationStatus: false,
       pagination: {
         limit: 5,
         pageNo: 1,
@@ -98,6 +131,7 @@ export default {
   async mounted () {
     this.resetForm()
     this.$refs.panelForm.goTo('main')
+    if (!this.user.activated) this.$refs.panelForm.goTo('consent')
     await this.getPatients()
   },
   methods: {
@@ -150,6 +184,30 @@ export default {
         })
       }
     },
+    async updateParticipationStatus () {
+      try {
+        const updatedParticipation = this.participationStatus
+        let response = await API.updateUserActivation(updatedParticipation)
+        if (response) {
+          this.$q.notify({
+            color: 'secondary',
+            icon: 'info',
+            position: 'top',
+            message: 'Updated consent status',
+          })
+          this.openHomePage()
+          return
+        }
+      } catch (err) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Could not update user consent: ' + err,
+          icon: 'warning'
+        })
+      }
+    },
+    
     async openPatientView (selectedUser) {
       let resp = await API.getPatient(selectedUser.patientID)
       this.selectedPatient = resp

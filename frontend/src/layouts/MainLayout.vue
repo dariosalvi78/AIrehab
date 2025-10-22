@@ -58,7 +58,7 @@
         <q-btn flat dense icon="logout" :label="$t('common.logout')" no-caps @click="logout()"/>
       </q-toolbar>
     </q-header>
-    <router-view />
+    <router-view :user="this.user" />
   </q-layout>
   <div v-else class="q-ma-md flex flex-center">
     <q-spinner-dots
@@ -97,7 +97,7 @@ export default {
     async getLoggedInUser () {
       try {
         let user = await API.getInfo()
-        return user 
+        return user
       } catch (err) {
         this.user = undefined
         console.info('Could not retrieve logged in user: ', err.response.statusText)
