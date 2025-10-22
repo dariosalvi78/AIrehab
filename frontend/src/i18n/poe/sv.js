@@ -22,5 +22,6 @@ export default {
     evaluation: 'Utvärdering',
     see_results: 'Se resultat',
     confidence: 'Förtroende',
-    repetition: 'Upprepning'
+    repetition: 'Upprepning',
+    no_results: 'Ingen POE-bedömning tillgänglig'
 }

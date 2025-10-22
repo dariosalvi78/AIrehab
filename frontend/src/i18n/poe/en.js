@@ -22,5 +22,6 @@ export default {
     evaluation: 'Evaluation',
     see_results: 'See results',
     confidence: 'Confidence',
-    repetition: 'Repetition'
+    repetition: 'Repetition',
+    no_results: 'No POE assessment available'
 }

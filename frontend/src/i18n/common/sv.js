@@ -8,6 +8,7 @@ export default {
     close: 'Stäng',
     confirm: 'Bekräfta',
     send: 'Skicka',
+    continue: 'Fortsätt',
     delete: 'Ta bort',
     signin: 'Inloggning',
     email: 'Email',
@@ -30,5 +31,13 @@ export default {
     go_to_exercise: 'Gå till övning',
     patient_list: 'Patient lista',
     session_list: 'Sessioner',
-    add_to_homescreen: 'Lägg till på Hemskärmen'
+    add_to_homescreen: 'Lägg till på Hemskärmen',
+    consent: {
+        read_information: 'Läs informationsbrev',
+        header: 'Deltagande i forskningsstudie',
+        description: `Vi behöver ditt samtycke för att du ska kunna delta i denna forskningsstudie. Vänligen läs informationsbrevet innan du fattar ditt beslut.`,
+        confirm_description: 'När du har fattat ditt beslut, kryssa i rutan nedan.',
+        confirm_checkbox: 'Jag godkänner villkoren i informationsbrevet.',
+        alt_text: 'Ditt deltagande kan ändras när som helst. '
+    }
 }

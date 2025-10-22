@@ -1,5 +1,8 @@
 
 export default {
+    name: 'Exercises',
+    patient_exercise_description: 'Here you can see your exercise results',
+    patient_exercise_no_results: 'No exercise results found',
     go_exercise: 'Go to exercise',
     go_evaluation: 'Go to Evaluation',
     edit_exercise: 'Edit exercise',

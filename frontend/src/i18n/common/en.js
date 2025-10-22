@@ -8,6 +8,7 @@ export default {
     close: 'Close',
     confirm: 'Confirm',
     send: 'Send',
+    continue: 'Continue',
     delete: 'Delete',
     signin: 'Sign-in',
     email: 'Email',
@@ -30,5 +31,13 @@ export default {
     go_to_exercise: 'Go to exercise',
     patient_list: 'Patients list',
     session_list: 'Sessions',
-    add_to_homescreen: 'Add to Home screen'
+    add_to_homescreen: 'Add to Home screen',
+    consent: {
+        read_information: 'Read information letter',
+        header: 'Participation in research study',
+        description: 'We need to have your consent to participate in this study. Please read the information letter before making your decision.',
+        confirm_description: 'Once you have made your decision, check the box below.',
+        confirm_checkbox: 'I agree to the terms in the information letter',
+        alt_text: 'Your participation can be changed at anytime. '
+    }
 }
