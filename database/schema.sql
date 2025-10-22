@@ -8,6 +8,7 @@ BEGIN
         role varchar(50) NOT NULL,
         createdTimestamp datetime NOT NULL,
         lastLoginTimestamp datetime
+        activated bit NOT NULL DEFAULT 'false'
     );
 END
 

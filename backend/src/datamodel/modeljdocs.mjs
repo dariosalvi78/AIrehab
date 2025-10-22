@@ -10,6 +10,7 @@
  * @property {!string} email - email address of the user
  * @property {string} hashedPassword - password, hashed
  * @property {!string} role - 'admin' or 'physiotherapist'
+ * @property {!boolean} activated - if user (the physiotherapist) has given consent and agreed to the research study
  */
 
 /**
