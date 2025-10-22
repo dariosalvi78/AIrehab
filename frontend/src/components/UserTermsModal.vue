@@ -1,5 +1,5 @@
 <template>
-  <q-dialog v-model="open" class="q-pa-none">
+  <q-dialog class="q-pa-none">
     <q-card>
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Information letter</div>
@@ -21,31 +21,54 @@
               <br><br>
               Syftet med projektet är att ta reda på hur användare upplever en mobilapplikation som används för att bedöma rörelsekvalitet med hjälp av artificiell intelligens.
               <br><br>
-              Din fysioterapeut har accepterat att delta i studien och därför får Du denna information och förfrågan om att delta.
-              <br><br>
+              <div v-if="isPatient">Din fysioterapeut har accepterat att delta i studien och därför får du denna information och förfrågan om att delta.</div>
+              <div v-else>Alla personer som kontaktat oss via vår annonsering om studien får denna information och förfrågan om att delta</div>
+              <br>
               Forskningshuvudman för projektet är Lunds universitet. Med forskningshuvudman menas den organisation som är ansvarig för projektet. Forskningen är godkänd av Etikprövningsmyndigheten, diarienummer för prövningen hos Etikprövningsmyndigheten är ange diarienummer 
             </q-expansion-item>
             <q-expansion-item
               label="Hur går projektet till?"
               header-class="expansion-header"
             >
+            <div v-if="isPatient">
               Din fysioterapeut kommer få tillgång till en mobilapplikation under 8 veckor för att via videomaterial vid utförande av övningar bedöma rörelsekvalitet med hjälp av AI-modeller på sina patienter när de utför ett test. Du kommer få tillgång till en inloggning till mobilapplikationen där du accepterar att delta i studien samt där du kan se resultat från dina tester. Deltagande innebär att du delar med dig av videomaterial och bakgrundinformation (ålder, kön, skada, idrott).
               <br><br>
               Du kommer även få möjligheten att besvara en digital enkät via mobilapplikationen vid 3 tillfällen; före användning, efter 3 mätningar och efter minst 6 veckor och 5 mätningar. Enkäterna handlar om hur du upplever appens användbarhet och om du tycker den är lätt att använda. Varje enklät tar ca 5-10 minuter att fyll i. Du kan också välja att ge samtycke till att ditt videomaterial används/delas utan att du behöver besvara frågeformulären. 
+            </div>
+            <div v-else>
+              Du kommer få tillgång till en mobilapplikation som du under 8 veckor kan använda för att bedöma rörelsekvalitet med hjälp av AI-modeller när dina patienter utför en enbensknäböj. För att du ska kunna använda mobilapplikationen säkert behöver du godkänna cookies. Dessa används enbart för att hantera din inloggade session och fungerar endast inom Lunds universitets webbdomäner. Cookien lagras inte i webbläsaren, vilket minskar risken för obehörig åtkomst, till exempel via phishing. Godkännandet av cookies är nödvändigt för att applikationen ska fungera korrekt.
+              <br><br>
+              Du kommer få besvara en digital enkät via mobilapplikationen vid 3 tillfällen; före användning, efter 2 och 8 veckors användning. Enkäterna handlar om hur du upplever appens användbarhet och om du tycker den är lätt att använda. Varje enklät tar ca 5-10 minuter att fyll i. 
+              <br><br>
+              Du kommer även att bli inbjuden att delta i uppföljande intervjuer och/eller workshops om användningen av mobilapplikationen. Intervjuer/workshops beräknas ta mellan 30-90 min.
+              <br><br>
+              Om du deltar i en intervju/workshop så kommer du få möjlighet att läsa en sammanställning av den samt ge återkoppling på den.
+            </div>
+            <br>
             </q-expansion-item>
             <q-expansion-item
               label="Möjliga följder och risker med att delta i projektet"
               header-class="expansion-header"
             >
-              Deltagande kan innebära integritetsintrång för dig då du filmas. Det samlas även in känsliga personuppgifter, till exempel om din skada. Filmerna sparas i mobilapplikationen som är lösenordskyddad och filmer och resultat från bedömningarna av rörelsekvalitet via maskininlärningsmodellerna sparas på en säker server på Lunds universitet.
+              <div v-if="isPatient">
+                Deltagande kan innebära integritetsintrång för dig då du filmas. Det samlas även in känsliga personuppgifter, till exempel om din skada. Filmerna sparas i mobilapplikationen som är lösenordskyddad och filmer och resultat från bedömningarna av rörelsekvalitet via maskininlärningsmodellerna sparas på en säker server på Lunds universitet.
+              </div>
+              <div v-else>
+                Vi kommer att hantera personuppgifter, till exempel din mejladress. All data hanteras kodad och det går inte att härleda data till enskilda individer.
+                <br><br>
+                Deltagande kan innebära integritetsintrång för dina patienter då de filmas. Det samlas även in känsliga personuppgifter, till exempel om deras skada. Filmerna sparas i mobilapplikationen som är lösenordskyddad och filmer och resultat från bedömningarna av rörelsekvalitet via maskininlärningsmodellerna sparas på en säker server på Lunds universitet.            
+              </div>
             </q-expansion-item>
             <q-expansion-item
               label="Vad händer med dina uppgifter?"
               header-class="expansion-header"
             >
-              Projektet kommer att samla in och registrera information om dig.
-              <br><br>
-              All data kodas och registreras i en databas som sparas på en säker server på Lunds universitet som endast forskarna i projektet har tillgång till. Dina svar och dina resultat kommer att behandlas så att inte obehöriga kan ta del av dem. Data kommer att presenteras på ett sådant sätt att ingen enskild person kan identifieras. Kodnyckel kommer att förvaras separat åtskilt från mätresultat, endast tillgänglig för forskare i projektet. I studien kommer personuppgifter om dig att registreras. Lunds universitet ansvarar för hantering av personuppgifter enligt EU:s dataskyddsförordning (GDPR). Om du samtycker till att delta i studien samtycker du också till att personuppgiftsbehandling sker. Allmän information om behandling av personuppgifter finns på Lunds universitets hemsida: Behandling av personuppgifter vid Lunds universitet | Lunds universitet.
+              <div v-if="isPatient">Projektet kommer att samla in och registrera information om dig.</div>
+              <div v-else>
+                Projektet kommer att samla in och registrera information om dig samt information och filmer på dina patienter. Patienten ger samtycke att dela videomaterial via appen.
+              </div>
+              <br>
+              All data kodas och registreras i en databas som sparas på en säker server på Lunds universitet som endast forskarna i projektet har tillgång till. Dina svar och dina resultat kommer att behandlas så att inte obehöriga kan ta del av dem. Data kommer att presenteras på ett sådant sätt att ingen enskild person kan identifieras. Kodnyckel kommer att förvaras separat åtskilt från mätresultat, endast tillgänglig för forskare i projektet. I studien kommer personuppgifter om dig att registreras. Lunds universitet ansvarar för hantering av personuppgifter enligt EU:s dataskyddsförordning (GDPR). Om du samtycker till att delta i studien samtycker du också till att personuppgiftsbehandling sker. Allmän information om behandling av personuppgifter finns på Lunds universitets hemsida: <a target="_blank" href="https://www.lu.se/om-universitetet/kontakta-oss/behandling-av-personuppgifter-vid-lunds-universitet">Behandling av personuppgifter vid Lunds universitet | Lunds universitet.</a>
               <br><br>
               Ansvarig för dina personuppgifter är Lunds universitet. Enligt EU:s dataskyddsförordning har du rätt att kostnadsfritt få ta del av de uppgifter om dig som hanteras i projektet, och vid behov få eventuella fel rättade. Du kan också begära att uppgifter om dig raderas samt att behandlingen av dina personuppgifter begränsas. Rätten till radering och till begränsning av behandling av personuppgifter gäller dock inte när uppgifterna är nödvändiga för den aktuella forskningen.
               <br><br>
@@ -127,15 +150,10 @@
 
 <script>
 export default {
-  name: 'PatientTermsModal',
-  props: { openModal: Boolean },
-  data () {
-    return {
-      open: false
-    }
-  },
-  watch: {
-    openModal () { return this.open = !this.open }
+  name: 'UserTermsModal',
+  props: { isPatient: Boolean },
+  mounted () {
+    console.log(this.isPatient)
   }
 }
 </script>

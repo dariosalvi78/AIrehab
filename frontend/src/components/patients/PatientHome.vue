@@ -14,24 +14,22 @@
     <q-page-container>
       <q-card flat bordered class="q-my-lg q-ma-md">
         <q-card-section>
-          <div class="text-h6">Patient consent</div>
+          <div class="text-h6">{{ $t('common.consent.header') }}</div>
         </q-card-section>
         <q-card-section class="q-pt-none flex flex-center">
-            <q-btn class="q-pb-lg" icon-right="open_in_new" label="Read information letter" @click="openConsentModal = !openConsentModal" no-caps flat dense />
-            <div class="text-body2">Once you have made your decision, you can click the checkbox below to participate in the study.</div>
+            <q-btn class="q-pb-lg" icon-right="open_in_new" :label="$t('common.consent.read_information')" @click="openConsentModal = !openConsentModal" no-caps flat dense />
+            <div class="text-body2">{{ $t('common.consent.description')  }} {{ $t('common.consent.confirm_description') }}</div>
         </q-card-section>
         <q-separator inset />
         <q-card-section>
-          <div class="text-body2">
-            Your participation can be changed at anytime.
-          </div>
+          <div class="text-body2">{{ $t('common.consent.alt_text') }}</div>
         </q-card-section>
         <q-card-actions vertical align="left" class="q-mx-none q-pa-none">
           <q-checkbox
             right-label
             size="lg"
             v-model="participationStatus"
-            label="I agree to the terms in the information letter"
+            :label="$t('common.consent.confirm_checkbox')"
             checked-icon="task_alt"
             unchecked-icon="highlight_off"
             :disable="!this.authenticated"
@@ -45,16 +43,14 @@
       </q-card>
       <q-card flat bordered class="q-my-lg q-ma-md">
         <q-card-section>
-          <div class="text-h6">Exercises</div>
+          <div class="text-h6">{{ $t('exercises.name') }}</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <div class="text-body2">Here you can see your exercise results</div>
+          <div class="text-body2">{{ $t('exercises.patient_exercise_description') }}</div>
         </q-card-section>
         <q-separator />
         <q-card-section class="q-pa-none">
-          <div v-if="!results.length" class="text-body2 text-center q-pa-md">
-            No exercise results found
-          </div>
+          <div v-if="!results.length" class="text-body2 text-center q-pa-md">{{ $t('exercises.patient_exercise_no_results') }}</div>
           <q-list v-else-if="results.length" v-for="exercise in results" :key="exercise.id">
             <q-expansion-item
               icon="accessibility"
@@ -70,15 +66,13 @@
                 </div>
               </div>
               <poe-view-modal v-if="exercise.poe.length" :assessmentResults="exercise.poe"/>
-              <div v-else class="q-ma-md text-body2">
-                No POE assessment available
-              </div>
+              <div v-else class="q-ma-md text-body2">{{ $t('poe.no_results') }}</div>
             </q-expansion-item>
           </q-list>
         </q-card-section>
       </q-card>
     </q-page-container>
-    <patient-terms-modal :openModal="openConsentModal"/>
+    <terms-modal v-model="openConsentModal" :isPatient="true"></terms-modal>
     <q-dialog ref="qDialogAuth" position="top">
       <q-card>
         <q-card-section>
@@ -115,7 +109,7 @@
 <script>
 import API from '../../API'
 import nicers from '../../utils/nicers'
-import PatientTermsModal from './PatientTermsModal.vue'
+import TermsModal from '../UserTermsModal.vue'
 import PoeViewModal from '../exercises/PoeViewModal.vue'
 import exerciseType from '../../utils/types/exerciseTypesEnum'
 import poeTypesEnum from '../../utils/types/poeTypesEnum'
@@ -123,7 +117,7 @@ import poeTypesEnum from '../../utils/types/poeTypesEnum'
 export default {
   name: 'PatientHome',
   props: { patientID: String },
-  components: { PatientTermsModal, PoeViewModal },
+  components: { TermsModal, PoeViewModal },
   data () {
     return {
       patient: {},
@@ -233,7 +227,7 @@ export default {
         const secret = this.secret
         this.$q.loading.show()
         await nicers.delay(200)
-        let response = await API.updateActivationStatus(this.patientID, secret)
+        let response = await API.updatePatientActivation(this.patientID, secret)
         if (response.token && response.message) {
           this.authenticated = true
           this.$refs.qDialogAuth.data = response.message
