@@ -2,6 +2,7 @@ import cron from 'node-cron'
 import logger from './logger.js'
 import poeMA from './poeMotionAnalysis.js'
 import mailer from './mailer.js'
+import exercisesCollection from '../DOM/exercisesCollection.js'
 
 export default {
 
@@ -15,7 +16,13 @@ export default {
         try {
             const task = cron.createTask('*/2 * * * *', async () => {
                 const email = userEmail, type = exerciseType
-                const ongoing = await poeMA.isEvaluationOngoing(exerciseID, sessionID, videoFile)
+                let ongoing = await poeMA.isEvaluationOngoing(sessionID, exerciseID, videoFile)
+
+                const exercise = await exercisesCollection.getExerciseByID(exerciseID)
+                if (!exercise) {
+                    task.destroy()
+                    return logger.info({ id: task.id, exerciseID: exerciseID }, 'exercise not found, quit poe task: ')
+                }
 
                 if (ongoing && ongoing.status === 201) {
                     logger.info({ id: task.id, exerciseID: exerciseID, status: ongoing.status }, 'poe task complete: ')
@@ -25,8 +32,8 @@ export default {
                     await mailer.sendPhysiotherapistPOEResults(email, exerciseType, sessionID, exerciseID)
                     return
                 }
-                logger.info({ id: task.id, exerciseID: exerciseID, status: ongoing.status }, 'poe task ongoing:  ')
-            })
+                logger.info({ id: task.id, exerciseID: exerciseID, status: ongoing.status }, 'poe task ongoing: ')
+            }, { maxExecutions: 10 })
             task.start()
         } catch (err) {
             logger.error({ error: err }, 'error scheduling poe task: ')
