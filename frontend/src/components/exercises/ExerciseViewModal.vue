@@ -122,6 +122,7 @@
 import API from '../../API'
 import nicers from '../../utils/nicers'
 import poeTypesEnum from '../../utils/types/poeTypesEnum'
+import exerciseTypes from '../../utils/types/exerciseTypesEnum'
 import ExerciseInstructions from './ExerciseInstructions.vue'
 import PoeViewModal from './PoeViewModal.vue'
 
@@ -294,7 +295,9 @@ export default {
               message: '<b>Video uploaded</b><br>Processing will start in a moment<br>Please wait...',
               html: true
             })
-            let poe_evaluation = await API.sendPOE(results.videoFile, this.exerciseID)
+            let formattedType = exerciseTypes.typeToAsc(results.type), exerciseDate = nicers.formattedDayOfMonth(results.date)
+            const meta_info = { typeAsc: formattedType, date: exerciseDate }
+            let poe_evaluation = await API.sendPOE(meta_info, this.exerciseID)
             if (poe_evaluation) {
               loading.hide()
               this.$q.notify({

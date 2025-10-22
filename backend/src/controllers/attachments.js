@@ -58,7 +58,11 @@ export default {
 
             let video = await files.saveVideo(exercise.physiotherapySessionId, exercise.id, req)
             if (!video) return res.sendStatus(500)
-            return res.send(video)
+            return res.send({
+                videoFile: video.videoFile,
+                date: exercise.startTimestamp,
+                type: exercise.type
+            })
         } catch (err) {
             logger.error({ error: err }, 'error uploading attachments: ')
             if (err.httpCode) return res.status(err.httpCode).send(err.reason)

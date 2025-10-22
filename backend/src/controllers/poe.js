@@ -66,6 +66,7 @@ export default {
      * Send video for evaluation, but does not receive results immediately
      * @param {Object} req - express request
      * @param {Object} req.params exerciseID
+     * @param {Object} req.body metaInfo (for email)
      * @param {Object} res - express response
      * @returns {Promise<Types.POEEvaluation>} mock poe results for exercise
      */
@@ -78,7 +79,8 @@ export default {
             if (!exercise.videoFile) return res.status(400).send('Video does not exist')
             let response = await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type)
             if (response) {
-                scheduler.startPOEEvaluationTask(email, exercise.type, exercise.id, exercise.physiotherapySessionId, exercise.videoFile)
+                const META_INFO = req.body.metaInfo
+                scheduler.startPOEEvaluationTask(email, META_INFO, exercise.id, exercise.physiotherapySessionId, exercise.videoFile)
                 return res.sendStatus(200)
             }
         } catch (err) {

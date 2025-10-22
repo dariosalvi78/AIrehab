@@ -155,8 +155,8 @@ let API = {
     return response.data
   },
 
-  async sendPOE (uploadedFile, exerciseID) {
-    let response = await axios.post('/poe/' + exerciseID, uploadedFile)
+  async sendPOE (metaInfo, exerciseID) {
+    let response = await axios.post('/poe/' + exerciseID, { metaInfo })
     return response.data
   },
 

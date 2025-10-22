@@ -10,12 +10,12 @@ export default {
      * Check POE status for a given exercise.
      * When POE results are ready, send email reminder to user
      */
-    startPOEEvaluationTask: (userEmail, exerciseType, exerciseID, sessionID, videoFile) => {
+    startPOEEvaluationTask: (userEmail, meta, exerciseID, sessionID, videoFile) => {
         /** @type {import('node-cron').ScheduledTask} */
         const task = undefined
         try {
             const task = cron.createTask('*/2 * * * *', async () => {
-                const email = userEmail, type = exerciseType
+                const email = userEmail, mailerInfo = meta
                 let ongoing = await poeMA.isEvaluationOngoing(sessionID, exerciseID, videoFile)
 
                 const exercise = await exercisesCollection.getExerciseByID(exerciseID)
@@ -25,11 +25,9 @@ export default {
                 }
 
                 if (ongoing && ongoing.status === 201) {
-                    logger.info({ id: task.id, exerciseID: exerciseID, status: ongoing.status }, 'poe task complete: ')
                     task.destroy()
-
-                    let exerciseType = (await import('../../../frontend/src/utils/types/exerciseTypesEnum.js')).default.typeToAsc(type)
-                    await mailer.sendPhysiotherapistPOEResults(email, exerciseType, sessionID, exerciseID)
+                    logger.info({ id: task.id, exerciseID: exerciseID, status: ongoing.status }, 'poe task complete: ')
+                    await mailer.sendPhysiotherapistPOEResults(email, mailerInfo, sessionID, exerciseID)
                     return
                 }
                 logger.info({ id: task.id, exerciseID: exerciseID, status: ongoing.status }, 'poe task ongoing: ')
