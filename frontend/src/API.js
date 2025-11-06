@@ -183,6 +183,11 @@ let API = {
   async passwordReset (newPassword, token) {
     let response = await axios.post('/resetpassword', { newPassword, token })
     return response.data
+  },
+
+  async getSurveys () {
+    let response = await axios.get('/surveys')
+    return response.data
   }
 }
 

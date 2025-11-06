@@ -6,6 +6,7 @@ import sessions from "./controllers/physiotherapySession.js";
 import exercises from "./controllers/exercises.js";
 import poe from "./controllers/poe.js";
 import attachments from "./controllers/attachments.js";
+import surveys from "./controllers/surveys.js";
 
 const API_PREFIX = '/api'
 
@@ -61,4 +62,6 @@ export default async (app, isAuth) => {
     app.post(`${API_PREFIX}/email/resetpassword`, users.sendPasswordResetEmail)
     app.post(`${API_PREFIX}/email/consent`, physiotherapists.sendPatientConsentEmail)
     app.post(`${API_PREFIX}/resetpassword`, users.resetPassword)
+    
+    app.get(`${API_PREFIX}/surveys`, isAuth, surveys.getSurveys)
 }
