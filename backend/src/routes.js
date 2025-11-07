@@ -64,4 +64,5 @@ export default async (app, isAuth) => {
     app.post(`${API_PREFIX}/resetpassword`, users.resetPassword)
     
     app.get(`${API_PREFIX}/surveys`, isAuth, surveys.getSurveys)
+    app.post(`${API_PREFIX}/surveys`, isAuth, surveys.addNewSurvey)
 }

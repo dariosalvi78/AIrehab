@@ -188,7 +188,12 @@ let API = {
   async getSurveys () {
     let response = await axios.get('/surveys')
     return response.data
-  }
+  },
+
+  async addSurvey (newSurveyData) {
+    let response = await axios.post('/surveys', { newSurveyData })
+    return response.data
+  },
 }
 
 export default API
