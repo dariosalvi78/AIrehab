@@ -46,35 +46,6 @@
             />
           </transition>
         </q-tab-panel>
-        <!-- <q-tab-panel name="consent" class="q-my-md">
-          <terms-modal v-model="openConsentModal" :isPatient="false"></terms-modal>
-          <transition appear enter-active-class="animated fadeIn">
-            <q-card flat class="q-ma-none">
-              <q-card-section>
-                <div class="text-h6 q-mb-md">{{ $t('common.consent.header') }}</div>
-              </q-card-section>
-              <q-card-section class="q-pt-none flex flex-center">
-                <div class="text-body2">{{ $t('common.consent.description') }}</div>
-                <q-btn class="q-py-lg" icon-right="open_in_new" :label="$t('common.consent.read_information')" @click="openConsentModal = !openConsentModal" no-caps flat dense />
-              </q-card-section>
-              <q-separator inset />
-              <q-card-section>
-                <div class="text-body2">{{ $t('common.consent.confirm_description') }}</div>
-              </q-card-section>
-              <q-card-actions vertical align="left" class="q-mx-none q-pa-none">
-                <q-checkbox
-                  right-label
-                  size="lg"
-                  v-model="participationStatus"
-                  :label="$t('common.consent.confirm_checkbox')"
-                  checked-icon="task_alt"
-                  unchecked-icon="highlight_off"
-                />
-              </q-card-actions>
-              <q-btn :disabled="!participationStatus" class="q-my-lg full-width" size="md" color="secondary" icon-right="chevron_right" :label="$t('common.continue')" @click="updateParticipationStatus" no-caps />
-            </q-card>
-          </transition>
-        </q-tab-panel> -->
         <q-tab-panel name="survey" class="q-my-md">
           <survey-form
             :incomingSurvey="this.incomingSurvey"
