@@ -1,3 +1,5 @@
+USE AIREHAB
+GO
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[user]') AND type in (N'U'))
 BEGIN
@@ -7,7 +9,7 @@ BEGIN
         hashedpassword varchar(100) NOT NULL,
         role varchar(50) NOT NULL,
         createdTimestamp datetime NOT NULL,
-        lastLoginTimestamp datetime
+        lastLoginTimestamp datetime,
         activated bit NOT NULL DEFAULT 'false'
     );
 END
@@ -25,7 +27,7 @@ BEGIN
         injuredSide varchar(10),
         injuredBodyPart varchar(50),
         createdTimestamp datetime,
-        activated bit NOT NULL DEFAULT 'false'
+        activated bit NOT NULL DEFAULT 'false',
         email varchar(100) DEFAULT NULL,
     )
     ALTER TABLE patient ADD CONSTRAINT patient_physiotherapist_id_fk FOREIGN KEY (physiotherapistId) REFERENCES [user] (id);
@@ -69,4 +71,20 @@ BEGIN
         repetition int
     )
     ALTER TABLE poe_evaluation ADD CONSTRAINT poe_evaluation_exercise_id_fk FOREIGN KEY (exerciseId) REFERENCES exercise (id);
+END
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[survey_answer]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE survey_answer (
+        id uniqueidentifier NOT NULL PRIMARY KEY,
+        physiotherapistId uniqueidentifier NOT NULL,
+        patientId uniqueidentifier DEFAULT NULL,
+        surveyName varchar(50) NOT NULL,
+        content nvarchar(max) NOT NULL,
+        createdTimestamp datetime NOT NULL
+    )
+    ALTER TABLE survey_answer ADD 
+        CONSTRAINT [content record should be formatted as JSON] CHECK (ISJSON([content])=1),
+        CONSTRAINT survey_answer_physiotherapist_id_fk FOREIGN KEY (physiotherapistId) REFERENCES [user] (id),
+        CONSTRAINT survey_answer_patient_id_fk FOREIGN KEY (patientId) REFERENCES patient (id);
 END

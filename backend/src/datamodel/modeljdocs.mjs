@@ -61,4 +61,14 @@
  * @property {?string} notes - some textual notes
  */
 
+/**
+ * @typedef {Object} SurveyAnswer 
+ * @property {!string} id - unique identifier
+ * @property {!string} physiotherapistId - id of the physiotherapist
+ * @property {?string} patientId - id of the patient
+ * @property {!string} surveyName - name of the survey
+ * @property {!string} content - survey content, questions and answers
+ * @property {string} createdTimestamp - ISO 8601 date and time
+ */
+
 export const Types = {}
