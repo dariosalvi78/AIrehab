@@ -17,7 +17,7 @@
               </q-item>
               <q-separator />
               <q-item clickable>
-                <q-item-section>{{ $t('common.language') }}</q-item-section>
+                <q-item-section>{{ $t('common.header.language') }}</q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
                 </q-item-section>
@@ -42,8 +42,14 @@
                   </q-list>
                 </q-menu>
               </q-item>
+              <q-item clickable to="/home/consent" exact>
+                <q-item-section>{{ $t('common.header.consent') }}</q-item-section>
+                <q-item-section side>
+                  <q-icon name="chevron_right" />
+                </q-item-section>
+              </q-item>
               <q-item clickable to="/about" exact>
-                <q-item-section>{{ $t('common.about') }}</q-item-section>
+                <q-item-section>{{ $t('common.header.about') }}</q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
                 </q-item-section>

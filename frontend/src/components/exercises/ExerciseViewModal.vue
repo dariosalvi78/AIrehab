@@ -1,6 +1,6 @@
 <template>
   <q-page-container class="q-pt-md" style="paddingTop:auto;">
-    <q-btn class="q-ml-md" round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />
+    <q-btn class="q-ml-md" round dense color="primary" size="lg" icon="chevron_left" @click="goToSession" />
     <q-page class="q-py-md">
       <div v-if="!videoFile">
         <exercise-instructions class="q-mb-md"/>
@@ -297,6 +297,7 @@ export default {
             })
             let formattedType = exerciseTypes.typeToAsc(results.type), exerciseDate = nicers.formattedDayOfMonth(results.date)
             const meta_info = { typeAsc: formattedType, date: exerciseDate }
+            console.log(meta_info)
             let poe_evaluation = await API.sendPOE(meta_info, this.exerciseID)
             if (poe_evaluation) {
               loading.hide()
@@ -407,6 +408,9 @@ export default {
       this.uploadedFile = true
       this.openExerciseVideo = !this.openExerciseVideo
       await this.getVideoPathForExercise()
+    },
+    goToSession () {
+      return this.$router.push('/home/sessions/' + this.sessionID)
     }
   },
   computed: {
