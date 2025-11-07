@@ -1,8 +1,8 @@
 <template>
    <q-layout>
     <q-page-container>
-      <q-card-actions class="flex flex-center">      
-        <q-btn v-if="panel !== 'consent'" class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+      <q-card-actions class="flex flex-center" v-if="showNewUserPrompt">      
+        <q-btn class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
           <q-icon left name="group_add"/>
           <div>{{ $t('patient.add') }}</div>
         </q-btn>
@@ -46,7 +46,7 @@
             />
           </transition>
         </q-tab-panel>
-        <q-tab-panel name="consent" class="q-my-md">
+        <!-- <q-tab-panel name="consent" class="q-my-md">
           <terms-modal v-model="openConsentModal" :isPatient="false"></terms-modal>
           <transition appear enter-active-class="animated fadeIn">
             <q-card flat class="q-ma-none">
@@ -74,6 +74,12 @@
               <q-btn :disabled="!participationStatus" class="q-my-lg full-width" size="md" color="secondary" icon-right="chevron_right" :label="$t('common.continue')" @click="updateParticipationStatus" no-caps />
             </q-card>
           </transition>
+        </q-tab-panel> -->
+        <q-tab-panel name="survey" class="q-my-md">
+          <survey-form
+            :incomingSurvey="this.incomingSurvey"
+            @panelFormGoBack="openHomePage"
+          />
         </q-tab-panel>
       </q-tab-panels>
       <div v-if="isLoadingPatients" class="q-ma-md flex flex-center">
@@ -94,16 +100,16 @@
 </template>
 
 <script>
-import API from '../API'
-import PatientEditForm from './patients/PatientEditForm.vue'
-import PatientsList from './patients/PatientsList.vue'
-import PatientViewModal from './patients/PatientViewModal.vue'
-import SessionsList from './sessions/SessionsList.vue'
-import TermsModal from './UserTermsModal.vue'
+import API from '../../API'
+import PatientEditForm from '../patients/PatientEditForm.vue'
+import PatientsList from '../patients/PatientsList.vue'
+import PatientViewModal from '../patients/PatientViewModal.vue'
+import SessionsList from '../sessions/SessionsList.vue'
+import SurveyForm from '../SurveyForm.vue'
 
 export default {
   name: 'TestLeaderHome',
-  components: { PatientEditForm, SessionsList, PatientViewModal, PatientsList, TermsModal },
+  components: { PatientEditForm, SessionsList, PatientViewModal, PatientsList, SurveyForm },
   props: { user: Object },
   data () {
     return {
@@ -112,8 +118,7 @@ export default {
       users: [],
       selectedPatient: undefined,
       isLoadingPatients: true,
-      openConsentModal: false,
-      participationStatus: false,
+      incomingSurvey: undefined,
       pagination: {
         limit: 5,
         pageNo: 1,
@@ -131,8 +136,12 @@ export default {
   async mounted () {
     this.resetForm()
     this.$refs.panelForm.goTo('main')
-    if (!this.user.activated) this.$refs.panelForm.goTo('consent')
     await this.getPatients()
+  },
+  watch: {
+    async panel(updatedView) {
+      if (!this.incomingSurvey && updatedView == 'main') await this.isNewSurveyAvailable()
+    }
   },
   methods: {
      async addNewUser (newUser) {
@@ -184,30 +193,18 @@ export default {
         })
       }
     },
-    async updateParticipationStatus () {
+    async isNewSurveyAvailable () {
       try {
-        const updatedParticipation = this.participationStatus
-        let response = await API.updateUserActivation(updatedParticipation)
-        if (response) {
-          this.$q.notify({
-            color: 'secondary',
-            icon: 'info',
-            position: 'top',
-            message: 'Updated consent status',
-          })
-          this.openHomePage()
-          return
-        }
+        const { activated, newSurveyAvailable } = await API.getInfo()
+        if (!newSurveyAvailable) return
+        // We need user to consent in order to do survey
+        if (!activated && newSurveyAvailable) return this.$router.push('home/consent')
+        this.incomingSurvey = newSurveyAvailable
+        return this.$refs.panelForm.goTo('survey')
       } catch (err) {
-        return this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: 'Could not update user consent: ' + err,
-          icon: 'warning'
-        })
+        return
       }
     },
-    
     async openPatientView (selectedUser) {
       let resp = await API.getPatient(selectedUser.patientID)
       this.selectedPatient = resp
@@ -235,8 +232,9 @@ export default {
     },
     async goToTestExercise (sessionID, exerciseID) {
       return this.$router.push('home/sessions/' + sessionID + '/exercise/' + exerciseID)
-    },
-  }
+    }
+  },
+  computed: { showNewUserPrompt () { return this.panel !== 'consent' && this.panel !== 'survey' } }
 }
 </script>
 
