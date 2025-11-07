@@ -3,7 +3,10 @@ export default {
     title: 'Questionnaire {surveyName}.',
     description: 'As part of this study, you will be asked to answer {numOfQuestions} open-ended questions regarding your use of the POE app.',
     complete_form_description: 'Once you have answered all the questions in the survey, please press the button below to submit your answers.',
-    notification_form_error: 'Please fill out the entire form',
+    notifications: {
+        form_error: 'Please fill out the entire form',
+        upload_completed: 'Questionnaire sent. Thank you for your participation'
+    },
     additional_info: { 
         title: 'Information about POE assessment',
         content: `
