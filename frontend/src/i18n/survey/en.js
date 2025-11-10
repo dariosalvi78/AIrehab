@@ -17,11 +17,17 @@ export default {
             I den här studien används en mobilapp, kallad <b>POE-appen</b>, som med hjälp av AI automatiskt bedömer dessa rörelsemönster. Appen gör det enklare att identifiera avvikelser i rörelsekvalitet utan att behöva avancerad utrustning. 
         `
     },
-    choices: [
-        'Disagree completely',
-        'Disagree somewhat',
-        'Neither agree nor disagree',
-        'Strongly agree',
-        'Completely agree'
-    ]
+    choices: {
+        scales: [
+            'Disagree completely',
+            'Disagree somewhat',
+            'Neither agree nor disagree',
+            'Strongly agree',
+            'Completely agree'
+        ],
+        text: {
+            label: 'Write your answer',
+            hint: 'Optional. Free-text question'
+        }
+    }
 }

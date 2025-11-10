@@ -1,8 +1,6 @@
 
 export default {
     name: 'Övningar',
-    patient_exercise_description: 'Här kan du se dina träningsresultat',
-    patient_exercise_no_results: 'Inga träningsresultat hittades',
     go_exercise: 'Gå till övning',
     go_evaluation: 'Gå till utvärdering',
     edit_exercise: 'Redigera övning',

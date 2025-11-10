@@ -4,6 +4,42 @@ export default {
     edit: 'Edit patient',
     start: 'Start session',
     ongoing: 'Go to ongoing session',
+    home: {
+        exercise_description: 'Here you can see your exercise results',
+        exercise_no_results: 'No exercise results found',
+        survey: {
+            title: 'Questionnaires',
+            description: 'As part of this research study you can take a short optional questionnaire to help us gather more insight of the usability and user experience of POE-app.',
+            available: 'New questionnaire to answer (Digital questionnaire {surveyName}.)',
+            no_results: 'At the moment, there are no questionnaires to complete. Come back at a later time.'
+        },
+        consent: {
+            confirm: {
+                email_required: 'Email is required',
+                description: `
+                    Before you can consent to participate in the study, you will need to provide an email so we can send important reminders.
+                    <br><br>
+                    <b>- By pressing "@.upper:{'common.confirm'}", you agree to the terms found in the information letter</b>
+                    <br><br>
+                    Please provide your email address below.
+                `
+            },
+            withdraw: {
+                title: 'Withdraw consent',
+                description: `
+                    You are about to withdraw your consent from the study.
+                    Withdrawing means but not limited to:
+                    <br>
+                    <br>- <b>No further data will be collected from you</b>
+                    <br>- <b>Your email will be removed</b>
+                    <br><br>
+                    More details can be found in the information letter.
+                    <br><br>
+                    Press the "@.upper:{'patient.home.consent.withdraw.title'}" button to remove your consent from the study.
+                `
+            }
+        }
+    },
     profile: {
         measurements: 'Measurements',
         dob: 'Date of birth',
