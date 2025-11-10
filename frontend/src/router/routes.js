@@ -22,9 +22,10 @@ const routes = [
     path: '/home',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('components/TestLeaderHome.vue') },
+      { path: '', component: () => import('components/test_leader/TestLeaderHome.vue') },
       { path: 'sessions/:sessionID', component: () => import('components/sessions/SessionViewModal.vue'), props: true },
-      { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true }
+      { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true },
+      { path: 'consent', component: () => import('components/test_leader/TestLeaderConsentPage.vue'), props: true },
     ]
   },
   {
