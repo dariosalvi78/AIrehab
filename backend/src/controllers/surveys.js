@@ -32,7 +32,7 @@ export default {
      * @returns {Promise<Types.SurveyAnswer>} added survey
      */
     addNewSurvey: async (req, res) => {
-        if (req.user.role === 'admin') return res.sendStatus(403)
+        if (!req) return res.sendStatus(403)
 
         try {
             let surveyData = req.body.newSurveyData, physioID = undefined, patientID = null

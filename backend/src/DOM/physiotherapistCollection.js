@@ -118,6 +118,19 @@ export default {
     },
 
     /**
+     * Get one patient with patient email
+     * @param {Types.Patient["email"]} patientEmail 
+     * @returns {Promise<Types.Patient>}
+     */
+    getPatientEmail: async function (patientEmail) {
+        const response = await db.query(`
+            SELECT TOP 1 p.id, p.email, p.activated FROM [patient] p
+            WHERE p.email = '${patientEmail}';
+        `)
+        return response.recordset[0]
+    },
+
+    /**
      * Inserts one patient and assign a physiotherapist
      * @param {Types.Patient} patient
      * @param {Types.User["id"]} therapistId 
@@ -203,7 +216,7 @@ export default {
     updateOnePatientEmail: async function (newEmail, patientID) {
         const response = await db.query(`
             UPDATE p SET 
-                p.email = '${newEmail}'
+                p.email = ${newEmail ? `'${newEmail}'` : null}
             FROM [patient] p
                 WHERE p.id = '${patientID}';
         `)

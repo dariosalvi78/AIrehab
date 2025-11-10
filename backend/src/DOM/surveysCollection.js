@@ -30,6 +30,21 @@ export default {
     },
 
     /**
+     * Gets all surveys for specific patient
+     * @param {Types.SurveyAnswer["patientId"]} patientID
+     * @returns {Promise<Array.<Types.SurveyAnswer>>}
+     */
+    getSurveysByPatientID: async function (patientID) {
+        let response = await db.query(`
+            SELECT s.id, s.surveyName, s.createdTimestamp FROM survey_answer s
+                WHERE s.patientID = '${patientID}'
+            GROUP BY s.id, s.surveyName, s.createdTimestamp
+            ORDER BY s.createdTimestamp DESC;
+        `)
+        return response.recordset
+    },
+
+    /**
      * Creates one survey using survey data
      * @param {Types.SurveyAnswer["physiotherapistId"]} physiotherapistId
      * @param {Types.SurveyAnswer["patientId"]} patientId
@@ -42,7 +57,7 @@ export default {
             INSERT INTO survey_answer
             (id, physiotherapistId, patientId, surveyName, content, createdTimestamp)
             OUTPUT Inserted.id, Inserted.content, Inserted.createdTimestamp
-            VALUES(NEWID(), '${physiotherapistId}', ${patientId ? `${patientId}` : null}, '${name}', N'${content}', CURRENT_TIMESTAMP)
+            VALUES(NEWID(), '${physiotherapistId}', ${patientId ? `'${patientId}'` : null}, '${name}', N'${content}', CURRENT_TIMESTAMP)
         `)
         return response.recordset[0]
     },
