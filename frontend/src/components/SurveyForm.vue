@@ -1,5 +1,6 @@
 <template>
-  <q-page-container>
+  <q-page-container class="bg-white">
+    <q-btn v-if="incomingSurvey.userType == 'patient'" class="q-mb-md" round dense color="primary" size="lg" icon="chevron_left" @click="this.$emit('panelFormGoBack')" />
     <div class="text-h5 q-mb-md">{{ $t('survey.title', { surveyName: this.incomingSurvey.currentSurveyID }) }}</div>
     <div class="text-body2">{{ $t('survey.description', { numOfQuestions: questions.length }) }}</div>
     <q-list class="q-py-sm">
@@ -10,15 +11,27 @@
     <q-separator class="q-my-sm" />
     <q-form class="survey-questions" @submit="submitForm">
       <div v-for="(question, qIndex) in questions" :key="question" :id="`question-${qIndex}`">
-        <div class="q-py-md text-body2"><b>{{ `${qIndex + 1}.` }}</b> {{ question }}</div>
-        <div class="q-gutter-sm column" v-for="(c, y) in choices" :key="y">
-          <q-radio 
-            class="col" :name="c" 
-            v-model="surveyFormData[`q_${qIndex+1}`]" 
-            :val="y + 1" :label="c"
-            :rules="[ val => val && !val || 'Please type something']"
+        <div class="q-py-md text-body2"><b>{{ `${qIndex + 1}.` }}</b> {{ question.q }}</div>
+        <section v-if="handleQuestionsInput(question)">
+          <div class="q-gutter-sm column" v-for="(c, y) in choices.scales" :key="y">
+            <q-radio 
+              class="col" :name="c" 
+              v-model="surveyFormData[`q_${qIndex+1}`]" 
+              :val="y + 1" :label="c"
+            />
+          </div>
+        </section>
+        <section v-else>
+          <q-input
+            :ref="`qTextarea_${question.code}`"
+            class="q-my-sm"
+            v-model="surveyFormData[`q_${qIndex+1}`]"
+            :label="choices.text.label"
+            type="textarea"
+            :hint="choices.text.hint"
+            :rules="patterns.textarea"
           />
-        </div>
+        </section>
       </div>
       <q-separator class="q-my-sm" />
       <div class="text-body2">{{ $t('survey.complete_form_description') }} </div>
@@ -41,11 +54,14 @@ export default {
     return {
       surveyFormData: {},
       questions: undefined,
-      choices: undefined
+      choices: undefined,
+      patterns: {
+        textarea: [val => !val ? true : val.length <= 10 || this.$t('exercises.form.notes_error')]
+      }
     }
   },
   created () {
-    this.questions = this.$tm(`survey.test_leader.t${this.incomingSurvey.currentSurveyID}`)
+    this.questions = this.$tm(`survey.${this.incomingSurvey.userType}.T${this.incomingSurvey.currentSurveyID}`)
     this.choices = this.$tm('survey.choices')
   },
   methods: {
@@ -59,7 +75,7 @@ export default {
       }
       try {
         const formData = {
-          surveyName: `t${this.incomingSurvey.currentSurveyID}`,
+          surveyName: `T${this.incomingSurvey.currentSurveyID}`,
           results: JSON.stringify(this.surveyFormData)
         }
         let response = await API.addSurvey(formData)
@@ -78,6 +94,9 @@ export default {
           icon: 'report_problem'
         })
       }
+    },
+    handleQuestionsInput (q) {
+      return q.code !== 'UB1' && q.code !== 'UB2'
     }
   }
 }

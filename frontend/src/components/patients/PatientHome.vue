@@ -5,72 +5,96 @@
         <q-avatar>
           <img src="/icons/favicon-maskable.ico">
         </q-avatar>
-        <q-toolbar-title>Home</q-toolbar-title>
+        <q-toolbar-title>Patient</q-toolbar-title>
         <q-chip v-show="authenticated" outline square size="md" class="q-mx-md text-white">
           {{patient.names}}
         </q-chip>
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <q-card flat bordered class="q-my-lg q-ma-md">
-        <q-card-section>
-          <div class="text-h6">{{ $t('common.consent.header') }}</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none flex flex-center">
-            <q-btn class="q-pb-lg" icon-right="open_in_new" :label="$t('common.consent.read_information')" @click="openConsentModal = !openConsentModal" no-caps flat dense />
-            <div class="text-body2">{{ $t('common.consent.description')  }} {{ $t('common.consent.confirm_description') }}</div>
-        </q-card-section>
-        <q-separator inset />
-        <q-card-section>
-          <div class="text-body2">{{ $t('common.consent.alt_text') }}</div>
-        </q-card-section>
-        <q-card-actions vertical align="left" class="q-mx-none q-pa-none">
-          <q-checkbox
-            right-label
-            size="lg"
-            v-model="participationStatus"
-            :label="$t('common.consent.confirm_checkbox')"
-            checked-icon="task_alt"
-            unchecked-icon="highlight_off"
-            :disable="!this.authenticated"
-            @click=" 
-              !this.patient.email && !this.patient.activated  
-                ? this.sendPatientActivationLink()
-                : this.showWithdrawConsentDialog()
-            "
+      <q-tab-panels v-model="panel" ref="panelForm" vertical>
+        <q-tab-panel name="main" class="q-px-none">
+          <q-card flat bordered class="q-my-lg q-ma-md">
+            <q-card-section>
+              <div class="text-h6">{{ $t('common.consent.header') }}</div>
+            </q-card-section>
+            <q-card-section class="q-pt-none flex flex-center">
+              <q-btn class="q-pb-lg" icon-right="open_in_new" :label="$t('common.consent.read_information')" @click="openConsentModal = !openConsentModal" no-caps flat dense />
+              <div class="text-body2" v-html="$t('common.consent.description')"></div>
+            </q-card-section>
+            <q-separator inset />
+            <q-card-section class="q-pb-sm">
+              <div class="text-body2">{{ $t('common.consent.confirm_description') }}</div>
+            </q-card-section>
+            <q-card-actions vertical align="left" class="q-mx-none q-pa-none">
+              <q-checkbox
+                right-label
+                size="lg"
+                v-model="participationStatus"
+                :label="$t('common.consent.confirm_checkbox')"
+                checked-icon="task_alt"
+                unchecked-icon="highlight_off"
+                :disable="!this.authenticated"
+                @click=" 
+                  !this.patient.email && !this.patient.activated  
+                    ? this.sendPatientActivationLink()
+                    : this.showWithdrawConsentDialog()
+                "
+              />
+            </q-card-actions>
+          </q-card>
+          <q-card flat bordered class="q-my-lg q-ma-md">
+            <q-card-section>
+              <div class="text-h6">{{ $t('exercises.name') }}</div>
+            </q-card-section>
+            <q-card-section class="q-pt-none">
+              <div class="text-body2">{{ $t('patient.home.exercise_description') }}</div>
+            </q-card-section>
+            <q-separator />
+            <q-card-section class="q-pa-none">
+              <div v-if="!results.length" class="text-body2 text-center q-pa-md">{{ $t('patient.home.exercise_no_results') }}</div>
+              <q-list v-else-if="results.length" v-for="exercise in results" :key="exercise.id">
+                <q-expansion-item
+                  icon="accessibility"
+                  :label="exercise.type"
+                  :caption="exercise.startTimestamp"
+                  class="q-py-sm text-body1"
+                >
+                  <div class="col q-ma-md text-body2">
+                    <div style="margin-left:-2px;" class="text-capitalize">
+                      <q-icon style="bottom:2px;" size="sm" name="schedule" />
+                      {{ exercise.startTimestamp }}
+                      - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
+                    </div>
+                  </div>
+                  <poe-view-modal v-if="exercise.poe.length" :assessmentResults="exercise.poe"/>
+                  <div v-else class="q-ma-md text-body2">{{ $t('poe.no_results') }}</div>
+                </q-expansion-item>
+              </q-list>
+            </q-card-section>
+          </q-card>
+          <q-card flat bordered class="q-my-lg q-ma-md">
+            <q-card-section>
+              <div class="text-h6">{{ $t('patient.home.survey.title') }}</div>
+            </q-card-section>
+            <q-card-section class="q-pt-none flex flex-center">
+              <div class="text-body2" v-html="$t('patient.home.survey.description')"></div>
+              <q-btn 
+                v-if="incomingSurvey" icon-right="open_in_new"
+                class="q-mt-lg q-pa-md full-width" outline no-caps @click="this.$refs.panelForm.goTo('survey')"
+                :label="$t('patient.home.survey.available', { surveyName: incomingSurvey.currentSurveyID })"
+              />
+              <div v-else class="q-mt-md text-subtitle2" v-html="$t('patient.home.survey.no_results')"></div>
+            </q-card-section>
+          </q-card>
+        </q-tab-panel>
+        <q-tab-panel name="survey" class="q-py-none">
+          <survey-form
+            :incomingSurvey="this.incomingSurvey"
+            @panelFormGoBack="this.$refs.panelForm.goTo('main')"
           />
-        </q-card-actions>
-      </q-card>
-      <q-card flat bordered class="q-my-lg q-ma-md">
-        <q-card-section>
-          <div class="text-h6">{{ $t('exercises.name') }}</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <div class="text-body2">{{ $t('exercises.patient_exercise_description') }}</div>
-        </q-card-section>
-        <q-separator />
-        <q-card-section class="q-pa-none">
-          <div v-if="!results.length" class="text-body2 text-center q-pa-md">{{ $t('exercises.patient_exercise_no_results') }}</div>
-          <q-list v-else-if="results.length" v-for="exercise in results" :key="exercise.id">
-            <q-expansion-item
-              icon="accessibility"
-              :label="exercise.type"
-              :caption="exercise.startTimestamp"
-              class="q-py-sm text-body1"
-            >
-              <div class="col q-ma-md text-body2">
-                <div style="margin-left:-2px;" class="text-capitalize">
-                  <q-icon style="bottom:2px;" size="sm" name="schedule" />
-                  {{ exercise.startTimestamp }}
-                  - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
-                </div>
-              </div>
-              <poe-view-modal v-if="exercise.poe.length" :assessmentResults="exercise.poe"/>
-              <div v-else class="q-ma-md text-body2">{{ $t('poe.no_results') }}</div>
-            </q-expansion-item>
-          </q-list>
-        </q-card-section>
-      </q-card>
+        </q-tab-panel>
+      </q-tab-panels>
     </q-page-container>
     <terms-modal v-model="openConsentModal" :isPatient="true"></terms-modal>
     <q-dialog ref="qDialogAuth" position="top">
@@ -111,13 +135,13 @@ import API from '../../API'
 import nicers from '../../utils/nicers'
 import TermsModal from '../UserTermsModal.vue'
 import PoeViewModal from '../exercises/PoeViewModal.vue'
-import exerciseType from '../../utils/types/exerciseTypesEnum'
 import poeTypesEnum from '../../utils/types/poeTypesEnum'
+import SurveyForm from '../SurveyForm.vue'
 
 export default {
   name: 'PatientHome',
   props: { patientID: String },
-  components: { TermsModal, PoeViewModal },
+  components: { TermsModal, PoeViewModal, SurveyForm },
   data () {
     return {
       patient: {},
@@ -125,10 +149,13 @@ export default {
       openConsentModal: false,
       authenticated: undefined,
       secret: undefined,
+      panel: undefined,
+      incomingSurvey: undefined,
       results: []
     }
   },
-  async beforeMount () {
+  async mounted () {
+    this.$refs.panelForm.goTo('main')
     this.openConsentModal = false
     this.authenticated = false
     this.secret = this.$route.query.access || null
@@ -144,6 +171,7 @@ export default {
           this.authenticated = true
           if (response.token) return await this.getPatientInfo()
           this.patient = response.patient
+          this.incomingSurvey = response.newSurveyAvailable
           this.results = await this.formatExerciseData(response.results)
           return response.patient.activated
         }
@@ -173,32 +201,40 @@ export default {
       }
     },
     async sendPatientActivationLink () {
+      const emailPattern = (await import('quasar')).patterns.testPattern.email
       try {
         if (!this.authenticated) return
         this.$q.dialog({
           color: 'primary',
-          title: 'Email is required',
-          message: `
-            Before you can consent to participate in the study, you will need to provide an email so we can send important reminders.
-            <br><br>
-            <b>- By pressing 'Consent', you agree to the terms found in the information letter</b>
-            <br><br>
-            Please provide your email address below.
-          `,
+          title: this.$t('patient.home.consent.confirm.email_required'),
+          message: this.$t('patient.home.consent.confirm.description'),
           prompt: {
             model: '',
-            isValid: val => val.length >= 8, 
+            isValid: val => emailPattern(val), 
             type: 'text'
           },
-          ok: { color: 'primary', label: 'Consent' },
+          ok: { color: 'primary', label: this.$t('common.confirm') },
           persistent: true,
-          cancel: true,
+          cancel: { class: 'q-btn--flat text-black', color: 'white', label: this.$t('common.cancel') },
           html: true
         }).onOk(async (email) => {
           this.$q.loading.show()
           await nicers.delay(200)
           const patientID = this.patientID, secret = this.secret
-          let response = await API.sendPatientConsentEmail(email.toLowerCase(), patientID, secret)
+          let response = undefined
+          try {
+            response = await API.sendPatientConsentEmail(email.toLowerCase(), patientID, secret)            
+          } catch (err) {
+            if (err.response.status == 409) {
+              this.$q.notify({
+                color: 'negative',
+                position: 'bottom',
+                message: 'Please provide another email address',
+                icon: 'report_problem'
+              })
+              return this.sendPatientActivationLink()
+            }
+          }
           if (response) {
             this.$q.notify({
               color: 'secondary',
@@ -279,21 +315,11 @@ export default {
       if (!this.authenticated) return
       this.$q.dialog({
         color: 'primary',
-        title: 'Withdraw consent',
-        message: `
-          You are about to withdraw your consent from the study.
-          Withdrawing means but not limited to:
-          <br>
-          <br>- <b>No further data will be collected from you</b>
-          <br>- <b>Your email will be removed</b>
-          <br><br>
-          More details can be found in the information letter.
-          <br><br>
-          Press the 'Withdraw consent' button to remove your consent from the study.
-        `,
-        ok: { color: 'primary', label: 'Withdraw consent' },
+        title: this.$t('patient.home.consent.withdraw.title'),
+        message: this.$t('patient.home.consent.withdraw.description'),
+        ok: { color: 'primary', label: this.$t('patient.home.consent.withdraw.title') },
         persistent: true,
-        cancel: true,
+        cancel: { class: 'q-btn--flat text-black', color: 'white', label: this.$t('common.cancel') },
         html: true
       }).onOk(() => {
         this.updateParticipationStatus()
@@ -305,7 +331,7 @@ export default {
       let results = exercises
       for (const e in results) {
         let exercise = exercises[e]
-        exercise.type = exerciseType.typeToAsc(exercise.type)
+        exercise.type = this.$t(`exercises.form.types.${exercise.type}`)
         exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
         exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
         
@@ -333,7 +359,7 @@ export default {
     },
     formatDate (date) {
       return nicers.formattedDayOfMonth(date)
-    } 
+    }
   }
 }
 </script>
