@@ -9,7 +9,7 @@
       </q-expansion-item>
     </q-list>
     <q-separator class="q-my-sm" />
-    <q-form class="survey-questions" @submit="submitForm">
+    <q-form class="survey-questions" @submit.prevent="">
       <div v-for="(question, qIndex) in questions" :key="question" :id="`question-${qIndex}`">
         <div class="q-py-md text-body2"><b>{{ `${qIndex + 1}.` }}</b> {{ question.q }}</div>
         <section v-if="handleQuestionsInput(question)">
@@ -36,7 +36,7 @@
       <q-separator class="q-my-sm" />
       <div class="text-body2">{{ $t('survey.complete_form_description') }} </div>
       <q-btn class="q-my-md full-width" icon="check" type="submit"
-        padding="sm" color="secondary" no-caps 
+        padding="sm" color="secondary" no-caps @click="submitForm"
         :label="$t('common.send')" 
       />
     </q-form>
@@ -61,12 +61,17 @@ export default {
     }
   },
   created () {
-    this.questions = this.$tm(`survey.${this.incomingSurvey.userType}.T${this.incomingSurvey.currentSurveyID}`)
+    this.questions = this.$tm(`survey.${this.incomingSurvey.userType}.${this.incomingSurvey.currentSurveyID}`)
     this.choices = this.$tm('survey.choices')
   },
   methods: {
     async submitForm () {
-      if (Object.keys(this.surveyFormData).length < this.questions.length) {
+      let refs = Object.keys(this.$refs), formError = false
+      for (const r of refs) {
+        this.$refs[r][0].validate()
+        if (this.$refs[r][0].hasError) formError = true
+      }
+      if (formError || (Object.keys(this.surveyFormData).length < this.questions.length)) {
         return this.$q.notify({
           color: 'negative',
           message: this.$t('survey.notifications.form_error'),
@@ -75,7 +80,7 @@ export default {
       }
       try {
         const formData = {
-          surveyName: `T${this.incomingSurvey.currentSurveyID}`,
+          surveyName: this.incomingSurvey.currentSurveyID,
           results: JSON.stringify(this.surveyFormData)
         }
         let response = await API.addSurvey(formData)
