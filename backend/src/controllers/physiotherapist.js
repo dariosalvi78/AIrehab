@@ -8,6 +8,8 @@ import files from '../utils/fileHandler.js'
 import { signPatientAccessToken, patient_cookie, verifyAuthToken } from "../utils/tokenAuth.js"
 import mailer from '../utils/mailer.js'
 import bcrypt from 'bcrypt'
+import survey from '../DOM/surveysCollection.js'
+import scheduler from '../utils/scheduler.js'
 
 export default {
 
@@ -276,7 +278,7 @@ export default {
      */
     getInfo: async (req, res) => {
         if (!req.params.patientID || !req.query.secret) return res.sendStatus(403)
-        let patientID = req.params.patientID, secret = req.query.secret
+        let patientID = req.params.patientID, secret = req.query.secret, response = {}
         try {
             const cookie = req.cookies[patient_cookie.name]
             if (!cookie) {
@@ -304,11 +306,14 @@ export default {
                     let poe_results = await poe.getEvaluationsFromID(exercise.id)
                     exercise.poe = poe_results
                 }
+                response.results = pExercises
             }
             delete patient.email
             delete patient.physiotherapistEmail
             delete patient.dateofbirth
-            return res.send({ patient: patient, results: pExercises })
+            response.patient = patient
+            response.newSurveyAvailable = await scheduler.isSurveyAvailable(patient.id, 'patient')            
+            return res.send(response)
         } catch (err) {
             logger.error({ patientID, error: err }, 'error getting patient info')
             res.sendStatus(500)
@@ -321,6 +326,9 @@ export default {
         try {
             const patient = await physiotherapist.getOnePatientByID(patientID)
             if (!patient || patientID !== patient.id) return res.sendStatus(204)
+
+            const isEmailAvailable = await physiotherapist.getPatientEmail(patientEmail)
+            if (isEmailAvailable) return res.sendStatus(409)
 
             await mailer.sendPatientAccessLink(patientEmail, patient.id, secret)
             logger.debug({ patient: patientID }, 'patient consent email sent')

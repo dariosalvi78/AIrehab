@@ -4,8 +4,10 @@ import bcrypt from 'bcrypt'
 import { signAccessToken, signResetPwdToken, verifyAuthToken, session_cookie } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"
 import physiotherapist from "../DOM/physiotherapistCollection.js"
+import survey from "../DOM/surveysCollection.js"
 import logger from "../utils/logger.js"
 import mailer from '../utils/mailer.js'
+import scheduler from '../utils/scheduler.js'
 
 export default {
     /**
@@ -237,11 +239,13 @@ export default {
         if (!req.user) return res.sendStatus(401)
         try {
             const user = await users.getUserByEmail(req.user.email)
-            return res.json({
+            const response = {
                 email: user.email,
                 lastLoginTimestamp: user.lastLoginTimestamp,
                 activated: user.activated
-            })
+            }
+            response.newSurveyAvailable = await scheduler.isSurveyAvailable(user.id, user.role)
+            return res.json(response)
         } catch (err) {
             logger.error({ error: err }, 'error getting info')
             res.sendStatus(500)
@@ -263,7 +267,7 @@ export default {
             const user = await users.getUserByEmail(req.user.email)
             delete user.hashedPassword
 
-            if (!newStatus || !user) return res.sendStatus(400)
+            if (typeof newStatus !== 'boolean' || !user) return res.sendStatus(400)
 
             const updatedStatus = await users.updateOneUserParticipation(newStatus, user.id)
 
