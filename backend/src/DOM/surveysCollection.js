@@ -22,7 +22,7 @@ export default {
     getSurveysByPhysioID: async function (physiotherapistID) {
         let response = await db.query(`
             SELECT s.id, s.surveyName, s.createdTimestamp FROM survey_answer s
-                WHERE s.physiotherapistId = '${physiotherapistID}'
+                WHERE s.physiotherapistId = '${physiotherapistID}' AND s.patientId IS NULL
             GROUP BY s.id, s.surveyName, s.createdTimestamp
             ORDER BY s.createdTimestamp DESC;
         `)
@@ -37,7 +37,7 @@ export default {
     getSurveysByPatientID: async function (patientID) {
         let response = await db.query(`
             SELECT s.id, s.surveyName, s.createdTimestamp FROM survey_answer s
-                WHERE s.patientID = '${patientID}'
+                WHERE s.patientId = '${patientID}' AND s.physiotherapistId IS NOT NULL
             GROUP BY s.id, s.surveyName, s.createdTimestamp
             ORDER BY s.createdTimestamp DESC;
         `)
