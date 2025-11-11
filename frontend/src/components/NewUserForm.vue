@@ -7,12 +7,15 @@
             </q-card-section>
             <q-form class="q-px-lg">
                 <q-input
+                    ref="qEmail"
                     class="q-my-lg"
                     filled
                     v-model="this.email"
                     label="Email"
                     type="email"
                     hint="e.g. user@email.com"
+                    :rules="patterns.email"
+                    :lazy-rules="true"
                 />
                 <q-input
                     ref="qPass"
@@ -22,7 +25,7 @@
                     label="Password"
                     type="password"
                     :hint="'Password for Test leader ' + getPwdFeedback"
-                    :rules="[(pwd) => !getPwdStrength || getPwdStrength]"
+                    :rules="patterns.password"
                 />
                 <q-input
                     ref="qConfirmPass"
@@ -32,13 +35,8 @@
                     label="Confirm password"
                     type="password"
                     hint="Must be the same password"
-                    :rules="[(pwd) => pwd === this.password || 'Please enter the same password']"
+                    :rules="patterns.passwordConfirm"
                 />
-                <!-- <q-option-group
-                    :options="optionsRadio"
-                    type="radio"
-                    v-model="this.new.role"
-                /> -->
             </q-form>
             <q-card-actions align="right" class="q-px-lg text-primary">
                 <q-btn flat label="Cancel" v-close-popup />
@@ -50,7 +48,7 @@
 
 <script>
 import pwd from '../utils/passwordValidation.js'
-
+import { patterns } from 'quasar'
 export default {
     name: 'NewUserForm',
     props: { role: String },
@@ -59,7 +57,12 @@ export default {
         return {
             email: undefined,
             password: undefined,
-            passwordConfirm: undefined
+            passwordConfirm: undefined,
+            patterns: {
+                email: [(val) => patterns.testPattern.email(val) || 'Provide valid email address'],
+                password: [() => !this.getPwdStrength || this.getPwdStrength],
+                passwordConfirm: [(pwd) => pwd === this.password || 'Please enter the same password']
+            }
         }
     },
     updated () {
@@ -75,9 +78,10 @@ export default {
     },
     methods: {
         async formSubmit () {
+            this.$refs.qEmail.validate()
             this.$refs.qPass.validate()
             this.$refs.qConfirmPass.validate()
-            if (this.$refs.qPass.hasError || this.$refs.qConfirmPass.hasError) {
+            if (this.$refs.qEmail.hasError || this.$refs.qPass.hasError || this.$refs.qConfirmPass.hasError) {
                 return this.$q.notify({
                     color: 'negative',
                     position: 'top',

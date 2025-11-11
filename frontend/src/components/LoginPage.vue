@@ -58,7 +58,7 @@
     </q-page-container>
     <q-footer class="bg-white text-black">
       <div class="flex justify-evenly q-pa-sm">
-        <q-btn flat dense no-caps :label="$t('common.about')" @click="$router.push('/about')" />
+        <q-btn flat dense no-caps :label="$t('common.header.about')" @click="$router.push('/about')" />
       </div>
     </q-footer>
   </q-layout>
