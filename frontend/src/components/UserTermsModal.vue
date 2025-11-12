@@ -2,7 +2,7 @@
   <q-dialog class="q-pa-none">
     <q-card>
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">Information letter</div>
+        <div class="text-h6">{{ $t('common.consent.information_letter') }}</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
@@ -151,10 +151,7 @@
 <script>
 export default {
   name: 'UserTermsModal',
-  props: { isPatient: Boolean },
-  mounted () {
-    console.log(this.isPatient)
-  }
+  props: { isPatient: Boolean }
 }
 </script>
 
