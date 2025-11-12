@@ -36,6 +36,7 @@ export default {
     session_list: 'Sessions',
     add_to_homescreen: 'Add to Home screen',
     consent: {
+        information_letter: 'Information letter',
         read_information: 'Read information letter',
         header: 'Participation in research study',
         description: `

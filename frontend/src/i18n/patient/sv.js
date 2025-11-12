@@ -10,8 +10,8 @@ export default {
         survey: {
             title: 'Frågeformulär',
             description: 'Som en del av denna forskningsstudie kan du fylla i en frivillig enkät för att hjälpa oss att samla in mer information om användbarheten av POE-app.',
-            available: 'Ny enkät att svara på (Digital enkät {surveyName}.)',
-            no_results: 'Just nu så finns det inga enkäter att svara på. Vänligen återkom under ett senare tillfälle.'
+            available: 'Ny enkät att svara på (Digital enkät {surveyName})',
+            no_results: 'Just nu så finns det inga enkäter att svara på.',
         },
         consent: {
             confirm: {

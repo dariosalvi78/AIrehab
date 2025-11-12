@@ -10,8 +10,8 @@ export default {
         survey: {
             title: 'Questionnaires',
             description: 'As part of this research study you can take a short optional questionnaire to help us gather more insight of the usability and user experience of POE-app.',
-            available: 'New questionnaire to answer (Digital questionnaire {surveyName}.)',
-            no_results: 'At the moment, there are no questionnaires to complete. Come back at a later time.'
+            available: 'New questionnaire to answer (Digital questionnaire {surveyName})',
+            no_results: 'At the moment, there are no questionnaires to complete.',
         },
         consent: {
             confirm: {

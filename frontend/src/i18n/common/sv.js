@@ -36,6 +36,7 @@ export default {
     session_list: 'Sessioner',
     add_to_homescreen: 'Lägg till på Hemskärmen',
     consent: {
+        information_letter: 'Informationsbrev',
         read_information: 'Läs informationsbrev',
         header: 'Deltagande i forskningsstudie',
         description: `
