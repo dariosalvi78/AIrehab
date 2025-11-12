@@ -6,52 +6,88 @@ import mailer from './mailer.js'
 import exercisesCollection from '../DOM/exercisesCollection.js'
 import surveysCollection from '../DOM/surveysCollection.js'
 import physiotherapistCollection from '../DOM/physiotherapistCollection.js'
+import usersCollection from '../DOM/usersCollection.js'
+
+const config = {
+    survey_prefix: 'T',
+    rules: {
+        test_leader: [
+            (latestSurveyTimestamp) => {
+                // 14 days from first survey
+                const dateUntilSecondSurvey = (latestSurveyTimestamp <= Date.now() - 14 * 24 * 60 * 60 * 1000)
+                return dateUntilSecondSurvey
+            },
+            (latestSurveyTimestamp) => { 
+                // 60 days from second survey
+                const dateUntilThirdSurvey = (latestSurveyTimestamp <= Date.now() - 60 * 24 * 60 * 60 * 1000)
+                return dateUntilThirdSurvey
+            }
+        ],
+        patient: [
+            (numOfExercises) => { return numOfExercises >= 3 },
+            (numOfExercises, latestSurveyTimestamp) => {
+                const sixWeeksInMs = 6 * 7 * 24 * 60 * 60 * 1000;
+                const dateIsSixWeeksApart = (latestSurveyTimestamp <= Date.now() - sixWeeksInMs)
+                return (dateIsSixWeeksApart && numOfExercises >= 5)
+            }
+        ]
+    }
+}
+
+/**
+ * Checks if there is a new survey available
+ * @typedef newSurveyAvailable
+ * @property {!string} currentSurveyID current survey increments
+ * @property {!number} completed surveys completed
+ * @property {!string} userType type of user
+ * @returns {Promise<newSurveyAvailable>} new survey
+*/
+const isSurveyAvailable = async (userID, role) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let surveys = [], available = undefined, userType = role, surveyIsAvailable = false
+            if (userType == 'physiotherapist') {
+                surveys = await surveysCollection.getSurveysByPhysioID(userID)
+                userType = 'test_leader'
+                if (surveys && surveys.length) {
+                    const latestSurveyTimestamp = new Date(surveys[0].createdTimestamp).getTime(),
+                        rules = config.rules.test_leader
+                    for (let i = 0; i < rules.length; i++) {
+                        if ((surveys.length - 1) === i && rules[i](latestSurveyTimestamp)) surveyIsAvailable = true
+                    }
+                }
+            } else if (userType == 'patient') {
+                surveys = await surveysCollection.getSurveysByPatientID(userID)
+                const patient = await physiotherapistCollection.getOnePatientByID(userID)
+                if (!patient.sessionID) return resolve()
+                let exercises = await exercisesCollection.getExercisesInSessionByEmail(patient.sessionID, patient.physiotherapistEmail)
+                const numOfExercises = exercises.length
+                if (surveys && surveys.length) {
+                    const latestSurveyTimestamp = new Date(surveys[0].createdTimestamp).getTime(),
+                        rules = config.rules.patient
+                    for (let i = 0; i < rules.length; i++) {
+                        if ((surveys.length - 1) === i && rules[i](numOfExercises, latestSurveyTimestamp)) surveyIsAvailable = true
+                    }
+                }
+            }
+
+            if (surveyIsAvailable || (surveys && !surveys.length)) {
+                const sCount = surveys.length + 1
+                available = {
+                    currentSurveyID: (config.survey_prefix + sCount),
+                    completed: surveys.length,
+                    userType: userType
+                }
+            }
+            return resolve(available)
+        } catch (err) {
+            logger.error({ error: err }, 'error checking for surveys: ')
+            return reject(err)
+        }
+    })
+}
 
 export default {
-    /**
-     * Checks if there is a new survey available
-     * @typedef newSurveyAvailable
-     * @property {!string} currentSurveyID current survey increments
-     * @property {!string} surveysCompleted surveys completed
-     * @property {!string} userType type of user
-     * @returns {Promise<newSurveyAvailable>} new survey
-    */
-    isSurveyAvailable: async (userID, role) => {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let surveys = [], available = undefined, surveyPrefix = 'T', userType = role, surveyIsAvailable = false, dateIsSixWeeksApart = undefined
-                if (userType == 'patient') {
-                    surveys = await surveysCollection.getSurveysByPatientID(userID)
-                    const patient = await physiotherapistCollection.getOnePatientByID(userID)
-                    let exercises = await exercisesCollection.getExercisesInSessionByEmail(patient.sessionID, patient.physiotherapistEmail)
-                    const numOfExercises = exercises.length
-
-                    if (surveys && surveys.length) {
-                        const latestSurveyTimestamp = new Date(surveys[0].createdTimestamp)
-                        const sixWeeksInMs = 6 * 7 * 24 * 60 * 60 * 1000;
-                        dateIsSixWeeksApart = (latestSurveyTimestamp <= Date.now() - sixWeeksInMs)
-                        if (
-                            (surveys.length === 1 && numOfExercises >= 3) ||
-                            (surveys.length === 2 && (dateIsSixWeeksApart && numOfExercises >= 5))
-                        ) surveyIsAvailable = true
-                    }
-                }
-
-                if (surveyIsAvailable || (surveys && !surveys.length)) {
-                    const sCount = surveys.length + 1
-                    available = {
-                        currentSurveyID: (surveyPrefix + sCount),
-                        surveysCompleted: surveys.length,
-                        userType: userType
-                    }
-                }
-                return resolve(available)
-            } catch (err) {
-                logger.error({ error: err }, 'error checking for surveys: ')
-                return reject(err)
-            }
-        })
-    },
     /**
      * Check POE status for a given exercise.
      * When POE results are ready, send email reminder to user
@@ -89,5 +125,6 @@ export default {
             task.destroy()
             return
         }
-    }
+    },
+    isSurveyAvailable
 }

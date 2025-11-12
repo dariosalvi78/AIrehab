@@ -37,20 +37,20 @@ export default {
         try {
             let surveyData = req.body.newSurveyData, physioID = undefined, patientID = null
             if (!surveyData) return res.sendStatus(400)
-            
+
             if (req.user) {
                 let user = await users.getUserByEmail(req.user.email)
                 if (!user.activated) return res.sendStatus(403)
                 physioID = user.id
-            } 
+            }
             else if (req.patient) {
                 let p = await patient.getOnePatientByID(req.patient.id)
                 if (!p.activated) return res.sendStatus(403)
                 physioID = p.physiotherapistId
                 patientID = p.id
-            }            
+            }
             const newSurvey = await surveys.createSurvey(physioID, patientID, surveyData.surveyName, surveyData.results)
-            logger.info({ data: newSurvey }, 'new survey created: ')
+            logger.info({ survey: { id: newSurvey.id, name: newSurvey.surveyName, createdTimestamp: newSurvey.createdTimestamp } }, 'new survey created: ')
 
             return res.status(201).json({
                 status: 'created', survey: newSurvey
