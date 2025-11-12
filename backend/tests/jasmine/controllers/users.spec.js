@@ -6,10 +6,13 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import physiotherapistCollection from '../../../src/DOM/physiotherapistCollection.js'
 import mock from '../../mock_data.js'
+import scheduler from '../../../src/utils/scheduler.js'
+import surveysCollection from '../../../src/DOM/surveysCollection.js'
 
 beforeAll(async function () {
     await spyOnAllFunctions(logger)
     this.physiotherapist = JSON.parse(JSON.stringify(mock.physiotherapist))
+    this.surveys = JSON.parse(JSON.stringify(mock.surveys))
 })
 
 describe('addNewUser access:', function () {
@@ -277,5 +280,71 @@ describe('deleteUser access:', function () {
                     expect(usersCollection.deleteOneUser).toHaveBeenCalled()
                 }
             })
+    })
+})
+
+describe('getInfo access:', function () {
+    beforeAll(() => jasmine.clock().install())
+    afterAll(() => jasmine.clock().uninstall())
+
+    it('physiotherapist can get info', async function () {
+        spyOn(usersCollection, 'getUserByEmail').and.returnValue({ email: this.physiotherapist.email, lastLoginTimestamp: new Date().toISOString(), activated: true, role: this.physiotherapist.role })
+        spyOn(scheduler, 'isSurveyAvailable')
+        await users.getInfo({ user: { email: 'email@test.com', role: 'physiotherapist' } }, {
+            json(data) {
+                expect(data.email).toBeDefined()
+                expect(data.lastLoginTimestamp).toBeDefined()
+                expect(data.activated).toBeDefined()
+                expect(data.newSurveyAvailable).toBeUndefined()
+            }
+        })
+    })
+    it('physiotherapist can get 2nd survey (14 days past)', async function () {
+        let surveyDate = new Date(), survey = this.surveys[0], daysToAdd = 14
+        surveyDate.setDate(surveyDate.getDate() + daysToAdd)
+        spyOn(usersCollection, 'getUserByEmail').and.returnValue({ email: this.physiotherapist.email, lastLoginTimestamp: new Date().toISOString(), activated: true, role: this.physiotherapist.role })
+        spyOn(surveysCollection, 'getSurveysByPhysioID').and.returnValue([survey])
+        jasmine.clock().mockDate(surveyDate)
+        spyOn(scheduler, 'isSurveyAvailable').and.callThrough()
+        await users.getInfo({ user: { email: 'email@test.com', role: 'physiotherapist' } }, {
+            sendStatus (status) {
+                expect(status).not.toBe(500)
+                return this
+            },
+            json(data) {
+                expect(data.email).toBeDefined()
+                expect(data.lastLoginTimestamp).toBeDefined()
+                expect(data.activated).toBeDefined()
+                expect(data.newSurveyAvailable.completed).toEqual(1)
+                expect(data.newSurveyAvailable.currentSurveyID).toBe('T2')
+                expect(data.newSurveyAvailable.userType).toBeDefined()
+                expect(usersCollection.getUserByEmail).toHaveBeenCalled()
+                expect(surveysCollection.getSurveysByPhysioID).toHaveBeenCalled()
+            }
+        })
+    })
+    it('physiotherapist can get 3rd survey (60 days past)', async function () {
+        let surveyDate = new Date(), surveys = this.surveys, daysToAdd = 60
+        surveyDate.setDate(surveyDate.getDate() + daysToAdd)
+        spyOn(usersCollection, 'getUserByEmail').and.returnValue({ email: this.physiotherapist.email, lastLoginTimestamp: new Date().toISOString(), activated: true, role: this.physiotherapist.role })
+        spyOn(surveysCollection, 'getSurveysByPhysioID').and.returnValue(surveys)
+        jasmine.clock().mockDate(surveyDate)
+        spyOn(scheduler, 'isSurveyAvailable').and.callThrough()
+        await users.getInfo({ user: { email: 'email@test.com', role: 'physiotherapist' } }, {
+            sendStatus (status) {
+                expect(status).not.toBe(500)
+                return this
+            },
+            json(data) {
+                expect(data.email).toBeDefined()
+                expect(data.lastLoginTimestamp).toBeDefined()
+                expect(data.activated).toBeDefined()
+                expect(data.newSurveyAvailable.completed).toEqual(surveys.length)
+                expect(data.newSurveyAvailable.currentSurveyID).toBe('T3')
+                expect(data.newSurveyAvailable.userType).toBeDefined()
+                expect(usersCollection.getUserByEmail).toHaveBeenCalled()
+                expect(surveysCollection.getSurveysByPhysioID).toHaveBeenCalled()
+            }
+        })
     })
 })

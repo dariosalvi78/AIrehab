@@ -51,6 +51,10 @@ const mock = {
             endTimestamp: "177718530000"
         }
     ],
+    surveys: [
+        { id: 1, surveyName: 'T1', createdTimestamp: new Date() },
+        { id: 2, surveyName: 'T2', createdTimestamp: new Date() }
+    ],
     poe: {
         id: 1,
         exerciseId: 1,
