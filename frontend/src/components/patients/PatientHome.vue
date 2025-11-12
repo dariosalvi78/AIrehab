@@ -52,8 +52,8 @@
             </q-card-section>
             <q-separator />
             <q-card-section class="q-pa-none">
-              <div v-if="!results.length" class="text-body2 text-center q-pa-md">{{ $t('patient.home.exercise_no_results') }}</div>
-              <q-list v-else-if="results.length" v-for="exercise in results" :key="exercise.id">
+              <div v-if="!results" class="q-my-sm flex flex-center"><q-spinner-dots color="primary" size="3em" /></div>
+              <q-list v-else-if="results && results.length" v-for="exercise in results" :key="exercise.id">
                 <q-expansion-item
                   icon="accessibility"
                   :label="exercise.type"
@@ -71,6 +71,7 @@
                   <div v-else class="q-ma-md text-body2">{{ $t('poe.no_results') }}</div>
                 </q-expansion-item>
               </q-list>
+              <div v-else class="text-body2 text-center q-pa-md">{{ $t('patient.home.exercise_no_results') }}</div>
             </q-card-section>
           </q-card>
           <q-card flat bordered class="q-my-lg q-ma-md">
@@ -79,9 +80,10 @@
             </q-card-section>
             <q-card-section class="q-pt-none flex flex-center">
               <div class="text-body2" v-html="$t('patient.home.survey.description')"></div>
+              <q-spinner-dots v-if="!incomingSurvey" color="primary" size="3em" />
               <q-btn 
-                v-if="incomingSurvey" icon-right="open_in_new"
-                class="q-mt-lg q-pa-md full-width" outline no-caps @click="this.$refs.panelForm.goTo('survey')"
+                v-else-if="incomingSurvey && incomingSurvey.currentSurveyID" icon-right="open_in_new"
+                class="q-mt-lg q-pa-md full-width" outline no-caps @click="goToSurvey"
                 :label="$t('patient.home.survey.available', { surveyName: incomingSurvey.currentSurveyID })"
               />
               <div v-else class="q-mt-md text-subtitle2" v-html="$t('patient.home.survey.no_results')"></div>
@@ -91,7 +93,7 @@
         <q-tab-panel name="survey" class="q-py-none">
           <survey-form
             :incomingSurvey="this.incomingSurvey"
-            @panelFormGoBack="this.$refs.panelForm.goTo('main')"
+            @panelFormGoBack="openPatientHome"
           />
         </q-tab-panel>
       </q-tab-panels>
@@ -151,7 +153,7 @@ export default {
       secret: undefined,
       panel: undefined,
       incomingSurvey: undefined,
-      results: []
+      results: undefined
     }
   },
   async mounted () {
@@ -171,8 +173,8 @@ export default {
           this.authenticated = true
           if (response.token) return await this.getPatientInfo()
           this.patient = response.patient
-          this.incomingSurvey = response.newSurveyAvailable
-          this.results = await this.formatExerciseData(response.results)
+          this.incomingSurvey = response.newSurveyAvailable || []
+          this.results = response.results ? await this.formatExerciseData(response.results) : []
           return response.patient.activated
         }
       } catch (err) {
@@ -359,6 +361,22 @@ export default {
     },
     formatDate (date) {
       return nicers.formattedDayOfMonth(date)
+    },
+    goToSurvey () {
+      if (!this.patient.activated) {
+        return this.$q.notify({
+          color: 'negative',
+          position: 'bottom',
+          message: this.$t('patient.no_consent'),
+          icon: 'report_problem'
+        })
+      }
+      window.scrollTo({ top: 0 })
+      return this.$refs.panelForm.goTo('survey')
+    },
+    async openPatientHome () {
+      await this.getPatientInfo() 
+      return this.$refs.panelForm.goTo('main')
     }
   }
 }
