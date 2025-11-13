@@ -1,5 +1,5 @@
 import mssql from 'mssql'
-import fs from 'fs/promises'
+import { createReadStream } from 'fs'
 import path from 'path'
 
 const mssql_port = 1443
@@ -98,7 +98,7 @@ export default {
 
       await this.connectToDatabase(db_config)
 
-      await runSQLSchema(pathToSQLFile)
+      await runSQLSchema(pathToSQLFile, db_config.database)
       if (db) await db.close()
       db = undefined
 
@@ -139,17 +139,25 @@ export default {
  * Execute sql script,
  * make sure to use the latest schema.sql
  * @param {Object} pathToSQLFile
+ * @param {string} dbName 
  */
-const runSQLSchema = async function (pathToSQLFile) {
-  try {
-    const sql_script = await fs.readFile(path.join(import.meta.dirname, pathToSQLFile), { encoding: 'utf-8' })
-    if (sql_script) {
-      console.log('populate db with schema objects')
-      await db.query(sql_script)
-    }
-  } catch (err) {
-    console.log(err)
-    if (db) await db.close()
-    db = undefined
-  }
+const runSQLSchema = async function (pathToSQLFile, dbName) {
+  return new Promise((resolve, reject) => {
+    const filestream = createReadStream(
+      path.join(import.meta.dirname, pathToSQLFile),
+      { start: 15, encoding: 'utf-8', flags: 'r' })
+      .on('data', (script) => {
+        if (script) {
+          console.log(`populate ${dbName} with schema objects`)
+          resolve(db.query(script))
+        }
+      })
+      .on('end', () => filestream.close())
+      .on('error', async (err) => {
+        filestream.close()
+        if (db) await db.close()
+        db = undefined
+        return reject('schema.sql error: ' + err.message)
+      })
+  })
 }
