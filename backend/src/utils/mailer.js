@@ -53,7 +53,6 @@ export default {
    * @param {String} password 
    */
   sendPhysiotherapistEmailCreated: async (recipient, password) => {
-
     const options = {
       from: config.mailer.from_address,
       to: recipient,
@@ -67,11 +66,9 @@ export default {
         Visit this <a href="${domain}/login">link</a> to login
       `
     }
-
     await sendEmail(options)
   },
   sendPhysiotherapistPasswordReset: async (recipient, resetToken) => {
-
     const options = {
       from: config.mailer.from_address,
       to: recipient,
@@ -82,11 +79,9 @@ export default {
         Proceed to this <a href="${domain}/resetpassword?token=${resetToken}&email=${recipient}">link</a>
       `
     }
-
     await sendEmail(options)
   },
   sendPatientAccessLink: async (recipient, patientID, accessToken) => {
-
     const options = {
       from: config.mailer.from_address,
       to: recipient,
@@ -100,11 +95,9 @@ export default {
         <br/><br/>
       `
     }
-
     await sendEmail(options)
   },
   sendPhysiotherapistPOEResults: async (recipient, meta, sessionID, exerciseID) => {
-
     const options = {
       from: config.mailer.from_address,
       to: recipient,
@@ -115,7 +108,19 @@ export default {
         Click <a href="${domain}/home/sessions/${sessionID}/exercise/${exerciseID}">here</a> to view your exercise results
       `
     }
-
+    await sendEmail(options)
+  },
+  sendPhysiotherapistSurveyAvailable: async (recipient) => {
+    const options = {
+      from: config.mailer.from_address,
+      to: recipient,
+      subject: 'POE survey • POE Assessment',
+      html: `
+        There is a new survey available for you to complete
+        <br/><br/>
+        Login to your account <a href="${domain}/login">here</a> to view the latest survey
+      `
+    }
     await sendEmail(options)
   },
   /**
