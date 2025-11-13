@@ -299,6 +299,23 @@ describe('getInfo access:', function () {
             }
         })
     })
+    it('physiotherapist can get 1st survey (no surveys completed)', async function () {
+        spyOn(usersCollection, 'getUserByEmail').and.returnValue({ email: this.physiotherapist.email, lastLoginTimestamp: new Date().toISOString(), activated: true, role: this.physiotherapist.role })
+        spyOn(surveysCollection, 'getSurveysByPhysioID').and.returnValue([])
+        spyOn(scheduler, 'isSurveyAvailable').and.callThrough()
+        await users.getInfo({ user: { email: 'email@test.com', role: 'physiotherapist' } }, {
+            sendStatus (status) {
+                expect(status).not.toBe(500)
+                return this
+            },
+            json(data) {
+                expect(data).toBeDefined()
+                expect(data.newSurveyAvailable.completed).toEqual(0)
+                expect(data.newSurveyAvailable.currentSurveyID).toBe('T1')
+                expect(data.newSurveyAvailable.userType).toBeDefined()
+            }
+        })
+    })
     it('physiotherapist can get 2nd survey (14 days past)', async function () {
         let surveyDate = new Date(), survey = this.surveys[0], daysToAdd = 14
         surveyDate.setDate(surveyDate.getDate() + daysToAdd)

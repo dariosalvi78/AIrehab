@@ -6,6 +6,7 @@ import poe from '../../../src/controllers/poe.js'
 import mock from '../../mock_data.js'
 import poeMotionAnalysis from '../../../src/utils/poeMotionAnalysis.js'
 import fileHandler from '../../../src/utils/fileHandler.js'
+import scheduler from '../../../src/utils/scheduler.js'
 
 beforeAll(function () {
     this.physiotherapist = mock.physiotherapist
@@ -196,7 +197,9 @@ describe('sendVideoForPOEEvaluation access:', function () {
         let exercise = this.exercises[1], patient = this.patient
         spyOn(exercisesCollection, 'getExerciseByID').and.returnValue({ ...exercise })
         spyOn(poeMotionAnalysis, 'uploadVideo').and.returnValue(true)
+        spyOn(scheduler, 'startPOEEvaluationTask').and.returnValue(true)
         await poe.sendVideoForPOEEvaluation({
+            body: { metaInfo: true },
             user: { role: 'admin' },
             params: { exerciseID: exercise.id }
         }, {
@@ -204,6 +207,7 @@ describe('sendVideoForPOEEvaluation access:', function () {
                 expect(status).toBe(200)
                 expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(exercise.id)
                 expect(poeMotionAnalysis.uploadVideo).toHaveBeenCalledWith(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type)
+                expect(scheduler.startPOEEvaluationTask).toHaveBeenCalled()
             }
         })
     })
@@ -211,7 +215,9 @@ describe('sendVideoForPOEEvaluation access:', function () {
         let exercise = this.exercises[1], patient = this.patient
         spyOn(exercisesCollection, 'getExerciseByID').and.returnValue({ ...exercise })
         spyOn(poeMotionAnalysis, 'uploadVideo').and.returnValue(true)
+        spyOn(scheduler, 'startPOEEvaluationTask').and.returnValue(true)
         await poe.sendVideoForPOEEvaluation({
+            body: { metaInfo: true },
             user: this.physiotherapist,
             params: { exerciseID: exercise.id }
         }, {
@@ -219,6 +225,7 @@ describe('sendVideoForPOEEvaluation access:', function () {
                 expect(status).toBe(200)
                 expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(exercise.id)
                 expect(poeMotionAnalysis.uploadVideo).toHaveBeenCalledWith(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type)
+                expect(scheduler.startPOEEvaluationTask).toHaveBeenCalled()
             }
         })
     })

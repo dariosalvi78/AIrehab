@@ -1,10 +1,18 @@
 import physiotherapist from '../../../src/controllers/physiotherapist.js'
 import physiotherapistCollection from '../../../src/DOM/physiotherapistCollection.js'
+import scheduler from '../../../src/utils/scheduler.js'
+import jwt from 'jsonwebtoken'
 import mock from '../../mock_data.js'
+import bcrypt from 'bcrypt'
+import exercisesCollection from '../../../src/DOM/exercisesCollection.js'
+import surveysCollection from '../../../src/DOM/surveysCollection.js'
+import poeCollection from '../../../src/DOM/poeCollection.js'
 
 beforeAll(function () {
     this.physiotherapist = mock.physiotherapist
     this.patient = mock.patient
+    this.surveys = JSON.parse(JSON.stringify(mock.surveys))
+    this.exercises = JSON.parse(JSON.stringify(mock.exercises))
 })
 
 describe('addNewPatient access:', function () {
@@ -228,7 +236,8 @@ describe('getPatient access:', function () {
     it('physiotherapist can get one assigned patient', async function () {
         let patient = this.patient
         spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({ physiotherapistEmail: this.physiotherapist.email })
-        spyOn(physiotherapistCollection, 'getOnePatientByEmail').and.returnValue(this.patient)
+        spyOn(physiotherapistCollection, 'getOnePatientByEmail').and.returnValue({ ...this.patient, physiotherapistId: 1 })
+        spyOn(bcrypt, 'hashSync').and.returnValue(true)
         await physiotherapist.getPatient({
             user: this.physiotherapist,
             params: { patientID: patient.id }
@@ -242,7 +251,8 @@ describe('getPatient access:', function () {
         })
     })
     it('admin can get one patient', async function () {
-        spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue(this.patient)
+        spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({ ...this.patient, physiotherapistId: 1 })
+        spyOn(bcrypt, 'hashSync').and.returnValue(true)
         await physiotherapist.getPatient({
             user: { role: 'admin', email: 'admin@email.com' },
             params: { patientID: 1 }
@@ -251,6 +261,7 @@ describe('getPatient access:', function () {
                 expect(data instanceof Object).toBe(true)
                 expect(data).toBeDefined()
                 expect(physiotherapistCollection.getOnePatientByID).toHaveBeenCalled()
+                expect(bcrypt.hashSync).toHaveBeenCalled()
             }
         })
     })
@@ -272,6 +283,7 @@ describe('getPatient access:', function () {
     it('cant find patient with unknown ID', async function () {
         spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({ physiotherapistEmail: this.physiotherapist.email })
         spyOn(physiotherapistCollection, 'getOnePatientByEmail').and.returnValue(undefined)
+        spyOn(bcrypt, 'hashSync').and.callThrough()
         await physiotherapist.getPatient({
             user: this.physiotherapist,
             params: { patientID: 1 }
@@ -280,6 +292,7 @@ describe('getPatient access:', function () {
                 expect(status).toBe(404)
                 expect(physiotherapistCollection.getOnePatientByID).toHaveBeenCalledWith(1)
                 expect(physiotherapistCollection.getOnePatientByEmail).toHaveBeenCalled()
+                expect(bcrypt.hashSync).not.toHaveBeenCalled()
             }
         })
     })
@@ -449,6 +462,104 @@ describe('editPatient access:', function () {
                 expect(status).toBe(204)
                 expect(physiotherapistCollection.getOnePatientByID).toHaveBeenCalledWith(patient.id)
                 expect(physiotherapistCollection.updateOnePatient).toHaveBeenCalled()
+            }
+        })
+    })
+})
+
+describe('getInfo access:', function () {
+    let cookie_name = undefined
+    beforeAll(async () => {
+        jasmine.clock().install()
+        spyOn(jwt, 'verify').and.callFake((token, secret, callback) => callback(null, { patient: { secret: true } }))
+        cookie_name = (await import('../../../src/utils/cookies.js')).default.patient.name.toString()
+    })
+    afterAll(() => jasmine.clock().uninstall())
+
+    it('patient can get info', async function () {
+        let patient = this.patient
+        spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue(patient)
+        spyOn(scheduler, 'isSurveyAvailable')
+        await physiotherapist.getInfo({
+            user: this.physiotherapist,
+            params: { patientID: patient.id },
+            query: { secret: true },
+            cookies: {[cookie_name]: true}
+        }, {
+            send(data) {
+                expect(data.patient).toBeDefined()
+                expect(data.newSurveyAvailable).toBeUndefined()
+            }
+        })
+    })
+    it('patient can get 1st survey (no surveys completed)', async function () {
+        let patient = this.patient
+        spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({...patient, sessionID: 1})
+        spyOn(surveysCollection, 'getSurveysByPatientID').and.returnValue([])
+        spyOn(exercisesCollection, 'getExercisesInSessionByEmail').and.returnValue([])
+        spyOn(poeCollection, 'getEvaluationsFromID').and.returnValue([])
+        spyOn(scheduler, 'isSurveyAvailable').and.callThrough()
+        await physiotherapist.getInfo({
+            user: this.physiotherapist,
+            params: { patientID: patient.id },
+            query: { secret: true },
+            cookies: {[cookie_name]: true}
+        }, {
+            send(data) {
+                expect(data.patient).toBeDefined()
+                expect(data.newSurveyAvailable).toBeDefined()
+                expect(data.newSurveyAvailable.completed).toEqual(0)
+                expect(data.newSurveyAvailable.currentSurveyID).toBe('T1')
+            }
+        })
+    })
+    it('patient can get 2nd survey (min 3 exercises)', async function () {
+        let patient = this.patient, survey = this.surveys[0], exercises = this.exercises
+        spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({...patient, sessionID: 1})
+        spyOn(surveysCollection, 'getSurveysByPatientID').and.returnValue([survey])
+        spyOn(exercisesCollection, 'getExercisesInSessionByEmail').and.returnValue(exercises)
+        spyOn(poeCollection, 'getEvaluationsFromID').and.returnValue(true)
+        spyOn(scheduler, 'isSurveyAvailable').and.callThrough()
+        await physiotherapist.getInfo({
+            user: this.physiotherapist,
+            params: { patientID: patient.id },
+            query: { secret: true },
+            cookies: { [cookie_name]: true }
+        }, {
+            send(data) {
+                expect(data.patient).toBeDefined()
+                expect(data.newSurveyAvailable).toBeDefined()
+                expect(data.newSurveyAvailable.completed).toEqual(1)
+                expect(data.newSurveyAvailable.currentSurveyID).toBe('T2')
+                expect(data.newSurveyAvailable.userType).toBeDefined()
+                expect(physiotherapistCollection.getOnePatientByID).toHaveBeenCalled()
+                expect(surveysCollection.getSurveysByPatientID).toHaveBeenCalled()
+            }
+        })
+    })
+    it('patient can get 3rd survey (min 5 exercises & 6 weeks)', async function () {
+        let surveyDate = new Date(), patient = this.patient, surveys = this.surveys, exercises = this.exercises, daysToAdd = 42
+        surveyDate.setDate(surveyDate.getDate() + daysToAdd)
+        jasmine.clock().mockDate(surveyDate)
+        spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({...patient, sessionID: 1})
+        spyOn(surveysCollection, 'getSurveysByPatientID').and.returnValue(surveys)
+        spyOn(exercisesCollection, 'getExercisesInSessionByEmail').and.returnValue([...exercises, { id: 1 }, { id: 2 }])
+        spyOn(poeCollection, 'getEvaluationsFromID').and.returnValue(true)
+        spyOn(scheduler, 'isSurveyAvailable').and.callThrough()
+        await physiotherapist.getInfo({
+            user: this.physiotherapist,
+            params: { patientID: patient.id },
+            query: { secret: true },
+            cookies: { [cookie_name]: true }
+        }, {
+            send(data) {
+                expect(data.patient).toBeDefined()
+                expect(data.newSurveyAvailable).toBeDefined()
+                expect(data.newSurveyAvailable.completed).toEqual(2)
+                expect(data.newSurveyAvailable.currentSurveyID).toBe('T3')
+                expect(data.newSurveyAvailable.userType).toBeDefined()
+                expect(physiotherapistCollection.getOnePatientByID).toHaveBeenCalled()
+                expect(surveysCollection.getSurveysByPatientID).toHaveBeenCalled()
             }
         })
     })
