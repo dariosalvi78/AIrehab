@@ -34,6 +34,22 @@ const config = {
     }
 }
 
+cron.schedule('0 9 * * *', async (ctx) => {
+    logger.info({ timestamp: ctx.triggeredAt.toISOString(), status: ctx.task.getStatus() }, 'scheduled morning job:')
+    try {
+        let users = await usersCollection.getUsers()
+        for (const u in users) {
+            if (users[u] && !users[u].activated) continue
+            let isNewSurvey = await isSurveyAvailable(users[u].id, users[u].role)
+            if (isNewSurvey && isNewSurvey.completed >= 1) {
+                await mailer.sendPhysiotherapistSurveyAvailable(users[u].email)
+            }
+        }
+    } catch (err) {
+        logger.info({ error: err, status: ctx.task.getStatus() }, 'morning job error:')
+    }
+})
+
 /**
  * Checks if there is a new survey available
  * @typedef newSurveyAvailable
