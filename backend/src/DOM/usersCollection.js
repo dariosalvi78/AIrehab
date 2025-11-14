@@ -9,7 +9,7 @@ export default {
      */
     getUsers: async function () {
         let response = await db.query(`
-            SELECT id, email, role, createdTimestamp, lastLoginTimestamp 
+            SELECT id, email, role, createdTimestamp, lastLoginTimestamp, activated
             FROM [user] WHERE role != 'admin';
         `)
         return response.recordset
