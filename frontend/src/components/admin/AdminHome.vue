@@ -1,39 +1,24 @@
 <template>
   <q-layout>
-    <q-card-actions class="q-pb-xl flex flex-center q-gutter-md">
-      <q-btn padding="md" color="secondary" @click="() => { this.newUserPrompt = !this.newUserPrompt }">
-        <q-icon left name="person"/>
-        <div>Add new Test leader</div>
-      </q-btn>
-      <q-btn class="action-button" padding="md" color="accent" @click="() => { this.newPatientPrompt = !this.newPatientPrompt }">
-        <q-icon left name="group_add"/>
-        <div>Add new Patient</div>
-      </q-btn>
-    </q-card-actions>
-    <patient-edit-form
-      :user="{}"
-      formMode="adminNew" 
-      v-model="newPatientPrompt" 
-      @addNewPatient="addNewPatient"
-    />
-    <new-user-form 
-      role="physiotherapist" 
-      v-model="newUserPrompt" 
-      @newUser="addNewUser"
-    />
-    <admin-user-table 
-      :users="users" 
-      @getUsers="getUsers()"
-      @addPatient="addNewPatient"
-    />
-    <admin-sessions-table 
-      :sessions="sessions" 
-      @getSessions="getSessions()"
-    />
-    <admin-exercises-table 
-      :exercises="exercises" 
-      @getExercises="getExercises()"
-    />
+    <div class="q-pb-xl q-px-none flex flex-center">
+      <q-btn-group class="full-width" spread>
+        <q-btn padding="md" no-caps color="secondary" 
+          @click="() => { newUserPrompt = !newUserPrompt }">
+          <q-icon left name="person" />
+          <div>Add new Test leader</div>
+        </q-btn>
+        <q-btn padding="md" no-caps color="accent"
+          @click="() => { newPatientPrompt = !newPatientPrompt }">
+          <q-icon left name="group_add" />
+          <div>Add new Patient</div>
+        </q-btn>
+      </q-btn-group>
+    </div>
+    <patient-edit-form :user="{}" formMode="adminNew" v-model="newPatientPrompt" @addNewPatient="addNewPatient" />
+    <new-user-form role="physiotherapist" v-model="newUserPrompt" @newUser="addNewUser" />
+    <admin-user-table :users="users" @getUsers="getUsers()" @addPatient="addNewPatient" />
+    <admin-sessions-table :sessions="sessions" @getSessions="getSessions()" />
+    <admin-exercises-table :exercises="exercises" @getExercises="getExercises()" />
   </q-layout>
 </template>
 
@@ -64,7 +49,7 @@ export default {
     await this.getExercises()
   },
   methods: {
-     async addNewUser (newUser) {
+    async addNewUser (newUser) {
       const createdNotify = this.$q.notify({
         group: false,
         color: 'secondary',
