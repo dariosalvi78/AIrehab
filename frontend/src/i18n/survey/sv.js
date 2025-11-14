@@ -1,6 +1,6 @@
 
 export default {
-    title: 'Frågeformulär {surveyName}.',
+    title: 'Frågeformulär {surveyName}',
     description: 'Som en del av denna studie så kommer du att få svara på {numOfQuestions} öppna frågor angående användning av POE-appen.',
     complete_form_description: 'När du har svarat på alla frågor i enkäten, vänligen tryck på knappen nedan för att skicka in dina svar.',
     notifications: {
