@@ -4,6 +4,8 @@ import surveys from "../DOM/surveysCollection.js"
 import patient from "../DOM/physiotherapistCollection.js"
 import users from "../DOM/usersCollection.js"
 import logger from "../utils/logger.js"
+import archiver from '../utils/archiver.js'
+import path from 'path'
 
 export default {
     /**
@@ -37,12 +39,12 @@ export default {
         try {
             let surveyData = req.body.newSurveyData, physioID = undefined, patientID = null
             if (!surveyData) return res.sendStatus(400)
-
+            
             if (req.user) {
                 let user = await users.getUserByEmail(req.user.email)
                 if (!user.activated) return res.sendStatus(403)
                 physioID = user.id
-            }
+            } 
             else if (req.patient) {
                 let p = await patient.getOnePatientByID(req.patient.id)
                 if (!p.activated) return res.sendStatus(403)
@@ -58,6 +60,32 @@ export default {
         }
         catch (err) {
             logger.error({ error: err }, 'something went wrong when creating survey')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    /**
+     * Download the lastest survey data
+     * @param {Object} req - express request
+     * @param {Object} res - express response
+     * @returns {File} surveys
+     */
+    downloadSurveyData: async (req, res) => {
+        if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
+
+        try {            
+            const filePath = await archiver.getArchivedSurveyData()
+            const FULL_FILEPATH = path.join(import.meta.dirname, '../../' + filePath)
+            return res.download(FULL_FILEPATH, (err) => {
+                if (err) {
+                    logger.error({ status: err.status }, 'error downloading surveys to client')
+                    return res.sendStatus(err.status)
+                }
+            })
+        }
+        catch (err) {
+            logger.error({ error: err }, 'Could not download survey files:')
             res.sendStatus(500)
             return
         }

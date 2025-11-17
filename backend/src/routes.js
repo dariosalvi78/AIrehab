@@ -65,4 +65,5 @@ export default async (app, isAuth) => {
     
     app.get(`${API_PREFIX}/surveys`, isAuth, surveys.getSurveys)
     app.post(`${API_PREFIX}/surveys`, isAuth, surveys.addNewSurvey)
+    app.get(`${API_PREFIX}/surveys/download`, isAuth, surveys.downloadSurveyData)
 }

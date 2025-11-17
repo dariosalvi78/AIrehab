@@ -194,6 +194,11 @@ let API = {
     let response = await axios.post('/surveys', { newSurveyData })
     return response.data
   },
+
+  async downloadSurveyData () {
+    let response = await axios.get('/surveys/download')
+    return response.data
+  },
 }
 
 export default API

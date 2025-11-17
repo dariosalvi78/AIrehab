@@ -12,6 +12,11 @@
           <q-icon left name="group_add" />
           <div>Add new Patient</div>
         </q-btn>
+        <q-btn padding="md" no-caps color="grey"
+          @click="downloadLatestSurveyData">
+          <q-icon left name="download" />
+          <div>Download survey data</div>
+        </q-btn>
       </q-btn-group>
     </div>
     <patient-edit-form :user="{}" formMode="adminNew" v-model="newPatientPrompt" @addNewPatient="addNewPatient" />
@@ -142,6 +147,21 @@ export default {
           icon: 'warning'
         })
       }
+    },
+    async downloadLatestSurveyData () {
+      try {
+        this.$q.loading.show()
+        await API.downloadSurveyData()
+      } catch (err) {
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: `Error downloading survey data: ${err}`,
+          icon: 'warning'
+        })
+      }
+      this.$q.loading.hide()
+      return
     }
   }
 }
