@@ -38,7 +38,12 @@ const config = {
             }
         ],
         patient: [
-            (numOfExercises) => { return numOfExercises >= 3 },
+            (numOfExercises, latestSurveyTimestamp) => {
+                return {
+                    isAvailable: numOfExercises >= 3,
+                    becameAvailableOn: new Date(latestSurveyTimestamp)
+                }
+            },
             (numOfExercises, latestSurveyTimestamp) => {
                 const sixWeeksInMs = 6 * 7 * 24 * 60 * 60 * 1000;
                 const dateIsSixWeeksApart = (latestSurveyTimestamp <= Date.now() - sixWeeksInMs)
