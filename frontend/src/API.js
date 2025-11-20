@@ -196,8 +196,8 @@ let API = {
   },
 
   async downloadSurveyData () {
-    let response = await axios.get('/surveys/download')
-    return response.data
+    let response = await axios.post('/surveys/download', {}, { headers: { Accept: 'application/zip' }, responseType: 'arraybuffer' })
+    return { data: response.data, headers: response.headers }
   },
 }
 
