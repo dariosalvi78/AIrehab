@@ -5,7 +5,6 @@ import patient from "../DOM/physiotherapistCollection.js"
 import users from "../DOM/usersCollection.js"
 import logger from "../utils/logger.js"
 import archiver from '../utils/archiver.js'
-import path from 'path'
 
 export default {
     /**
@@ -74,19 +73,13 @@ export default {
     downloadSurveyData: async (req, res) => {
         if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
 
-        try {            
-            const filePath = await archiver.getArchivedSurveyData()
-            const FULL_FILEPATH = path.join(import.meta.dirname, '../../' + filePath)
-            return res.download(FULL_FILEPATH, (err) => {
-                if (err) {
-                    logger.error({ status: err.status }, 'error downloading surveys to client')
-                    return res.sendStatus(err.status)
-                }
-            })
+        try {
+            await archiver.streamArchivedSurveyData(res)
+            return
         }
         catch (err) {
-            logger.error({ error: err }, 'Could not download survey files:')
-            res.sendStatus(500)
+            logger.error({ error: err.error || err }, 'Could not download survey files:')
+            if (!res.headersSent) res.sendStatus(err.statusCode || 500)
             return
         }
     },
