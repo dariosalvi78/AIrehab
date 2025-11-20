@@ -56,7 +56,7 @@ export default {
         let response = await db.query(`
             INSERT INTO survey_answer
             (id, physiotherapistId, patientId, surveyName, content, createdTimestamp)
-            OUTPUT Inserted.id, Inserted.content, Inserted.createdTimestamp
+            OUTPUT Inserted.id, Inserted.surveyName, Inserted.content, Inserted.createdTimestamp
             VALUES(NEWID(), '${physiotherapistId}', ${patientId ? `'${patientId}'` : null}, '${name}', N'${content}', CURRENT_TIMESTAMP)
         `)
         return response.recordset[0]
