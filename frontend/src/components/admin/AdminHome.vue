@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import nicers from 'src/utils/nicers.js'
 import API from '../../API.js'
 import NewUserForm from '../NewUserForm.vue'
 import PatientEditForm from '../patients/PatientEditForm.vue'
@@ -151,12 +152,25 @@ export default {
     async downloadLatestSurveyData () {
       try {
         this.$q.loading.show()
-        await API.downloadSurveyData()
+        await nicers.delay(500)
+        let response = await API.downloadSurveyData()
+        if (response) {
+          let file = new Blob([response.data], { type: 'application/zip' }),
+            filename = response.headers['content-disposition'].split('filename=')[1]
+          let url = URL.createObjectURL(file)
+          let a = document.createElement('a')
+          a.style = 'display: none'
+          a.href = url
+          a.download = filename
+          a.click()
+          URL.revokeObjectURL(url)
+        }
       } catch (err) {
+        let errMsg = err.response && err.response.status === 404 ? 'No survey data available' : err.message
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Error downloading survey data: ${err}`,
+          message: `${errMsg}`,
           icon: 'warning'
         })
       }
