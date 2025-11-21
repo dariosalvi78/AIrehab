@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <%- '<style>' + include(`./index.css`) + '</style>' %>
+</head>
+
+<body>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="email-wrapper">
+        <tr>
+            <td>&nbsp;</td>
+            <td class="container">
+                <div class="content">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main">
+                        <tr>
+                            <td class="wrapper">
+                                <div class="email-logo" alt="POE assessment Logo"></div>
+                                <div class="email-content">
+                                    <p>Your POE results for exercise <%= exerciseType %> are ready</p>
+                                    <div class="btn">
+                                        <a href="<%= domain %>/home/sessions/<%= sessionID %>/exercise/<%= exerciseID %>" target="_blank">
+                                            View your latest exercise results
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+            <td>&nbsp;</td>
+        </tr>
+    </table>
+</body>
+
+</html>
