@@ -12,11 +12,11 @@
     <q-form class="survey-questions" @submit.prevent="">
       <div v-for="(question, qIndex) in questions" :key="question" :id="`question-${qIndex}`">
         <div class="q-py-md text-body2"><b>{{ `${qIndex + 1}.` }}</b> {{ question.q }}</div>
-        <section v-if="handleQuestionsInput(question)">
+        <section v-if="handleQuestionsInput(question)" :ref="`${qIndex + 1}_${question.code}`">
           <div class="q-gutter-sm column" v-for="(c, y) in choices.scales" :key="y">
             <q-radio 
-              class="col" :name="c" 
-              v-model="surveyFormData[`q_${qIndex+1}`]" 
+              class="col" :name="c"
+              v-model="surveyFormData[`${qIndex+1}_${question.code}`]"
               :val="y + 1" :label="c"
             />
           </div>
@@ -25,7 +25,7 @@
           <q-input
             :ref="`qTextarea_${question.code}`"
             class="q-my-sm"
-            v-model="surveyFormData[`q_${qIndex+1}`]"
+            v-model="surveyFormData[`${qIndex+1}_${question.code}`]"
             :label="choices.text.label"
             type="textarea"
             :hint="choices.text.hint"
@@ -33,7 +33,7 @@
           />
         </section>
       </div>
-      <q-separator class="q-my-sm" />
+      <q-separator class="q-my-lg" />
       <div class="text-body2">{{ $t('survey.complete_form_description') }} </div>
       <q-btn class="q-my-md full-width" icon="check" type="submit"
         padding="sm" color="secondary" no-caps @click="submitForm"
@@ -56,22 +56,29 @@ export default {
       questions: undefined,
       choices: undefined,
       patterns: {
-        textarea: [val => !val ? true : val.length <= 10 || this.$t('exercises.form.notes_error')]
+        textarea: [val => !val ? true : val.length <= 300 || this.$t('exercises.form.notes_error')]
       }
     }
   },
   created () {
     this.questions = this.$tm(`survey.${this.incomingSurvey.userType}.${this.incomingSurvey.currentSurveyID}`)
     this.choices = this.$tm('survey.choices')
+    for (let i = 0; i < this.questions.length; i++) this.surveyFormData[`${i + 1}_${this.questions[i].code}`] = ''
   },
   methods: {
     async submitForm () {
-      let refs = Object.keys(this.$refs), formError = false
-      for (const r of refs) {
-        this.$refs[r][0].validate()
-        if (this.$refs[r][0].hasError) formError = true
+      let refs = Object.keys(this.$refs), formError = false, surveyForm = Object.keys(this.surveyFormData)
+      for (const r in refs) {
+        let refInput = this.$refs[refs[r]][0]
+        if (refInput.hasError) {
+          refInput.validate()
+          formError = true
+        }
+        if (refs[r] !== surveyForm[r]) continue
+        if (!this.surveyFormData[surveyForm[r]]) formError = true
       }
-      if (formError || (Object.keys(this.surveyFormData).length < this.questions.length)) {
+
+      if (formError) {
         return this.$q.notify({
           color: 'negative',
           message: this.$t('survey.notifications.form_error'),
