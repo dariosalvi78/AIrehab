@@ -3,9 +3,11 @@
     <q-separator />
     <q-btn class="q-ma-md" round dense color="primary" size="lg" icon="chevron_left" @click="$emit('panelFormGoBack')" />
     <div class="q-pa-md flex justify-between patient-view-width">
-      <q-btn icon-right="person" size="sm" :label="$t('patient.edit')" type="submit" color="primary" v-close-popup  @click="openUserEditPrompt = !openUserEditPrompt"/>
-      <q-btn v-if="!selectedPatient.sessionID" icon-right="start" size="sm" :label="$t('patient.start')" type="submit" color="secondary" v-close-popup  @click="startNewSession(selectedPatient)"/>
-      <q-btn v-else icon-right="open_in_new" size="sm" :label="$t('patient.ongoing')" type="submit" color="secondary" v-close-popup  @click="navigateToSession(selectedPatient.sessionID)"/>
+      <q-btn-group class="full-width" spread>
+        <q-btn icon-right="person" size="12px" :label="$t('patient.edit')" type="submit" color="primary" v-close-popup no-caps @click="openUserEditPrompt = !openUserEditPrompt"/>
+        <q-btn v-if="!selectedPatient.sessionID" icon-right="start" size="12px" :label="$t('patient.start')" type="submit" color="secondary" v-close-popup no-caps @click="startNewSession(selectedPatient)"/>
+        <q-btn v-else icon-right="open_in_new" size="12px" :label="$t('patient.ongoing')" type="submit" color="secondary" v-close-popup no-caps @click="navigateToSession(selectedPatient.sessionID)"/>
+      </q-btn-group>
     </div>
     <q-card flat class="patient-view-width">
       <q-card-section>
@@ -17,16 +19,20 @@
           <q-icon style="bottom: 2px;" size="sm" name="calendar_month"/>
           {{ formatDate(selectedPatient.createdTimestamp) }}
           <div class="text-body2">
-            <q-badge class="q-my-sm" :color="selectedPatient.activated ? 'positive' : 'negative'">
-              {{selectedPatient.activated ? $t('patient.consent') : $t('patient.no_consent') }} 
+            <q-badge class="q-my-sm" :color="getPatientStatus.theme">
+              {{ getPatientStatus.label }} 
+              <q-icon :name="getPatientStatus.icon" color="white" class="q-ml-xs" />
             </q-badge>
           </div>
-          <q-btn icon-right="open_in_new" size="sm" :label="$t('patient.code')" type="submit" color="primary" class="q-my-sm" v-close-popup  @click="openPatientModal = !openPatientModal"/>
+          <q-btn icon-right="open_in_new" size="md" :label="$t('patient.code')" type="submit" class="q-my-sm full-width" outline no-caps v-close-popup  @click="openPatientModal = !openPatientModal"/>
         </div>
       </q-card-section>
-      <q-separator inset />
+      <q-separator />
       <q-card-section>
-        <div class="text-subtitle1">{{ $t('patient.profile.measurements') }}</div>
+        <div class="text-subtitle1 q-mb-sm flex">
+          <q-icon class="q-mr-sm" size="sm" name="height"/>
+          {{ $t('patient.profile.measurements') }}
+        </div>
         <div class="text-body2">
           {{ selectedPatient.height ? selectedPatient.height + ' cm' : $t('patient.profile.height_not_specified') }}
         </div>
@@ -34,14 +40,20 @@
           {{ selectedPatient.weight ? selectedPatient.weight + ' kg' : $t('patient.profile.weight_not_specified') }}
         </div>
       </q-card-section>
-      <q-separator inset />
+      <q-separator />
       <q-card-section>
-        <div class="text-subtitle1">{{ $t('patient.profile.dob') }}</div>
+        <div class="text-subtitle1 q-mb-sm flex">
+          <q-icon class="q-mr-sm" size="sm" name="calendar_month"/>
+          {{ $t('patient.profile.dob') }}
+        </div>
         <div class="text-body2">{{ formatDate(selectedPatient.dateofbirth) }}</div>
       </q-card-section>
-      <q-separator inset />
+      <q-separator />
       <q-card-section>
-        <div class="text-subtitle1">{{ $t('patient.profile.injuries') }}</div>
+        <div class="text-subtitle1 q-mb-sm flex">
+          <q-icon class="q-mr-sm" size="sm" name="accessibility"/>
+          {{ $t('patient.profile.injuries') }}
+        </div>
         <div class="text-body2">
           {{ selectedPatient.injuredBodyPart ? getInjuredBodyPart : $t('patient.profile.part_not_specified') }}
         </div>
@@ -49,15 +61,16 @@
           {{ selectedPatient.injuredSide ? getInjuredSide : $t('patient.profile.side_not_specified') }}
         </div>
       </q-card-section>
-      <q-separator inset />
+      <q-separator />
       <q-card-section>
-        <div class="text-subtitle1">{{ $t('patient.profile.notes') }}</div>
-        <div style="whiteSpace: break-spaces" class="text-body2">
-          <div class="q-py-sm text-body2">
-            <q-scroll-area :visible="true" style="height: 160px;">
-              {{ selectedPatient.injuries ? selectedPatient.injuries : '...' }}
-            </q-scroll-area>
-          </div>
+        <div class="text-subtitle1 q-mb-sm flex">
+          <q-icon class="q-mr-sm" size="sm" name="notes"/>
+          {{ $t('patient.profile.notes') }}
+        </div>
+        <div class="q-py-sm text-body2 patient-notes-area q-pa-sm">
+          <q-scroll-area :visible="true" style="height: 160px;">
+            {{ selectedPatient.injuries ? selectedPatient.injuries : '...' }}
+          </q-scroll-area>
         </div>
       </q-card-section>
     </q-card>
@@ -245,6 +258,13 @@ export default {
       let side = this.selectedPatient.injuredSide
       side = this.$i18n.t(`patient.injuries.${side}`)
       return this.selectedPatient.injuredSide !== 'both' ? (side + ` ${this.$i18n.t('patient.injuries.side')}`) : side + ` ${this.$i18n.t('patient.injuries.sides')}`
+    },
+    getPatientStatus() {
+      let status = {
+        consented: { theme: 'positive', icon: 'check', label: this.$t('patient.consent') },
+        notConsented: { theme: 'negative', icon: 'warning', label: this.$t('patient.no_consent') }
+      }
+      return this.selectedPatient.activated ? status.consented : status.notConsented
     }
   }
 }
@@ -254,5 +274,10 @@ export default {
 .patient-view-width {
   margin: 0 auto;
   max-width: 400px;
+}
+.patient-notes-area {
+  background-color: #0000000a;
+  white-space: break-spaces;
+  border-radius: 8px;
 }
 </style>
