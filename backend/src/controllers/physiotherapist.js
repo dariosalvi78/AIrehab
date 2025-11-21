@@ -6,9 +6,8 @@ import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
 import files from '../utils/fileHandler.js'
 import { signPatientAccessToken, patient_cookie, verifyAuthToken } from "../utils/tokenAuth.js"
-import mailer from '../utils/mailer.js'
+import mailer from '../utils/mailer/mailer.js'
 import bcrypt from 'bcrypt'
-import survey from '../DOM/surveysCollection.js'
 import scheduler from '../utils/scheduler.js'
 
 export default {
@@ -83,9 +82,9 @@ export default {
             } else if (req.user.role == 'admin') {
                 patient = await physiotherapist.getOnePatientByID(patientID)
             }
-            patient.access = bcrypt.hashSync(patient.physiotherapistId, 8)
             if (!patient) return res.sendStatus(404)
             else if (!patient["sessionID"]) delete patient.sessionID
+            patient.access = bcrypt.hashSync(patient.physiotherapistId, 8)
 
             return res.send(patient)
         } catch (err) {

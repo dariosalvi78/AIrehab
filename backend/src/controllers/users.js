@@ -4,9 +4,8 @@ import bcrypt from 'bcrypt'
 import { signAccessToken, signResetPwdToken, verifyAuthToken, session_cookie } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"
 import physiotherapist from "../DOM/physiotherapistCollection.js"
-import survey from "../DOM/surveysCollection.js"
 import logger from "../utils/logger.js"
-import mailer from '../utils/mailer.js'
+import mailer from '../utils/mailer/mailer.js'
 import scheduler from '../utils/scheduler.js'
 
 export default {
