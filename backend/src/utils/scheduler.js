@@ -32,7 +32,7 @@ const config = {
             },
             (latestSurveyTimestamp) => { 
                 // 60 days from second survey
-                let timestamp = 14 * 24 * 60 * 60 * 1000
+                let timestamp = 60 * 24 * 60 * 60 * 1000
                 const dateUntilThirdSurvey = (latestSurveyTimestamp <= Date.now() - timestamp)
                 return { isAvailable: dateUntilThirdSurvey, becameAvailableOn: new Date(latestSurveyTimestamp + timestamp) }
             }
@@ -150,7 +150,7 @@ export default {
         /** @type {import('node-cron').ScheduledTask} */
         const task = undefined
         try {
-            const task = cron.createTask('*/2 * * * *', async () => {
+            const task = cron.createTask('*/1 * * * *', async () => {
                 const email = userEmail, mailerInfo = meta
                 let ongoing = await poeMA.isEvaluationOngoing(sessionID, exerciseID, videoFile)
 
