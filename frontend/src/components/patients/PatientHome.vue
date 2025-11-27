@@ -68,9 +68,22 @@
                     </div>
                   </div>
                   <poe-view-modal v-if="exercise.poe.length" :assessmentResults="exercise.poe"/>
-                  <div v-else class="q-ma-md text-body2">{{ $t('poe.no_results') }}</div>
+                  <div v-else class="q-ma-md text-body2 text-italic">{{ $t('poe.no_results') }}</div>
                 </q-expansion-item>
               </q-list>
+              <q-separator />
+              <q-pagination
+                v-if="pagination.maxPageNo >= 1"
+                v-model="pagination.pageNo"
+                :max="pagination.maxPageNo"
+                :min="1" flat
+                @update:model-value="(e) => handlePageExercise(e)"
+                direction-links
+                color="grey" active-color="primary"
+                class="q-my-md flex flex-center"
+                active-design="push"
+                size="md" gutter="sm"
+              />
               <div v-else class="text-body2 text-center q-pa-md">{{ $t('patient.home.exercise_no_results') }}</div>
             </q-card-section>
           </q-card>
@@ -153,7 +166,13 @@ export default {
       secret: undefined,
       panel: undefined,
       incomingSurvey: undefined,
-      results: undefined
+      results: undefined,
+      pagination: {
+        limit: 3,
+        pageNo: 1,
+        sortOrder: 'DESC',
+        maxPageNo: 1
+      },
     }
   },
   async mounted () {
@@ -164,6 +183,7 @@ export default {
 
     if (this.patientID && this.secret) await this.setPatientActivation()
     this.participationStatus = await this.getPatientInfo()
+    await this.getPatientExercises()
   },
   methods: {
     async getPatientInfo() {
@@ -174,7 +194,6 @@ export default {
           if (response.token) return await this.getPatientInfo()
           this.patient = response.patient
           this.incomingSurvey = response.newSurveyAvailable || []
-          this.results = response.results ? await this.formatExerciseData(response.results) : []
           return response.patient.activated
         }
       } catch (err) {
@@ -192,7 +211,7 @@ export default {
             html: true
           })
         } else {
-            this.$q.notify({
+          this.$q.notify({
             color: 'negative',
             position: 'top',
             message: 'Could not retrieve patient: ' + errMsg,
@@ -202,6 +221,22 @@ export default {
         return this.participationStatus
       }
     },
+    async getPatientExercises () {
+      try {
+        let exercise_results = await API.getExercises(this.patient.sessionID, this.pagination)
+        if (exercise_results) {
+          this.results = exercise_results ? await this.formatExerciseData(exercise_results.exercises) : []
+          this.pagination.maxPageNo = exercise_results.maxPageNo
+        }
+      } catch (err) {
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Could not retrieve exercises: ' + err,
+          icon: 'report_problem'
+        })
+      }
+    },  
     async sendPatientActivationLink () {
       const emailPattern = (await import('quasar')).patterns.testPattern.email
       try {
@@ -358,6 +393,10 @@ export default {
         exercise.poe.maxScore = (poeTypesEnum.scores.POOR.point * exercise.poe.length) * 10
       }
       return results
+    },
+    async handlePageExercise (no) {
+      this.pagination.pageNo = no
+      await this.getPatientExercises()  
     },
     formatDate (date) {
       return nicers.formattedDayOfMonth(date)
