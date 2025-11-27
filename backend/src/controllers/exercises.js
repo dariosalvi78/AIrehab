@@ -4,9 +4,9 @@ import exercises from "../DOM/exercisesCollection.js"
 import sessions from '../DOM/physiotherapySessionCollection.js'
 import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
-import config from '../utils/config.js'
 import files from '../utils/fileHandler.js'
 import physiotherapistCollection from '../DOM/physiotherapistCollection.js'
+import usersCollection from '../DOM/usersCollection.js'
 
 export default {
 
@@ -18,24 +18,40 @@ export default {
      * @returns {Promise<Array<Types.Exercise>>} array with exercises
     */
     getExercises: async (req, res) => {
-        if (!req.user) return res.sendStatus(403)
-        let results, sessionID = req.query.sessionID
+        let results, sessionID = req.query.sessionID, isAssignedTo = undefined
         try {
-            if (req.user.role == 'admin') {
+            if (req.user && req.user.role == 'admin') {
                 results = await exercises.getExercises()
-            } else if (req.user.role == 'physiotherapist' && sessionID) {
-                const isAssignedTo = await sessions.getSessionByID(sessionID, req.user.email)
-                if (!isAssignedTo) return res.sendStatus(403)
+                return res.send(results)
+            }
 
-                let exercise = await exercises.getExercisesBySession(sessionID, req.query.pagination)
-                results = {
-                    exercises: exercise[0],
-                    maxPageNo: exercise[exercise.length - 1][0].maxPage,
-                    numOfExercises: exercise[exercise.length - 1][0].numOfExercises
+            if ((req.user && req.user.role == 'physiotherapist') && sessionID) {
+                isAssignedTo = await sessions.getSessionByID(sessionID, req.user.email)
+            } else if (req.patient && req.patient.physiotherapistId) {
+                const physio = await usersCollection.getOneUser(req.patient.physiotherapistId)
+                isAssignedTo = await sessions.getSessionByID(sessionID, physio.email)
+                if (isAssignedTo.patientId !== req.patient.id) return res.sendStatus(400)
+            }
+            if (!isAssignedTo) return res.sendStatus(403)
+    
+            let exercise = await exercises.getExercisesBySession(sessionID, req.query.pagination)
+            if (exercise[0] && req.patient) {
+                let exercises_in_session = exercise[0]
+                for (const e in exercises_in_session) {
+                    let _exercise = exercises_in_session[e]
+                    delete _exercise.videoFile
+                    delete _exercise.notes
+                    let poe_results = await poe.getEvaluationsFromID(_exercise.id)
+                    _exercise.poe = poe_results
                 }
             }
-            res.send(results)
-            return
+
+            results = {
+                exercises: exercise[0],
+                maxPageNo: exercise[exercise.length - 1][0].maxPage,
+                numOfExercises: exercise[exercise.length - 1][0].numOfExercises
+            }
+            return res.send(results)
         } catch (err) {
             logger.error({ error: err }, 'error getting exercises: ')
             res.sendStatus(500)

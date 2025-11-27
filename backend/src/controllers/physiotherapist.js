@@ -290,7 +290,7 @@ export default {
                     `
                 })
             }
-            let decoded_data = await verifyAuthToken(cookie), pExercises = []
+            let decoded_data = await verifyAuthToken(cookie)
             const patient = await physiotherapist.getOnePatientByID(decoded_data.patient.id)
 
             if (
@@ -298,15 +298,6 @@ export default {
                 || secret !== decoded_data.patient.secret 
                 || patient.id !== patientID
             ) return res.sendStatus(404)
-            if (patient.sessionID) {
-                pExercises = await exercises.getExercisesInSessionByEmail(patient.sessionID, patient.physiotherapistEmail)
-                for (const e in pExercises) {
-                    let exercise = pExercises[e]
-                    let poe_results = await poe.getEvaluationsFromID(exercise.id)
-                    exercise.poe = poe_results
-                }
-                response.results = pExercises
-            }
             delete patient.email
             delete patient.physiotherapistEmail
             delete patient.dateofbirth
