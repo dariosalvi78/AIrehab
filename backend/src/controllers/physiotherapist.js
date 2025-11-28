@@ -5,7 +5,7 @@ import exercises from "../DOM/exercisesCollection.js"
 import poe from "../DOM/poeCollection.js"
 import logger from "../utils/logger.js"
 import files from '../utils/fileHandler.js'
-import { signPatientAccessToken, patient_cookie, verifyAuthToken } from "../utils/tokenAuth.js"
+import { signPatientAccessToken, patient_cookie, verifyAuthToken, session_cookie } from "../utils/tokenAuth.js"
 import mailer from '../utils/mailer/mailer.js'
 import bcrypt from 'bcrypt'
 import scheduler from '../utils/scheduler.js'
@@ -279,6 +279,7 @@ export default {
         if (!req.params.patientID || !req.query.secret) return res.sendStatus(403)
         let patientID = req.params.patientID, secret = req.query.secret, response = {}
         try {
+            if (req.cookies[session_cookie.name]) res.clearCookie(session_cookie.name, session_cookie.options)
             const cookie = req.cookies[patient_cookie.name]
             if (!cookie) {
                 const supportEmail = (await import('../utils/config.js')).default.admin.username 
