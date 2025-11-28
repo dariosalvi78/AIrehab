@@ -7,6 +7,7 @@ import logger from "../utils/logger.js"
 import files from '../utils/fileHandler.js'
 import physiotherapistCollection from '../DOM/physiotherapistCollection.js'
 import usersCollection from '../DOM/usersCollection.js'
+import poeMotionAnalysis from '../utils/poeMotionAnalysis.js'
 
 export default {
 
@@ -27,13 +28,13 @@ export default {
 
             if ((req.user && req.user.role == 'physiotherapist') && sessionID) {
                 isAssignedTo = await sessions.getSessionByID(sessionID, req.user.email)
-            } else if (req.patient && req.patient.physiotherapistId) {
+            } else if (req.patient && req.patient.physiotherapistId && sessionID) {
                 const physio = await usersCollection.getOneUser(req.patient.physiotherapistId)
                 isAssignedTo = await sessions.getSessionByID(sessionID, physio.email)
                 if (isAssignedTo.patientId !== req.patient.id) return res.sendStatus(400)
-            }
+            } else return res.send({ exercises: [] })
             if (!isAssignedTo) return res.sendStatus(403)
-    
+
             let exercise = await exercises.getExercisesBySession(sessionID, req.query.pagination)
             if (exercise[0] && req.patient) {
                 let exercises_in_session = exercise[0]
@@ -42,7 +43,8 @@ export default {
                     delete _exercise.videoFile
                     delete _exercise.notes
                     let poe_results = await poe.getEvaluationsFromID(_exercise.id)
-                    _exercise.poe = poe_results
+                    let mapPOEResults = poeMotionAnalysis.mapPosturalOrientation(poe_results, true)
+                    _exercise.poe = mapPOEResults
                 }
             }
 
