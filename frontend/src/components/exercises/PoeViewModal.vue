@@ -15,13 +15,13 @@
         <div class="text-h6 q-mt-md">{{ $t('poe.results.title') }}</div>
         <div class="text-body2 q-mb-xl">{{ $t('poe.results.description') }}</div>
         <div class="poe-score full-width">
-          <q-item class="q-pa-none">
+          <q-item v-if="poe && poe.bracket" class="q-pa-none">
             <q-item-section avatar class="row" >
-              <q-icon class="q-mb-md material-symbols-outlined" :color="overallScore.theme" size="52px" :name="getProgressIcon" />
+              <q-icon class="q-mb-md material-symbols-outlined" :color="poe.bracket.theme" size="52px" :name="getProgressIcon" />
             </q-item-section>
             <q-item-section>
-              <q-slider v-model="progressResults" rounded readonly label-always :label-value="progressResults + ` (${$t(`poe.scores.${overallScore.text}`) })`"
-                :min="0" :max="assessmentResults.maxScore" track-size="12px" track-color="grey-1" :color="overallScore.theme" class="q-my-sm"
+              <q-slider v-model="poe.sumOfScores" rounded readonly label-always :label-value="poe.sumOfScores + ` (${$t(`poe.scores.${poe.bracket.text}`) })`"
+                :min="0" :max="poe.maxScore" track-size="12px" track-color="grey-1" :color="poe.bracket.theme" class="q-my-sm"
               />
               <div class="poe-indicator row justify-between">
                 <div class="score" :key="score" v-for="score in getPOEScores">
@@ -30,7 +30,7 @@
                     :clickable="false" 
                     :ripple="false" 
                     size="md"
-                    :class="`q-mb-md ${overallScore.theme == score.theme ? 'text-bold' : ''}`"
+                    :class="`q-mb-md ${poe.bracket.theme == score.theme ? 'text-bold' : ''}`"
                     :text-color="score.theme">
                     {{ $t(`poe.scores.${score.text}`) }}
                   </q-chip>
@@ -44,7 +44,7 @@
                 <q-avatar square class="full-width full-height">
                   <q-img src="/exercise_poe.png" :ratio="9/16">
                     <q-icon @click="handleTPChange(poe.posturalOrientation)" :class="`poe-item-info all-pointer-events ${poe.posturalOrientation}`"
-                      :key="poe.posturalOrientation" v-for="poe in assessmentResults" :color="getPOEScoreToTheme(poe.score)" name="info"
+                      :key="poe.posturalOrientation" v-for="poe in poe.results" :color="getPOEScoreToTheme(poe.score)" name="info"
                     >
                       <q-tooltip :ref="`tp_${poe.posturalOrientation}`" max-width="300px" class="text-center bg-white text-black text-subtitle2 shadow-5">
                         {{ $t(`poe.${poe.posturalOrientation}`) }} 
@@ -61,7 +61,7 @@
         </div>
       </q-tab-panel>
       <q-tab-panel name="stats" class="q-px-none">
-        <q-list bordered class="rounded-borders q-gutter-sm q-ma-sm" :key="poe.posturalOrientation" v-for="poe in assessmentResults">
+        <q-list v-if="poe && poe.results" bordered class="rounded-borders q-gutter-sm q-ma-sm" :key="poe.posturalOrientation" v-for="poe in poe.results">
           <q-expansion-item
             class="q-py-sm"
             expand-separator
@@ -124,30 +124,49 @@ import poeTypesEnum from '../../utils/types/poeTypesEnum'
 export default {
     name: 'PoeViewModal',
     props: { assessmentResults: Object },
+    emits: ['getPOEBracket'],
     data () {
       return {
         panel: 'results',
-        progressResults: 0,
-        overallScore: {}
+        poe: {}
       }
     },
     mounted () {
       this.$refs.panelForm.goTo('results')
-      this.progressResults = this.getPOESumScoreBar()
-      this.overallScore = poeTypesEnum.getPOEScoreBracket(this.assessmentResults.sumOfScores)
+      if (this.assessmentResults) this.poe = this.formatPOEData()
     },
     methods: {
+      formatPOEData () {
+        const results = this.assessmentResults
+        let sumOfScores = 0, confidencesCount = Object.keys(poeTypesEnum.scores).length
+        for (const p in results) {
+          let poe = results[p], confidences = []
+          sumOfScores += poe.score
+          poe["posturalOrientation"] = poe.posturalOrientation
+          poe["scoreToText"] = poeTypesEnum.formattedScoreToText(poe.score)
+          poe["repetition"] = poe["repetition"] === 0 ? 'Summative evaluation' : poe["repetition"]
+
+          for (let i = 0; i < confidencesCount; i++) {
+            confidences.push({ score: poe['scoreConfidence_' + i] = parseFloat((poe['scoreConfidence_' + i] * 100)).toFixed(0), text: poeTypesEnum.formattedScoreToText(i) })
+            poe['confidences'] = confidences
+            delete poe['scoreConfidence_' + i]
+          }
+          poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
+        }
+        const poe = {
+          results: results,
+          sumOfScores: ((sumOfScores / 10) * 100),
+          maxScore: ((poeTypesEnum.scores.POOR.point * results.length) * 10),
+          bracket: poeTypesEnum.getPOEScoreBracket(sumOfScores)
+        }
+        this.$emit('getPOEBracket', poe.bracket)
+        return poe
+      },
       getPOEScoreToTheme(score) {
           let poes = Object.values(poeTypesEnum.scores)
           for (const poe in poes) {
             if (poes[poe].point === score) return poes[poe].theme
           }
-      },
-      getPOESumScoreBar() {
-        return this.assessmentResults.sumOfScores
-      },
-      formatPosturalOrientation (posturalOrientation) {
-        return poeTypesEnum.formattedPosturalOrientation(posturalOrientation)
       },
       handleTPChange (posturalOrientation) {
         return this.$refs[`tp_${posturalOrientation}`][0].show()
@@ -162,9 +181,9 @@ export default {
         return results
       },
       getProgressIcon () {
-        return this.overallScore.point == 0 
+        return this.poe.bracket.point == 0 
           ? 'sentiment_satisfied'
-            : this.overallScore.point == 1 
+            : this.poe.bracket.point == 1 
           ? 'sentiment_neutral'
           : 'sentiment_dissatisfied'
       }
