@@ -45,7 +45,7 @@
           </q-card>
           <q-card flat bordered class="q-my-lg q-ma-md">
             <q-card-section>
-              <div class="text-h6">{{ $t('exercises.name') }}</div>
+              <div class="text-h6">{{ $t('exercises.name') }} {{ getNumOfExercises }}</div>
             </q-card-section>
             <q-card-section class="q-pt-none">
               <div class="text-body2">{{ $t('patient.home.exercise_description') }}</div>
@@ -60,6 +60,23 @@
                   :caption="exercise.startTimestamp"
                   class="q-py-sm text-body1"
                 >
+                  <template v-slot:header>
+                    <q-item-section v-if="exercise.bracket" avatar style="width: 100px;">
+                      <q-chip
+                        :clickable="false" :ripple="false" size="md"
+                        class="q-py-sm full-width glossy"
+                        :color="exercise.bracket.theme" text-color="white"
+                      >
+                        <span style="width: 100%; text-align: center;" class="text-subtitle2">{{ $t(`poe.scores.${exercise.bracket.text}`) }}</span>
+                      </q-chip>
+                    </q-item-section>
+                    <q-item-section>
+                      <span>{{ exercise.type }}</span>
+                      <span class="q-item__label--caption text-caption">
+                        {{ exercise.startTimestamp }}
+                      </span>
+                    </q-item-section>
+                  </template>
                   <div class="col q-ma-md text-body2">
                     <div style="margin-left:-2px;" class="text-capitalize">
                       <q-icon style="bottom:2px;" size="sm" name="schedule" />
@@ -67,13 +84,17 @@
                       - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
                     </div>
                   </div>
-                  <poe-view-modal v-if="exercise.poe.length" :assessmentResults="exercise.poe"/>
+                  <poe-view-modal 
+                    v-if="exercise.poe.length" 
+                    :assessmentResults="exercise.poe" 
+                    @getPOEBracket="(bracket) => exercise.bracket = bracket"
+                  />
                   <div v-else class="q-ma-md text-body2 text-italic">{{ $t('poe.no_results') }}</div>
                 </q-expansion-item>
               </q-list>
-              <q-separator />
+              <div v-else class="text-body2 text-center q-pa-md">{{ $t('patient.home.exercise_no_results') }}</div>
               <q-pagination
-                v-if="pagination.maxPageNo >= 1"
+                v-if="pagination.maxPageNo > 1"
                 v-model="pagination.pageNo"
                 :max="pagination.maxPageNo"
                 :min="1" flat
@@ -84,7 +105,6 @@
                 active-design="push"
                 size="md" gutter="sm"
               />
-              <div v-else class="text-body2 text-center q-pa-md">{{ $t('patient.home.exercise_no_results') }}</div>
             </q-card-section>
           </q-card>
           <q-card flat bordered class="q-my-lg q-ma-md">
@@ -150,7 +170,6 @@ import API from '../../API'
 import nicers from '../../utils/nicers'
 import TermsModal from '../UserTermsModal.vue'
 import PoeViewModal from '../exercises/PoeViewModal.vue'
-import poeTypesEnum from '../../utils/types/poeTypesEnum'
 import SurveyForm from '../SurveyForm.vue'
 
 export default {
@@ -225,7 +244,8 @@ export default {
       try {
         let exercise_results = await API.getExercises(this.patient.sessionID, this.pagination)
         if (exercise_results) {
-          this.results = exercise_results ? await this.formatExerciseData(exercise_results.exercises) : []
+          this.numOfExercises = exercise_results.numOfExercises
+          this.results = exercise_results ? this.formatExerciseData(exercise_results.exercises) : []
           this.pagination.maxPageNo = exercise_results.maxPageNo
         }
       } catch (err) {
@@ -364,33 +384,13 @@ export default {
         this.participationStatus = !this.participationStatus
       })
     },
-    async formatExerciseData (exercises) {
-      let results = exercises
+    formatExerciseData (exercises) {
+      const results = exercises
       for (const e in results) {
         let exercise = exercises[e]
         exercise.type = this.$t(`exercises.form.types.${exercise.type}`)
         exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
         exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
-        
-        // TODO: This should be moved to PoeViewModal
-        let sumOfScores = 0
-        for (const p in exercise.poe) {
-          let poe = exercise.poe[p], confidences = []
-
-          sumOfScores += poe.score
-          poe["posturalOrientation"] = poe.posturalOrientation
-          poe["scoreToText"] = poeTypesEnum.formattedScoreToText(poe.score)
-          poe["repetition"] = poe["repetition"] === 0 ? 'Summative evaluation' : poe["repetition"]
-
-          for (let i = 0; i < 3; i++) {
-            confidences.push({score: poe['scoreConfidence_'+ i] = parseFloat((poe['scoreConfidence_'+ i]*100)).toFixed(0), text: poeTypesEnum.formattedScoreToText(i)})
-            poe['confidences'] = confidences
-            delete poe['scoreConfidence_'+ i]
-          }
-          poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
-        }
-        exercise.poe.sumOfScores = (sumOfScores / 10) * 100
-        exercise.poe.maxScore = (poeTypesEnum.scores.POOR.point * exercise.poe.length) * 10
       }
       return results
     },
@@ -416,6 +416,11 @@ export default {
     async openPatientHome () {
       await this.getPatientInfo() 
       return this.$refs.panelForm.goTo('main')
+    }
+  },
+  computed: {
+    getNumOfExercises () {
+      return this.results && this.numOfExercises ? `· ${this.numOfExercises}` : ''
     }
   }
 }

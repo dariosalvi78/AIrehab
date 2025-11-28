@@ -1,5 +1,5 @@
 <template>
-  <q-page-container class="q-pt-md" style="paddingTop:auto;">
+  <q-page-container style="padding-top:16px;">
     <q-btn class="q-ml-md" round dense color="primary" size="lg" icon="chevron_left" @click="goToSession" />
     <q-page class="q-py-md">
       <div v-if="!videoFile">
@@ -74,7 +74,7 @@
         </q-dialog>
       </div>
       <div v-else>
-        <q-card v-if="!poe" flat class="q-pa-lg flex flex-center column">
+        <q-card v-if="!poeResultsToFormat" flat class="q-pa-lg flex flex-center column">
           <q-card-section class="flex flex-center q-gutter-sm evaluation-card">
             <q-icon name="info_outline" size="md" class="q-ml-xs" />
             <div class="text-body2 text-center" v-html="$t('exercises.results.processing_info')"></div>
@@ -98,7 +98,7 @@
             </q-card-section>
             <q-separator />
             <poe-view-modal
-              :assessmentResults="poe"
+              :assessmentResults="poeResultsToFormat"
               class="q-mb-sm"
             />
           </q-card>
@@ -121,7 +121,6 @@
 <script>
 import API from '../../API'
 import nicers from '../../utils/nicers'
-import poeTypesEnum from '../../utils/types/poeTypesEnum'
 import exerciseTypes from '../../utils/types/exerciseTypesEnum'
 import ExerciseInstructions from './ExerciseInstructions.vue'
 import PoeViewModal from './PoeViewModal.vue'
@@ -141,7 +140,7 @@ export default {
       isRecording: false,
       uploadedFile: undefined,
       videoFile: undefined,
-      poe: undefined,
+      poeResultsToFormat: undefined,
       isGettingPOEStatus: true,
       showPreview: false,
       openRecordModal: false,
@@ -351,24 +350,7 @@ export default {
           try {
             let resp = await API.getPOE(this.exerciseID)
             if (resp && resp._results) {
-              let poe_results = resp._results, sumOfScores = 0
-              poe_results.map((poe, i) => {
-                let confidences = []
-                sumOfScores += poe.score
-                poe["posturalOrientation"] = poe.posturalOrientation
-                poe["scoreToText"] = poeTypesEnum.formattedScoreToText(poe.score)
-                poe["repetition"] = poe["repetition"] === 0 ? 'Summative evaluation' : poe["repetition"]
-
-                for (let i = 0; i < 3; i++) {
-                  confidences.push({score: poe['scoreConfidence_'+ i] = parseFloat((poe['scoreConfidence_'+ i]*100)).toFixed(0), text: poeTypesEnum.formattedScoreToText(i)})
-                  poe['confidences'] = confidences
-                  delete poe['scoreConfidence_'+ i]
-                }
-                poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
-              })
-              this.poe = poe_results
-              this.poe.sumOfScores = (sumOfScores / 10) * 100
-              this.poe.maxScore = (poeTypesEnum.scores.POOR.point * this.poe.length) * 10
+              this.poeResultsToFormat = resp._results
               return
             } else if (resp && !resp._results) {
               await nicers.delay(10000)
