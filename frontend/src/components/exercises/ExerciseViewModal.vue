@@ -397,7 +397,8 @@ export default {
   },
   computed: {
     formatModifiedDate () {
-      return nicers.formattedDayOfMonth(this.uploadedFile.lastModified)
+      let lastModified = new Date(this.uploadedFile.lastModified).toLocaleString()
+      return nicers.formattedDayOfMonth(lastModified)
     },
     getUploadedFileSize () {
       let formatFileSize = this.uploadedFile.size
