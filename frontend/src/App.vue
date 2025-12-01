@@ -5,6 +5,7 @@
 <script>
 import API, { axios } from './API.js';
 import MainLayout from './layouts/MainLayout.vue';
+import nicers from './utils/nicers.js';
 import store from './utils/storage.js';
 
 export default {
@@ -27,6 +28,7 @@ export default {
     if (store.getItem('locale')) {
       const newLocale = store.getItem('locale')
       this.$i18n.locale = newLocale
+      nicers.updateLocale(newLocale)
     }
 
     axios.interceptors.response.use((response) => {

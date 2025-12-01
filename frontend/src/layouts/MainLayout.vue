@@ -23,19 +23,12 @@
                 </q-item-section>
                 <q-menu auto-close anchor="top end" self="top start">
                   <q-list>
-                    <q-item
-                      v-for="lang in [
+                    <q-item v-for="lang in [
                         { value: 'en', label: '🇬🇧 English' },
                         { value: 'sv-SE', label: '🇸🇪 Svenska' }
-                      ]"
-                      :key="lang"
-                      dense
-                      clickable
-                    >
-                      <q-item-section 
-                        @click="changeLocale(lang.value)" 
-                        :class="lang.value == $i18n.locale ? 'text-subtitle2' : ''"
-                      >
+                      ]" :key="lang" dense clickable>
+                      <q-item-section @click="changeLocale(lang.value)"
+                        :class="lang.value == $i18n.locale ? 'text-subtitle2' : ''">
                         {{ lang.label }}
                       </q-item-section>
                     </q-item>
@@ -61,16 +54,13 @@
           {{user.email}}
         </q-chip>
         <q-space />
-        <q-btn flat dense icon="logout" :label="$t('common.logout')" no-caps @click="logout()"/>
+        <q-btn flat dense icon="logout" :label="$t('common.logout')" no-caps @click="logout()" />
       </q-toolbar>
     </q-header>
     <router-view :user="this.user" />
   </q-layout>
   <div v-else class="q-ma-md flex flex-center">
-    <q-spinner-dots
-      color="primary"
-      size="3em"
-    />
+    <q-spinner-dots color="primary" size="3em" />
   </div>
 </template>
 
@@ -113,6 +103,7 @@ export default {
     changeLocale (newLocale) {
       store.setItem('locale', newLocale)
       console.info('updated locale: ' + newLocale)
+      nicers.updateLocale(newLocale)
       return this.$i18n.locale = newLocale
     }
   },
