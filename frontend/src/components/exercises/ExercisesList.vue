@@ -7,12 +7,11 @@
           :key="exercise.id"
         >
           <transition appear enter-active-class="animated fadeIn delay-1s">
-            <q-card class="q-ma-md exercise-card">
+            <q-card flat bordered square class="q-my-lg q-mx-sm">
               <q-card-section class="row">
                 <div class="col">
-                  <q-btn class="q-mb-sm q-mr-sm" :label="!exercise.videoFile ? $t('exercises.go_exercise') : $t('exercises.go_evaluation')" dense color="secondary" size="sm" icon-right="open_in_new" @click="navigateToExercise(exercise.id)"/>
-                  <q-btn class="q-mb-sm" :label="$t('exercises.edit_exercise')" dense color="primary" size="sm" icon-right="edit" @click="$emit('openExerciseModal', exercise)"/>
-                  <div class="text-h6">{{ exercise.type ? exercise.type : $t('common.exercise', 1) }}
+                  <q-btn class="q-mb-sm" :label="$t('exercises.edit_exercise')" dense color="primary" size="sm" icon-right="edit" no-caps @click="$emit('openExerciseModal', exercise)"/>
+                  <div class="text-h6 q-mb-sm">{{ exercise.type ? $t(`exercises.form.types.${exercise.type}`) : $t('common.exercise', 1) }}
                     <q-icon v-if="exercise.videoFile" size="sm" name="video_file" />
                   </div>
                   <div style="margin-left:-2px;">
@@ -23,8 +22,11 @@
                 </div>
                 <q-btn style="height:fit-content;" dense color="negative" size="sm" icon="close" @click="closeExercise(exercise)"/>
               </q-card-section>
-              <q-separator />
-              <q-card-section>
+              <div class="exercise-action">
+                <q-btn push class="q-mx-md full-width" :label="!exercise.videoFile ? $t('exercises.go_exercise') : $t('exercises.go_evaluation')" color="secondary" size="md" no-caps icon-right="chevron_right" @click="navigateToExercise(exercise.id)"/>
+              </div>
+              <q-separator class="q-mt-md" />
+              <q-card-section class="q-pa-none">
                 <div v-if="exercise.notes.length" class="q-pa-sm text-body2 notes">
                   <q-scroll-area :visible="true" style="height: 130px;">
                     {{ exercise.notes }}
@@ -95,7 +97,7 @@ export default {
   },
   computed: {
     getCountExercises () {
-      return this.numOfExercises >= 1 ? `(${this.numOfExercises})` : ''
+      return this.numOfExercises >= 1 ? `· ${this.numOfExercises}` : ''
     }
   },
   methods: {
@@ -104,7 +106,6 @@ export default {
         if (this.sessionID) {
           let resp = await API.getExercises(this.sessionID, this.pagination)
           resp.exercises.map((exercise) => {
-            exercise.type = this.$i18n.t(`exercises.form.types.${exercise.type}`)
             exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
             exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
           })
@@ -215,10 +216,14 @@ export default {
 </script>
 
 <style scoped>
-.exercise-card {
-  max-height: 300px;
+.exercise-action {
+  display: flex;
+  align-content: center;
+  width: 90%;
+  margin: 0 auto;
 }
 .notes {
   white-space: break-spaces;
+  background-color: #0000000a;
 }
 </style>

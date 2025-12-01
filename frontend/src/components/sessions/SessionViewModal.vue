@@ -11,10 +11,10 @@
             <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
             {{ formatDate(session.startTimestamp) }} - {{ session.endTimestamp ? formatDate(session.endTimestamp) : $t('exercises.sessions.no_end_date') }}
           </div>
-          <div>
-            <q-btn dense class="q-mr-md" :label="$t('common.delete_session')" color="negative" size="sm" icon="close" @click="closeSession"/>
-            <q-btn dense class="q-my-md" color="secondary" size="sm" :label="$t('common.start_exercise')" icon-right="chevron_right" @click="openExerciseModal('new')" />
-          </div>
+          <q-btn-group push spread class="q-mt-md">
+            <q-btn :label="$t('common.delete_session')" color="negative" size="12px" icon="close" no-caps @click="closeSession"/>
+            <q-btn color="secondary" size="12px" :label="$t('common.start_exercise')" icon-right="add" no-caps @click="openExerciseModal('new')" />
+          </q-btn-group>
         </q-card-section>
         <q-separator />
       </q-card>
