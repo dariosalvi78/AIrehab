@@ -1,18 +1,36 @@
-import { date, Notify } from 'quasar'
-const { formatDate } = date
+import { Notify } from 'quasar'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+import 'dayjs/locale/sv.js'
+import 'dayjs/locale/en.js'
+
+dayjs.extend(utc)
+dayjs.extend(localizedFormat)
+const dateFormatter = dayjs
 
 export default {
-    /**
-    * @returns Date with format: YYYY-MM-DD
-    */
-    formattedDate(date) {
-        return formatDate(date, 'YYYY-MM-DD')
+    /** @param {String} newLocale new locale from i18n */
+    async updateLocale (newLocale) {
+        if (!newLocale || newLocale && typeof newLocale !== 'string') return
+        return dateFormatter.locale(newLocale)
     },
     /**
-    * @returns Date with format: MMM-DD HH:MM
+     * @param {Date} date
+     * @returns Localized date with initial format: YYYY-MM-DD
     */
-    formattedDayOfMonth(date) {
-        return formatDate(date, 'DD MMM HH:mm')
+    formattedDate (date) {
+        if (!date) return
+        return dateFormatter.utc(date).format('L')
+    },
+
+    /** 
+     * @param {Date} date
+     * @returns Localized date with initial format: DD MMM HH:mm
+    */
+    formattedDayOfMonth (date) {
+        if (!date) return
+        return dateFormatter.utc(date).format('D MMM LT')
     },
 
     /**

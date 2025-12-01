@@ -5,7 +5,7 @@ ENV MSSQL_SA_PASSWORD=MyPassword_1234
 ENV MSSQL_PID=Developer
 ENV MSSQL_BACKUP_DIR=/var/opt/mssql/backups
 ENV MSSQL_LCID=1033
-ENV TZ=Etc/UTC+1
+ENV TZ=Europe/Stockholm
 
 COPY ./init.sql .
 COPY ./entrypoint.sh .
