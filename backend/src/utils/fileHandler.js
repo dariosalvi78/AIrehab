@@ -57,7 +57,7 @@ export default {
                         await rm(file.filepath, { recursive: true }) // remove copy from /temp folder
 
                         const exercise_with_video = await exercises.updateExerciseVideo(exerciseID, { fileName: `'${filename}'`, endTimestamp: 'CURRENT_TIMESTAMP' })
-                        await sessions.updateSessionTimestamp(sessionID, `'${new Date().toLocaleString()}'`)
+                        await sessions.updateSessionTimestamp(sessionID, 'CURRENT_TIMESTAMP')
                         if (exercise_with_video) {
                             resolve(exercise_with_video)
                             return
