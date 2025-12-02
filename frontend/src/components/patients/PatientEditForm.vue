@@ -3,7 +3,6 @@
         <q-card class="q-pl-mx" style="min-width: 350px">
             <q-card-section>
                 <div class="text-h6">{{mode == 'new' || mode == 'adminNew' ? $t('patient.add') : $t('patient.edit') }}</div>
-                <!-- <div class="text-subtitle2">Send invitation to patient</div> -->
             </q-card-section>
             <q-card-section v-if="mode == 'adminEdit'">
                 <div class="text-body2">
@@ -49,30 +48,25 @@
                             :hint="!user.physiotherapistEmail ? 'e.g. user@email.com' : 'Assigned to test leader'"
                             :readonly="!!user.physiotherapistEmail"
                         />
-                        <!-- <q-input
-                            filled
-                            v-model="this.new.email"
-                            label="Email"
-                            type="email"
-                            hint="e.g. user@email.com"
-                        /> -->
                         <q-input
+                            ref="qName"
                             class="q-my-md"
                             filled
                             v-model="this.new.fullName"
                             :label="$t('patient.form.name')"
                             type="text"
                             :hint="$t('patient.form.name_hint')"
+                            :rules="patterns.name"
                         />
                         <q-input
-                        ref="qDate"
-                        class="q-my-md"            
-                        filled
-                        v-model="this.new.dateOfBirth"
-                        :label="$t('patient.form.date')"
-                        mask="####-##-##"
-                        :rules="[(date) => dateRestrictions(date) || $t('patient.form.date_error')]"
-                        :hint="$t('patient.form.date_hint') + ' - yyyy-mm-dd'"
+                            ref="qDate"
+                            class="q-my-md"            
+                            filled
+                            v-model="this.new.dateOfBirth"
+                            :label="$t('patient.form.date')"
+                            mask="####-##-##"
+                            :hint="$t('patient.form.date_hint') + ' - yyyy-mm-dd'"
+                            :rules="patterns.dob"
                         >
                         <template v-slot:append>
                             <q-icon name="event" style="cursor:pointer;">
@@ -102,7 +96,7 @@
                             :label="$t('patient.form.height') + ' (cm)'"
                             type="number"
                             :hint="$t('patient.form.height_hint')"
-                            :rules="[height => !height ? true : height <= 200 && height >= 0 || $t('patient.form.height_error')]"
+                            :rules="patterns.measurements('height')"
                         />
                         <q-input
                             ref="qWeight"
@@ -112,7 +106,7 @@
                             :label="$t('patient.form.weight') + ' (kg)'"
                             type="number"
                             :hint="$t('patient.form.weight_hint')"
-                            :rules="[weight => !weight ? true : weight <= 200 && weight >= 0 || $t('patient.form.weight_error')]"
+                            :rules="patterns.measurements('weight')"
                         />
                         <q-input
                             class="q-my-md"
@@ -121,7 +115,7 @@
                             :label="$t('patient.profile.notes')"
                             type="textarea"
                             :hint="$t('patient.form.notes_hint')"
-                            :rules="[injuries => !injuries ? true : injuries.length <= 150 || $t('exercises.form.notes_error')]"
+                            :rules="patterns.notes"
                         />
                         <q-toggle class="text-body2" v-model="hasInjury" :label="!hasInjury ? $t('patient.form.no_injuries') : $t('patient.form.injuries') " />
                         <div class="q-my-md q-gutter-sm" v-if="hasInjury">
@@ -167,7 +161,7 @@
                     :options="this.testExercise.types"
                     :label="$t('exercises.form.type')"
                     :hint="$t('exercises.form.type_hint')"
-                    :rules="[type => !!type  || $t('exercises.form.type_error')]"
+                    :rules="patterns.exerciseType"
                 />
                 <q-btn 
                     class="prompts"
@@ -192,6 +186,13 @@ export default {
     emits: ['addNewPatient', 'editPatient'],
     data () {
         return {
+            patterns: {
+                name: [injuries => !injuries ? true : injuries.length <= 25 || this.$t('patient.form.name_error')],
+                dob: [(date) => this.dateRestrictions(date) || this.$t('patient.form.date_error')],
+                measurements: (type) => [m => !m ? true : m <= 200 && m >= 0 || this.$t(`patient.form.${type}_error`)],
+                notes: [injuries => !injuries ? true : injuries.length <= 150 || this.$t('exercises.form.notes_error')],
+                exerciseType: [type => !!type  || this.$t('exercises.form.type_error')]
+            },
             new: {
                 fullName: undefined,
                 dateOfBirth: undefined,
@@ -228,16 +229,18 @@ export default {
     },
     methods: {
         formSubmit () {
-            this.$refs.qDate.validate()
-            this.$refs.qWeight.validate()
-            this.$refs.qHeight.validate()
-            if (this.$refs.qDate.hasError || this.$refs.qWeight.hasError || this.$refs.qHeight.hasError) {
-                return this.$q.notify({
-                    color: 'negative',
-                    position: 'top',
-                    message: 'Please review fields and try again',
-                    icon: 'report_problem'
-                })
+            let refs = Object.keys(this.$refs), formError = false
+            for (const r of refs) {
+                let refInput = this.$refs[r]
+                if (refInput.hasError) {
+                    refInput.validate()
+                    return this.$q.notify({
+                        color: 'negative',
+                        position: 'top',
+                        message: 'Please review fields and try again',
+                        icon: 'report_problem'
+                    })
+                }
             }
             let userSubmitted = {
                 fullName: this.new.fullName,
