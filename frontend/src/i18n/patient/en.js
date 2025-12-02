@@ -64,6 +64,7 @@ export default {
         `,
         name: 'Full name',
         name_hint: 'Patient full name',
+        name_error: 'Please enter a shorter name',
         date: 'Date',
         date_hint: 'Date of birth',
         date_error: 'Please enter valid date',

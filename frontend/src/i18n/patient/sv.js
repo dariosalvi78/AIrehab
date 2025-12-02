@@ -64,6 +64,7 @@ export default {
         `,
         name: 'Fullständiga namn',
         name_hint: 'Hela namnet på patienten',
+        name_error: 'Vänligen ange ett kortare namn',
         date: 'Datum',
         date_hint: 'Födelsedatum',
         date_error: 'Vänligen ange ett giltigt datum',
