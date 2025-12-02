@@ -15,17 +15,16 @@
           </div>
           <q-intersection
             v-for="session in sessions"
-            :key="session.id"
+            :key="session.id" once
             transition="jump-up"
-            class="example-item"
           >
-            <q-item clickable v-ripple @click="(e) => openSessionView(session)">
+            <q-item class="q-pa-md q-ma-sm rounded-borders shadow-1" clickable v-ripple @click="(e) => openSessionView(session)">
               <q-item-section avatar>
                 <q-avatar color="secondary" text-color="white" icon="accessibility" class="shadow-2"/>
               </q-item-section>
 
               <q-item-section>
-                <q-item-label class="text-body2">{{ session.names }}</q-item-label>
+                <q-item-label class="text-body1">{{ session.names }}</q-item-label>
                 <q-item-label caption>Start: {{ formatDate(session.startTimestamp) }}</q-item-label>
                 <q-item-label caption>{{ session.endTimestamp ? `End: ${formatDate(session.endTimestamp)}` : $t('exercises.sessions.no_end_date') }}</q-item-label>
                 <q-item-label caption>
