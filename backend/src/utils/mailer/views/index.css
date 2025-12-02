@@ -8,20 +8,21 @@ body {
     box-sizing: border-box;
 }
 
-.email-content {
+.container .email-content {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
 }
 
-.email-logo {
+.container .email-logo {
     position: relative;
+    display: block;
+    right: 8px;
     height: 120px;
+    width: auto;
     aspect-ratio: initial;
     object-fit: contain;
-    display: flex;
-    right: 8px;
     align-self: flex-start;
 }
 
