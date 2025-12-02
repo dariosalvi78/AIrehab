@@ -1,5 +1,5 @@
 <template>
-  <q-page-container class="q-py-md" style="paddingTop:auto;">
+  <q-page-container class="q-pb-md" style="padding-top: 16px;">
     <q-page v-if="session">
       <q-btn round dense class="q-ml-md" color="primary" size="lg" icon="chevron_left" @click="this.$router.push('/home')" />        
        <q-card flat class="q-pb-lg q-mt-sm">
@@ -7,7 +7,7 @@
           <div class="text-h6">
             {{ $t('exercises.sessions.title', { name: session.patientName }) }}
           </div>
-          <div class="text-body2 q-mt-sm" style="marginLeft: -3px;">
+          <div class="text-body2 q-mt-sm" style="margin-left: -3px;">
             <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
             {{ formatDate(session.startTimestamp) }} - {{ session.endTimestamp ? formatDate(session.endTimestamp) : $t('exercises.sessions.no_end_date') }}
           </div>
@@ -18,25 +18,22 @@
         </q-card-section>
         <q-separator />
       </q-card>
-      <exercise-form 
+      <exercise-form
         :formMode="this.exerciseForm"
         :selectedExercise="this.selectedExercise"
         v-model="exerciseModalPrompt"
         @newExercise="(data) => (newExercise = data)"
       />
-      <exercises-list 
-        :formMode="this.exerciseForm" 
-        :sessionID="sessionID" 
-        :newExerciseData="newExercise" 
+      <exercises-list
+        :formMode="this.exerciseForm"
+        :sessionID="sessionID"
+        :newExerciseData="newExercise"
         @openExerciseModal="e => openExerciseModal('edit', e)"
         @deletedExercise="getSessionData"
       />
     </q-page>
     <div v-else-if="isloadingSession" class="q-ma-md flex flex-center">
-      <q-spinner-dots
-          color="primary"
-          size="3em"
-        />
+      <q-spinner-dots color="primary" size="3em" />
     </div>
     <div v-else class="q-pa-lg flex flex-center column">
       <div class="q-py-md text-h6">No session found</div>
@@ -46,7 +43,6 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 import ExerciseForm from '../exercises/ExerciseForm.vue'
 import ExercisesList from '../exercises/ExercisesList.vue'
 import API from '../../API'
@@ -108,6 +104,7 @@ export default {
       try {
         this.$q.loading.show()
         await API.deleteSession(this.sessionID)
+        this.session = undefined
         await nicers.delay(500)
         this.$q.notify({
           color: 'info',
@@ -115,7 +112,7 @@ export default {
           message: 'Session has been deleted',
           icon: 'info'
         })
-        this.$router.go(-1)
+        this.$router.push('/home')
       } catch (err) {
         let errMsg = err
         if (err.response && err.response.status == 409) errMsg = err.response.data
