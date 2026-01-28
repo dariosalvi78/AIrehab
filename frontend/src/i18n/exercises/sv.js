@@ -16,8 +16,8 @@ export default {
         notes_error: 'Anteckningsgräns nådd',
         uploaded: 'Uppladdad träningsvideo',
         types: {
-            singleLeggedSquatLeft: 'Single-leg Squat (Vänster)',
-            singleLeggedSquatRight: 'Single-leg Squat (Höger)'
+            singleLeggedSquatLeft: 'Enbensknäböj (Vänster)',
+            singleLeggedSquatRight: 'Enbensknäböj (Höger)'
         }
     },
     record: {

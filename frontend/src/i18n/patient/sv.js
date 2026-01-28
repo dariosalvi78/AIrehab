@@ -1,5 +1,6 @@
 
 export default {
+    participant: "Deltagare",
     add: 'Lägg till ny patient',
     edit: 'Redigera patient',
     start: 'Starta session',

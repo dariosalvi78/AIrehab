@@ -1,5 +1,6 @@
 
 export default {
+    participant: "Participant",
     add: 'Add new patient',
     edit: 'Edit patient',
     start: 'Start session',

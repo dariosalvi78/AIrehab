@@ -36,15 +36,18 @@ export default {
     session_list: 'Sessioner',
     add_to_homescreen: 'Lägg till på Hemskärmen',
     consent: {
-        information_letter: 'Informationsbrev',
-        read_information: 'Läs informationsbrev',
-        header: 'Deltagande i forskningsstudie',
+        information_letter: 'Bedömning av rörelsekvalitet via en mobilapplikation',
+        read_information: 'Öppna ”Information till forskningspersoner: Bedömning av rörelsekvalitet via en mobilapplikation”',
+        header: 'Samtycke till att delta i projektet',
         description: `
-            Vi behöver ditt samtycke för att du ska kunna delta i denna forskningsstudie. Vänligen läs informationsbrevet innan du fattar ditt beslut.
-            <br><br>Ditt deltagande kan ändras när som helst.
+            Jag har fått muntlig och/eller skriftligen information om studien som getts via ”Information till forskningspersoner: Bedömning av rörelsekvalitet via en mobilapplikation”.
+            <br><br>
+            Jag har fått möjlighet att ställa frågor och har fått information om vem jag ska vända mig till vid fler frågor
+            <br><br>
+            Jag har fått information om att deltagandet i studien är frivilligt, att jag kan avbryta när jag vill utan att ange anledning samt välja att delta i alla eller enstaka delar av studien.
         `,
         confirm_description: 'När du har fattat ditt beslut, kryssa i rutan nedan.',
-        confirm_checkbox: 'Jag godkänner villkoren i informationsbrevet.',
+        confirm_checkbox: 'Jag samtycker till att delta i studien ”Bedömning av rörelsekvalitet via en mobilapplikation”',
         continue_to_survey: 'Fortsätt till frågeformulär' 
     }
 }
