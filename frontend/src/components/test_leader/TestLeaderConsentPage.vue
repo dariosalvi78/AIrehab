@@ -8,7 +8,12 @@
       </q-card-section>
       <q-card-section class="q-pt-none flex flex-center">
         <div class="text-body2" v-html="$t('common.consent.description')"></div>
-        <q-btn class="q-pt-lg" icon-right="open_in_new" :label="$t('common.consent.read_information')" @click="openConsentModal = !openConsentModal" no-caps flat dense />
+        <div class="q-mt-lg text-center" @click="openConsentModal = !openConsentModal">
+          <div class="text-body2 text-bold cursor-pointer">
+            {{ $t('common.consent.read_information') }}
+            <q-icon name="open_in_new" size="sm" />
+          </div>
+        </div>
       </q-card-section>
       <q-separator inset />
       <q-card-section>

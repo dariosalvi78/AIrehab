@@ -25,11 +25,12 @@ export default {
       this.$router.push('login')
     }
 
-    if (store.getItem('locale')) {
-      const newLocale = store.getItem('locale')
-      this.$i18n.locale = newLocale
-      nicers.updateLocale(newLocale)
+    const currentLocale = store.getItem('locale')
+    if (currentLocale) {
+      store.setItem('locale', currentLocale)
+      this.$i18n.locale = currentLocale
     }
+    nicers.updateLocale(this.$i18n.locale)
 
     axios.interceptors.response.use((response) => {
       return response

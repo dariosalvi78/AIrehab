@@ -273,7 +273,7 @@ export default {
 <style scoped>
 .patient-view-width {
   margin: 0 auto;
-  max-width: 400px;
+  max-width: 100%;
 }
 .patient-notes-area {
   background-color: #0000000a;
