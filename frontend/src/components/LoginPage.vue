@@ -130,8 +130,17 @@ export default {
       if (this.installPrompt) return this.installPrompt.prompt()
     }
   },
-  created () {
-    window.addEventListener('beforeinstallprompt', (e) => {
+  async created () {
+    let template = await import('../../manifest.json')
+    let content = JSON.stringify(template.default)
+    const blob = new Blob([content], { type: 'application/json' });
+    const manifestURL = URL.createObjectURL(blob);
+    document.querySelector('#manifest').setAttribute('href', manifestURL)
+
+    let element = document.createElement('link')
+    element.setAttribute('rel', 'manifest')
+    element.setAttribute('href', 'data:application/json;charset=utf-8,' + content)
+    window.addEventListener('beforeinstallprompt', async (e) => {
       e.preventDefault();
       this.installPrompt = e;
     })

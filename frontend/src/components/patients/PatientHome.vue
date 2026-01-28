@@ -5,7 +5,7 @@
         <q-avatar>
           <img src="/icons/favicon-maskable.ico">
         </q-avatar>
-        <q-toolbar-title>Patient</q-toolbar-title>
+        <q-toolbar-title>{{ $t('patient.participant') }}</q-toolbar-title>
         <q-chip v-show="authenticated" outline square size="md" class="q-mx-md text-white">
           {{patient.names}}
         </q-chip>
@@ -13,20 +13,26 @@
     </q-header>
     <q-page-container>
       <q-tab-panels v-model="panel" ref="panelForm" vertical>
-        <q-tab-panel name="main" class="q-px-none">
-          <q-card flat bordered class="q-my-lg q-ma-md">
+        <q-tab-panel name="main" class="q-px-none q-px-md">
+          <q-btn v-if="installPrompt" color="secondary" class="q-mx-md full-width" icon="add_to_home_screen" :label="$t('common.add_to_homescreen')"  no-caps @click="showInstallPrompt"/>
+          <q-card flat bordered class="q-my-lg">
             <q-card-section>
               <div class="text-h6">{{ $t('common.consent.header') }}</div>
             </q-card-section>
-            <q-card-section class="q-pt-none flex flex-center">
-              <q-btn class="q-pb-lg" icon-right="open_in_new" :label="$t('common.consent.read_information')" @click="openConsentModal = !openConsentModal" no-caps flat dense />
+            <q-card-section class="q-pt-none">
               <div class="text-body2" v-html="$t('common.consent.description')"></div>
+              <div class="q-mt-lg text-center" @click="openConsentModal = !openConsentModal">
+                  <div class="text-body2 text-bold cursor-pointer">
+                    {{ $t('common.consent.read_information') }}
+                    <q-icon name="open_in_new" size="sm" />
+                  </div>
+              </div>
             </q-card-section>
             <q-separator inset />
             <q-card-section class="q-pb-sm">
               <div class="text-body2">{{ $t('common.consent.confirm_description') }}</div>
             </q-card-section>
-            <q-card-actions vertical align="left" class="q-mx-none q-pa-none">
+            <q-card-actions vertical align="left" class="q-mx-none q-pa-none q-pb-sm">
               <q-checkbox
                 right-label
                 size="lg"
@@ -43,7 +49,7 @@
               />
             </q-card-actions>
           </q-card>
-          <q-card flat bordered class="q-my-lg q-ma-md">
+          <q-card flat bordered class="q-my-lg">
             <q-card-section>
               <div class="text-h6">{{ $t('exercises.name') }} {{ getNumOfExercises }}</div>
             </q-card-section>
@@ -107,7 +113,7 @@
               />
             </q-card-section>
           </q-card>
-          <q-card flat bordered class="q-my-lg q-ma-md">
+          <q-card flat bordered class="q-my-lg">
             <q-card-section>
               <div class="text-h6">{{ $t('patient.home.survey.title') }}</div>
             </q-card-section>
@@ -192,6 +198,7 @@ export default {
         sortOrder: 'DESC',
         maxPageNo: 1
       },
+      installPrompt: null
     }
   },
   async mounted () {
@@ -203,6 +210,7 @@ export default {
     if (this.patientID && this.secret) await this.setPatientActivation()
     this.participationStatus = await this.getPatientInfo()
     await this.getPatientExercises()
+    await this.setManifestFile()
   },
   methods: {
     async getPatientInfo() {
@@ -388,6 +396,7 @@ export default {
       const results = exercises
       for (const e in results) {
         let exercise = exercises[e]
+        exercise.poe = exercise?.endTimestamp ? exercises[e].poe : []
         exercise.type = this.$t(`exercises.form.types.${exercise.type}`)
         exercise.startTimestamp = nicers.formattedDayOfMonth(exercise.startTimestamp)
         exercise.endTimestamp = nicers.formattedDayOfMonth(exercise.endTimestamp)
@@ -416,12 +425,39 @@ export default {
     async openPatientHome () {
       await this.getPatientInfo() 
       return this.$refs.panelForm.goTo('main')
+    },
+    async showInstallPrompt () {
+      if (this.installPrompt) return this.installPrompt.prompt()
+    },
+    async setManifestFile () {
+      let manifest = null, template = await import('../../../manifest.json'),
+        patientURL = window.location.href
+      manifest = Object.assign(template.default, {
+        start_url: patientURL, scope: patientURL,
+        name: `${this.patient.names} - POE assessment`
+      })
+
+      let content = JSON.stringify(manifest)
+      const blob = new Blob([content], {type: 'application/json'});
+      const manifestURL = URL.createObjectURL(blob);
+      document.querySelector('#manifest').setAttribute('href', manifestURL)
+
+      let element = document.createElement('link')
+      element.setAttribute('rel', 'manifest')
+      element.setAttribute('href', 'data:application/json;charset=utf-8,' + content)
     }
   },
   computed: {
     getNumOfExercises () {
       return this.results && this.numOfExercises ? `· ${this.numOfExercises}` : ''
     }
+  },
+  created () {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.installPrompt = e;
+    })
+    window.addEventListener("appinstalled", () => this.installPrompt = null )
   }
 }
 </script>
