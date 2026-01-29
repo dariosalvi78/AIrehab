@@ -1,7 +1,7 @@
 {
   "short_name": "POE assessment",
   "name": "POE assessment",
-  "description": "POE AI based physiotherapy rehabilitation",
+  "description": "POE - Utvärdering av rörelsekvalitet med hjälp av AI",
   "icons": [
     {
       "src": "icons/favicon-maskable.ico",
@@ -34,6 +34,6 @@
   "scope": "/",
   "display": "standalone",
   "theme_color": "#1976D2",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#ffffff"
 }
