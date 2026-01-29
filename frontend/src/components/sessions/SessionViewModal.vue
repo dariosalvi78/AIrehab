@@ -70,9 +70,10 @@ export default {
   methods: {
     async getSessionData () {
       try {
-        let resp = await API.getSession(this.sessionID)
-        this.session = resp
-        this.endDate = this.formatDate(resp.endTimestamp)
+        const response = await API.getSession(this.sessionID)
+        if (response?.isTestPatient) return this.$router.push('/home')
+        this.session = response
+        this.endDate = this.formatDate(response.endTimestamp)
       } catch (err) {
         this.session = undefined  
         this.$q.notify({

@@ -8,14 +8,13 @@
         <q-card flat class="q-mx-md">
           <q-card-section v-show="!uploadedFile" class="column items-center q-pa-sm">
             <div class="text-body2 text-center q-my-md">{{ $t('exercises.record.title') }}</div>
-            <q-btn v-if="hasVideoDevice" class="q-mb-md q-pa-sm full-width" :label="$t('exercises.record.open_camera')" color="secondary" icon-right="camera" @click="openRecordingModal" />
+            <q-btn v-if="hasVideoDevice" class="q-mb-md q-pa-md full-width" push no-caps :label="$t('exercises.record.open_camera')" color="secondary" icon-right="camera" @click="openRecordingModal" />
             <div v-else class="flex column items-center full-width">
               <q-badge class="col q-mb-md" outline color="negative" :label="$t('exercises.record.no_device')" />
-              <q-btn class="col q-mb-md q-py-sm full-width" :label="$t('exercises.record.reconnect')" color="secondary" icon="refresh" @click="checkForVideoSupport" no-caps />
+              <q-btn class="col q-mb-md q-pa-md q-py-sm full-width" push :label="$t('exercises.record.reconnect')" color="secondary" icon="refresh" @click="checkForVideoSupport" no-caps />
             </div>
           </q-card-section>
-          <q-separator />
-          <q-card-section class="column items-center q-pa-sm">
+          <q-card-section v-if="showUploadPrompt" class="column items-center q-pa-sm">
             <div v-show="!uploadedFile" class="text-body2 text-center q-my-md">{{ $t('exercises.record.upload_desc') }}</div>
             <q-file class="q-mb-sm full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" color="secondary" :label="$t('exercises.record.upload')" 
               v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload"
@@ -24,13 +23,13 @@
                 <q-icon name="attach_file" />
               </template>
               <template v-if="uploadedFile" v-slot:append>
-                <q-icon name="cancel" @click.stop.prevent="uploadedFile = null" class="cursor-pointer" />
+                <q-icon name="cancel" @click.stop.prevent="clearUpload" class="cursor-pointer" />
               </template>
             </q-file>
             <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
             </form>
             <div class="video-container col" v-show="uploadedFile">
-              <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline>
+              <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline controlsList="nodownload">
                 <source src="" type="video/mp4">
                 Your browser does not support HTML5 video.
               </video>
@@ -39,20 +38,20 @@
               {{ $t('exercises.record.recorded') }}: {{formatModifiedDate}}<br/>
               {{ $t('exercises.record.size') }}: {{getUploadedFileSize}}
             </div>
-            <q-btn v-show="uploadedFile" class="q-my-md full-width" :label="$t('exercises.record.begin')" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
+            <q-btn v-show="uploadedFile" class="q-my-md q-pa-md full-width" push :label="$t('exercises.record.begin')" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
           </q-card-section>
         </q-card>
         <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal" maximized>
           <q-card class="full-width">
             <q-card-section class="q-pb-none flex justify-between">
               <div class="text-body1">{{ $t('exercises.record.dialog.title') }}</div>
-              <q-btn class="q-pa-none q-pb-sm" flat :label="$t('common.close')" v-close-popup />
+              <q-btn class="q-pa-none q-pb-sm" flat :label="$t('common.close')" v-close-popup  @click="stopRecording" />
             </q-card-section>
             <q-checkbox class="q-mx-md q-mb-md text-weight-light" dense v-model="saveVideoToDevice" :label="$t('exercises.record.dialog.save')" />
             <q-separator />
             <q-card-section class="flex flex-center column q-px-xl">
               <div class="video-container col text-center flex flex-center">
-                <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls>
+                <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls controlsList="nodownload">
                   <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
                 </video>
@@ -108,7 +107,7 @@
             <div v-if="uploadedFile == 'missing'" class="q-ma-md flex flex-center">
               <q-chip size="md" color="warning" icon="warning" text-color="black">{{ $t('exercises.results.recording_not_found') }}</q-chip>
             </div>
-            <video v-else ref="videoPreview" id="videoPreview" autoplay playsinline webkit-playsinline controls>
+            <video v-else ref="videoPreview" id="videoPreview" autoplay playsinline webkit-playsinline controls controlsList="nodownload">
               Your browser does not support HTML5 video.
             </video>
           </q-card>
@@ -198,7 +197,7 @@ export default {
 
       navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
         .then((stream) => {
-          if (!MediaRecorder.isTypeSupported(this.constraints.codec)) throw new Error('Browser does not support .mp4 web recording, upload video instead.')
+          if (!MediaRecorder.isTypeSupported(this.constraints.codec)) throw new Error('Browser does not support .mp4 web recording, use a different web browser.')
           this.$refs.videoOutput.srcObject = stream
           const mediaRecorder = new MediaRecorder(stream, { mimeType: this.constraints.codec, videoBitsPerSecond: this.constraints.bits  })
           this.mediaRecorder = mediaRecorder
@@ -258,7 +257,10 @@ export default {
     async stopRecording () {
       this.isRecording = false
       this.showPreview = true
-      this.mediaRecorder.stop()
+      if (this.mediaRecorder) {
+        this.mediaRecorder.stream.getTracks().forEach( track => track.stop() )
+        this.mediaRecorder.stop()
+      }
     },
     async startRecording () {
       this.isRecording = true
@@ -391,6 +393,10 @@ export default {
       this.openExerciseVideo = !this.openExerciseVideo
       await this.getVideoPathForExercise()
     },
+    clearUpload () {
+      this.uploadedFile = null
+      this.showPreview = !this.showPreview
+    },
     goToSession () {
       return this.$router.push('/home/sessions/' + this.sessionID)
     }
@@ -403,7 +409,8 @@ export default {
     getUploadedFileSize () {
       let formatFileSize = this.uploadedFile.size
       return (formatFileSize / Math.pow(1024, 2)).toFixed(1) + ' MB'
-    }
+    },
+    showUploadPrompt () { return process.env.DEV || (this.showPreview) }
   },
   unmounted () {
     this.isGettingPOEStatus = false
