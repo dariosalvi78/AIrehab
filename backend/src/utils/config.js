@@ -42,7 +42,8 @@ const config = {
     certs: {
         key_file: process.env.CERT_PRIVATE_KEY,
         chain_file: process.env.CERT_CHAIN
-    }
+    },
+    test: { prefix: 'test_' }
 }
 
 export default config

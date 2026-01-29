@@ -41,7 +41,7 @@ BEGIN
         startTimestamp datetime NOT NULL,
         endTimestamp datetime
     )
-    ALTER TABLE physiotherapy_session ADD CONSTRAINT physiotherapy_session_patient_id_fk FOREIGN KEY (patientId) REFERENCES patient (id);
+    ALTER TABLE physiotherapy_session ADD CONSTRAINT physiotherapy_session_patient_id_fk FOREIGN KEY (patientId) REFERENCES patient (id) ON DELETE CASCADE;
 END
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[exercise]') AND type in (N'U'))
@@ -55,7 +55,7 @@ BEGIN
         videoFile varchar(100),
         notes text
     )
-    ALTER TABLE exercise ADD CONSTRAINT exercise_physiotherapy_session_id_fk FOREIGN KEY (physiotherapySessionId) REFERENCES physiotherapy_session (id);
+    ALTER TABLE exercise ADD CONSTRAINT exercise_physiotherapy_session_id_fk FOREIGN KEY (physiotherapySessionId) REFERENCES physiotherapy_session (id) ON DELETE CASCADE;
 END
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[poe_evaluation]') AND type in (N'U'))
@@ -70,7 +70,7 @@ BEGIN
         scoreConfidence_2 DECIMAL(4,2),
         repetition int
     )
-    ALTER TABLE poe_evaluation ADD CONSTRAINT poe_evaluation_exercise_id_fk FOREIGN KEY (exerciseId) REFERENCES exercise (id);
+    ALTER TABLE poe_evaluation ADD CONSTRAINT poe_evaluation_exercise_id_fk FOREIGN KEY (exerciseId) REFERENCES exercise (id) ON DELETE CASCADE;
 END
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[survey_answer]') AND type in (N'U'))
