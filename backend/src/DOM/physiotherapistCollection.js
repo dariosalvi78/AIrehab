@@ -1,5 +1,6 @@
 import * as Types from '../datamodel/modeljdocs.mjs'
 import db from '../db/dbDriver.js'
+import config from '../utils/config.js'
 
 export default {
     /**
@@ -34,7 +35,8 @@ export default {
                     CAST(p.names AS NVARCHAR(100)) as names,  
                     p.id as patientID, 
                     p.createdTimestamp,
-                    CASE WHEN COUNT(s.id) >= 1 THEN 1 ELSE 0 END AS isPartOfSession
+                    CASE WHEN COUNT(s.id) >= 1 THEN 1 ELSE 0 END AS isPartOfSession,
+                    CASE WHEN CHARINDEX('${config.test.prefix}', CAST(p.names AS NVARCHAR(100))) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS isTestPatient
                 FROM [user] u
                     INNER JOIN [patient] p ON u.id = p.physiotherapistId
                     LEFT JOIN [physiotherapy_session] s ON p.id = s.patientId

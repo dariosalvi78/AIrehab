@@ -9,6 +9,7 @@ import { signPatientAccessToken, patient_cookie, verifyAuthToken, session_cookie
 import mailer from '../utils/mailer/mailer.js'
 import bcrypt from 'bcrypt'
 import scheduler from '../utils/scheduler.js'
+import config from '../utils/config.js'
 
 export default {
 
@@ -31,7 +32,7 @@ export default {
                 
                 // Clear test suite
                 for (const p_test in results[0]) {
-                    if (results[0][p_test].names == `test_${assignedTo.id}`) {
+                    if (results[0][p_test].isTestPatient) {
                         testPatientID = results[0][p_test].patientID
                         const session = await sessions.getOneSessionByPatientID(testPatientID)
                         const exercise = await exercises.getExercisesInSessionByEmail(session.id, assignedTo.email)
@@ -39,14 +40,16 @@ export default {
                         for (const e of exercise) {
                             if (!e) continue
                             if (e.videoFile) await files.deleteVideo(session.id, e.id, e.videoFile)
-                            await poe.deletePOEForExerciseByID(e.id)
-                            await exercises.deleteOneExercise(e.id)
                         }
 
                         await files.closeDirectory(session.id)
-                        await sessions.deleteOneSession(session.id)
                         await physiotherapist.deleteOnePatient(assignedTo.id, testPatientID)
-                        logger.info({ patientID: testPatientID }, 'deleted temporary patient and associated data: ')
+                        logger.info({ 
+                            patientID: testPatientID,
+                            created: exercise[0].startTimestamp,
+                            exerciseType: exercise[0].type,
+                            videoFile: exercise[0].videoFile
+                        }, 'deleted temporary patient and associated data:')
                     }
                 }
                 results = await physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
@@ -128,7 +131,7 @@ export default {
                 if (!results) return res.status(404).send('No physiotherapist with given email')
             }
 
-            if (patient.isTestPatient && results) patient.fullName = `test_${results.id}`
+            if (patient.isTestPatient && results) patient.fullName = `${config.test.prefix}${results.id}`
             const addedPatient = await physiotherapist.createPatient(patient, results.id)
             let patientData = { patient: addedPatient }
 

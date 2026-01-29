@@ -1,5 +1,6 @@
 import * as Types from '../datamodel/modeljdocs.mjs'
 import db from '../db/dbDriver.js'
+import config from '../utils/config.js'
 
 export default {
     /**
@@ -48,10 +49,10 @@ export default {
             WHILE @maxPage >= @pageNo
             BEGIN
                 SELECT s.id,
-                    s.startTimestamp, 
-                    s.endTimestamp, 
-                    CAST(p.names AS NVARCHAR(100)) names, 
-                    COUNT(e.id) AS numOfExercises 
+                    s.startTimestamp,
+                    s.endTimestamp,
+                    CAST(p.names AS NVARCHAR(100)) names,
+                    COUNT(e.id) AS numOfExercises
                 FROM [physiotherapy_session] s
                     INNER JOIN [patient] p ON p.id = s.patientId
                     INNER JOIN [user] u ON p.physiotherapistId = u.id
@@ -80,12 +81,14 @@ export default {
     */
     getSessionByID: async function (sessionID, therapistEmail) {
         const response = await db.query(`
-            SELECT s.*, p.names AS patientName, p.activated FROM [physiotherapy_session] s
-            INNER JOIN [patient] p ON p.id = s.patientId
-            INNER JOIN [user] u ON p.physiotherapistId = u.id
+            SELECT s.*, p.names AS patientName, p.activated,
+                CASE WHEN CHARINDEX('${config.test.prefix}', p.names) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS isTestPatient
+            FROM [physiotherapy_session] s
+                INNER JOIN [patient] p ON p.id = s.patientId
+                INNER JOIN [user] u ON p.physiotherapistId = u.id
             WHERE u.email = '${therapistEmail}'
-            AND s.id = '${sessionID}'
-            ORDER BY s.startTimestamp DESC;
+                AND s.id = '${sessionID}'
+                ORDER BY s.startTimestamp DESC;
         `)
         return response.recordset[0]
     },
