@@ -2,13 +2,14 @@
 export default {
     title: 'Questionnaire {surveyName}',
     description: 'As part of this study, you will be asked to answer {numOfQuestions} open-ended questions regarding your use of the POE app.',
-    complete_form_description: 'Once you have answered all the questions in the survey, please press the button below to submit your answers.',
+    complete_form_description: 'Once you have answered the questions in the survey, please press the button below to submit your answers.',
+    send_survey: 'Send survey',
     notifications: {
         form_error: 'Please fill out the entire form',
         upload_completed: 'Questionnaire sent. Thank you for your participation'
     },
     additional_info: { 
-        title: 'Information about POE assessment',
+        title: 'See information about POE assessment',
         content: `
             <b>Postural orientering</b> handlar om kroppens förmåga att hålla olika delar - som höft, knä och bål - i rätt läge i förhållande till varandra när man rör sig. Det är ett sätt att bedöma rörelsekvalitet. 
             <br><br>
@@ -56,7 +57,8 @@ export default {
             { code: 'A5', q: 'I want my colleagues to have access to and be able to review the data.' },
             { code: 'BI1', q: 'I intend to use the POE app throughout the study.' },
             { code: 'UB1', q: 'How would you describe your use of the POE app?' },
-            { code: 'UB2', q: 'What difficulties (if any) did you experience when using the POE app?' }
+            { code: 'UB2', q: 'What difficulties (if any) did you experience when using the POE app?' },
+            { code: 'interview', q: '(Optional) I am interested in participating in an interview or workshop on the usability of the mobile application.' }
         ]
     },
     patient: {

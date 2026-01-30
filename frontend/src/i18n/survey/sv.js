@@ -2,13 +2,14 @@
 export default {
     title: 'Frågeformulär {surveyName}',
     description: 'Som en del av denna studie så kommer du att få svara på {numOfQuestions} öppna frågor angående användning av POE-appen.',
-    complete_form_description: 'När du har svarat på alla frågor i enkäten, vänligen tryck på knappen nedan för att skicka in dina svar.',
+    complete_form_description: 'När du har svarat på frågorna i enkäten, vänligen tryck på knappen nedan för att skicka in dina svar.',
+    send_survey: 'Skicka enkät',
     notifications: {
         form_error: 'Vänligen fyll i hela formuläret',
         upload_completed: 'Frågeformulär har skickats. Tack för din medverkan'
     },
     additional_info: { 
-        title: 'Information om POE-bedömning',
+        title: 'Se information om POE-bedömning',
         content: `
             <b>Postural orientering</b> handlar om kroppens förmåga att hålla olika delar - som höft, knä och bål - i rätt läge i förhållande till varandra när man rör sig. Det är ett sätt att bedöma rörelsekvalitet. 
             <br><br>
@@ -56,8 +57,9 @@ export default {
             { code: 'A5', q: 'Jag vill att mina kollegor ska ha tillgång till och kunna granska data.' },
             { code: 'BI1', q: 'Jag har för avsikt att använda POE appen under hela studiens gång.' },
             { code: 'UB1', q: 'Hur skulle du beskriva din användning av POE appen?' },
-            { code: 'UB2', q: 'Vilka svårigheter (om några) upplevde du när du använde POE appen?' }
-        ]
+            { code: 'UB2', q: 'Vilka svårigheter (om några) upplevde du när du använde POE appen?' },
+            { code: 'interview', q: '(Valfri) Jag är intresserad av att delta i en intervju eller workshop om användningen av mobilapplikationen.' }
+        ],
     },
     patient: {
         T1: [
