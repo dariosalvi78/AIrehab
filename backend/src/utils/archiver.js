@@ -1,6 +1,7 @@
 import archiver from 'archiver'
 import logger from './logger.js'
 import surveysCollection from '../DOM/surveysCollection.js'
+import usersCollection from '../DOM/usersCollection.js';
 import { json2csv as csv } from 'json-2-csv';
 
 export default {
@@ -14,7 +15,8 @@ export default {
         let archive = undefined
         return new Promise(async (resolve, reject) => {
             try {
-                const outputFilename = new Date().toISOString().split('T')[0] + '_enkäter.zip'
+                const [currentDate, time] = new Date().toLocaleString().split(' ')
+                const outputFilename = currentDate + '_enkäter.zip'
 
                 res.setHeaders(new Headers({
                     'Content-Type': 'application/zip',
@@ -23,7 +25,12 @@ export default {
         
                 res.on('finish', () => {
                     if (archive.destroyed && archive.pointer() <= 0) return resolve()
-                    logger.info({ file: outputFilename, bytes: archive.pointer() }, 'downloaded surveys:')
+                    let kb = (archive.pointer() / Math.pow(1024, 1)).toFixed(2)
+                    logger.info({ 
+                        file: outputFilename, 
+                        size: `${kb} kB`, 
+                        download_at: `${currentDate} ${time}`},
+                    'downloaded surveys:')
                     return resolve(res)
                 }).on('error', (err) => {
                     return reject(new Error('response stream error: ' + err.message))
@@ -56,15 +63,22 @@ export default {
                     return
                 }
 
-                let surveysFormatted = { användare: [], patient: [] }
-                surveys.forEach((survey, i) => {
+                let surveysFormatted = { användare: [], patient: [] }, interviews = []
+                for (const [i, survey] of surveys.entries()) {
                     const userType = !survey.patientId ? 'användare' : 'patient'
                     surveysFormatted[userType].push({
                         ID: 'Enkät_' + (i + 1),
                         surveyName: survey.surveyName,
                         ...JSON.parse(survey.content)
                     })
-                })
+                    let userInterview = JSON.parse(survey.content)['13_interview'] ?? false
+                    if (userType == 'användare' && userInterview) {
+                        try {
+                            let user = await usersCollection.getOneUser(survey.physiotherapistId)
+                            interviews.push(user.email)
+                        } catch (err) { return reject(err) }
+                    }
+                }
 
                 for (const i in Object.keys(surveysFormatted)) {
                     const userType = Object.keys(surveysFormatted)[i],
@@ -73,6 +87,10 @@ export default {
                     archive.append(surveyToCSV, { name: `${userType}/` + 'enkäter.csv' })
                     archive.append(JSON.stringify(surveysFormatted[userType] || [], null, 4), { name: `${userType}/` + 'enkäter.json' })
                 }
+                let interviewsToString = `Hämtad: ${`${currentDate} ${time}`}\nAntal: ${interviews.length}\n\n`
+                interviewsToString += interviews.length ? `E-postadresser:\n${interviews.join('\n')}` : 'Inga resultat'
+                archive.append(interviewsToString, { name: 'intresserade_workshop.txt' })
+
                 await archive.finalize()
 
             } catch (err) {
