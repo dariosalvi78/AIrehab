@@ -53,13 +53,14 @@ export default {
    * @param {String} recipient 
    * @param {String} password 
    */
-  sendPhysiotherapistEmailCreated: async (recipient, password) => {
-    const template = await renderFile(import.meta.dirname + '/views/welcome.ejs', { recipient, password, domain })
+  sendPhysiotherapistEmailCreated: async (recipient, password, resetToken) => {
+    const template = await renderFile(import.meta.dirname + '/views/welcome.ejs', { recipient, password, domain, resetToken })
     const options = {
       from: config.mailer.from_address,
       to: recipient,
-      subject: 'Account created • POE Assessment',
-      html: template
+      subject: 'Nytt konto • Välkommen till POE Assessment',
+      html: template,
+      attachDataUrls: true
     }
     await sendEmail(options)
   },
@@ -68,8 +69,9 @@ export default {
     const options = {
       from: config.mailer.from_address,
       to: recipient,
-      subject: 'Password reset • POE Assessment',
-      html: template
+      subject: 'Återställ lösenord • POE Assessment',
+      html: template,
+      attachDataUrls: true
     }
     await sendEmail(options)
   },
@@ -78,8 +80,9 @@ export default {
     const options = {
       from: config.mailer.from_address,
       to: recipient,
-      subject: 'Patient consent • POE Assessment',
-      html: template
+      subject: 'Din personliga sida • POE Assessment',
+      html: template,
+      attachDataUrls: true
     }
     await sendEmail(options)
   },
@@ -88,8 +91,9 @@ export default {
     const options = {
       from: config.mailer.from_address,
       to: recipient,
-      subject: `POE results ${meta.date} • POE Assessment`,
-      html: template
+      subject: `Övningsresultat ${meta.date} • POE Assessment`,
+      html: template,
+      attachDataUrls: true
     }
     await sendEmail(options)
   },
@@ -98,8 +102,9 @@ export default {
     const options = {
       from: config.mailer.from_address,
       to: recipient,
-      subject: 'POE survey • POE Assessment',
-      html: template
+      subject: 'Påminnelse om enkät • POE Assessment',
+      html: template,
+      attachDataUrls: true
     }
     await sendEmail(options)
   },
