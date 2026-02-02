@@ -1,7 +1,7 @@
 <template>
    <q-layout>
     <q-page-container>
-      <q-card-actions class="flex flex-center" v-if="showNewUserPrompt">      
+      <q-card-actions v-show="!isLoadingPatients" class="flex flex-center" v-if="showNewUserPrompt">      
         <q-btn class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
           <q-icon left name="group_add"/>
           <div>{{ $t('patient.add') }}</div>
@@ -13,8 +13,8 @@
           @addNewPatient="addNewUser"
         />
       </q-card-actions>
-      <q-tab-panels v-show="users.length >= 1 && pagination.maxPageNo >= 1" v-model="panel" ref="panelForm" vertical class="shadow-2 rounded-borders">
-        <q-tab-panel id="panel" name="main" class="q-px-none">
+      <q-tab-panels v-model="panel" ref="panelForm" vertical class="shadow-2 rounded-borders">
+        <q-tab-panel id="panel" name="main" class="q-px-none" v-show="users.length >= 1 && pagination.maxPageNo >= 1" >
           <patients-list
             @openView="openPatientView"
             @handleSortOrder="(sort) => handleSortOrder(sort)"
@@ -37,7 +37,7 @@
             gutter="sm"
           />
         </q-tab-panel>
-        <q-tab-panel name="view" class="q-px-none">
+        <q-tab-panel name="view" class="q-px-none" v-show="users.length >= 1 && pagination.maxPageNo >= 1">
           <transition appear enter-active-class="animated fadeIn">
             <patient-view-modal 
               :selectedPatient="selectedPatient" 
@@ -59,7 +59,7 @@
           size="3em"
         />
       </div>
-      <div v-else-if="pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
+      <div v-else-if="this.panel !== 'survey' && pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
         <q-chip outline :ripple="false" icon="people" color="primary" text-color="white" >{{ $t('patient.not_found') }}</q-chip>
       </div>
       <div v-if="panel == 'main'">
@@ -77,6 +77,7 @@ import PatientsList from '../patients/PatientsList.vue'
 import PatientViewModal from '../patients/PatientViewModal.vue'
 import SessionsList from '../sessions/SessionsList.vue'
 import SurveyForm from '../SurveyForm.vue'
+import h from '../../utils/nicers.js'
 
 export default {
   name: 'TestLeaderHome',
@@ -171,10 +172,19 @@ export default {
         // We need user to consent in order to do survey
         if (!activated && newSurveyAvailable) return this.$router.push('home/consent')
         this.incomingSurvey = newSurveyAvailable
-        return this.$refs.panelForm.goTo('survey')
-      } catch (err) {
-        return
-      }
+
+        let q = new URLSearchParams(window.location.search)
+        if (q?.get('redirect') === 'survey') return this.$refs.panelForm.goTo('survey')
+
+        this.$q.dialog({
+          color: 'primary', 
+          title: this.$t('common.new_survey.header'),
+          message: this.$t('common.new_survey.description', { date: this.incomingSurvey?.surveyDate ? h.formattedDateFromNow(this.incomingSurvey.surveyDate) : h.formattedDate(new Date()) }),
+          ok: { color: 'primary', label:this.$t('common.new_survey.action'), noCaps: true, push: true, size: 'lg', style: 'width: 100%;' },
+          persistent: true,
+          html: true,
+        }).onOk(() => { return this.$refs.panelForm.goTo('survey') })
+      } catch (err) { return }
     },
     async openPatientView (selectedUser) {
       let resp = await API.getPatient(selectedUser.patientID)
@@ -184,6 +194,8 @@ export default {
     async openHomePage () {
       await this.getPatients()
       this.$refs.panelForm.goTo('main')
+      this.incomingSurvey = undefined
+      window.scrollTo({ top: 0 })
     },
     resetForm () {
       this.newUserPrompt = false

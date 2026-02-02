@@ -79,7 +79,8 @@ export default {
             position: 'top',
             message: 'Updated consent status',
           })
-          return this.$router.push('/home')
+          let q = this.user?.newSurveyAvailable ? '?redirect=survey' : ''
+          return this.$router.push(`/home${q}`)
         }
       } catch (err) {
         return this.$q.notify({
