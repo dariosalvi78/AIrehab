@@ -1,12 +1,15 @@
-import { Notify } from 'quasar'
+import { date, Notify } from 'quasar'
+const { formatDate } = date
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/sv.js'
 import 'dayjs/locale/en.js'
 
 dayjs.extend(utc)
 dayjs.extend(localizedFormat)
+dayjs.extend(relativeTime)
 const dateFormatter = dayjs
 
 export default {
@@ -31,6 +34,16 @@ export default {
     formattedDayOfMonth (date) {
         if (!date) return
         return dateFormatter.utc(date).format('D MMM LT')
+    },
+
+    
+    /** 
+     * @param {Date} date
+     * @returns Localized date from now
+    */
+    formattedDateFromNow (date) {
+        if (!date) return
+        return dateFormatter.utc(date).fromNow()
     },
 
     /**
