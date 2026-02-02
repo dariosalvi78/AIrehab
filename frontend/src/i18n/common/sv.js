@@ -49,5 +49,10 @@ export default {
         confirm_description: 'När du har fattat ditt beslut, kryssa i rutan nedan.',
         confirm_checkbox: 'Jag samtycker till att delta i studien ”Bedömning av rörelsekvalitet via en mobilapplikation”',
         continue_to_survey: 'Fortsätt till frågeformulär' 
+    },
+    new_survey: {
+        header: 'En ny enkät är tillgänglig',
+        description: 'Som en del av denna studie så kommer du att få svara på ett par enkäter. Det finns en ny enkät som har blivit tillgänglig {date}.<br><br>Efter att du har skickat in dina svar, så kan du fortsätta att använda POE appen.',
+        action: 'Gå till senaste enkäten'
     }
 }
