@@ -124,7 +124,8 @@ export default {
         }
 
         try {
-            await mailer.sendPhysiotherapistEmailCreated(body.email, body.password)
+            const reset_token = await signResetPwdToken(body.email)
+            await mailer.sendPhysiotherapistEmailCreated(body.email, body.password, reset_token)
             let hash = bcrypt.hashSync(body.password, 8)
             const user = await users.createUser(body.email, hash, body.role)
             logger.info({ data: user }, 'new user created: ')
@@ -241,9 +242,10 @@ export default {
             const response = {
                 email: user.email,
                 lastLoginTimestamp: user.lastLoginTimestamp,
-                activated: user.activated
+                activated: user.activated,
+                role: user.role
             }
-            response.newSurveyAvailable = await scheduler.isSurveyAvailable(user.id, user.role)
+            if (user?.role !== 'admin') response.newSurveyAvailable = await scheduler.isSurveyAvailable(user.id, user.role)
             return res.json(response)
         } catch (err) {
             logger.error({ error: err }, 'error getting info')

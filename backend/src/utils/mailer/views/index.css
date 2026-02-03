@@ -9,21 +9,42 @@ body {
 }
 
 .container .email-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
+    border: 0;
+    font: inherit;
+    font-size: 100%;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.email-content .main-title {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 20px;
+    box-sizing: border-box;
+    position: relative;
+    align-self: stretch;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 28px;
+    width: 100%;
 }
 
 .container .email-logo {
-    position: relative;
-    display: block;
-    right: 8px;
     height: 120px;
-    width: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
     aspect-ratio: initial;
+    box-sizing: border-box;
+    text-align: left;
+    display: block;
+    width: auto;
     object-fit: contain;
-    align-self: flex-start;
 }
 
 table {
@@ -42,6 +63,7 @@ body {
 }
 
 .email-wrapper {
+    background-color: #8080800d;
     width: 100%;
 }
 
@@ -49,7 +71,6 @@ body {
     margin: 0 auto !important;
     max-width: 600px;
     padding: 0;
-    padding-top: 24px;
     width: 600px;
     height: 500px;
 }
@@ -59,30 +80,32 @@ body {
     display: block;
     margin: 0 auto;
     max-width: 600px;
-    padding: 0;
+    padding: 0px 12px 0px 12px;
 }
 
 .main {
     background: #ffffff;
     width: 100%;
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     border-radius: 8px;
 }
 
-.wrapper {
-    display: flex;
-    flex-direction: column;
+.email-body {
+    margin: 0;
+    padding: 0px 24px 0px 24px;
+    border: 0;
+    font: inherit;
+    font-size: 100%;
+    display: block;
     box-sizing: border-box;
-    padding: 24px;
-    gap: 24px;
+    width: 100%;
 }
 
-.btn {
+.cta-btn {
     box-sizing: border-box;
     min-width: 100% !important;
 }
 
-.btn a {
+.cta-btn a {
     background-color: #26A69A;
     border-radius: 4px;
     box-sizing: border-box;
@@ -94,8 +117,15 @@ body {
     margin: 0;
     padding: 12px 24px;
     text-decoration: none;
-    text-transform: capitalize;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
     width: 100%;
     text-align: center;
+}
+
+.line {
+    margin: 14px 0px 32px 0px;
+    height: 2px;
+    width: 100%;
+    display: block;
+    background-color: #26A69A;
 }
