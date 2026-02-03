@@ -80,7 +80,13 @@ export default {
         no_injuries: 'Patient has no injuries',
         injured_side: 'Side of the body that is injured',
         injured_part: 'Injured body part',
-        injured_part_hint: 'Part of the body that is injured'
+        injured_part_hint: 'Part of the body that is injured',
+        admin: {
+            assigned_to: "Assigned to: {email}",
+            created: "Created: {created}",
+            email: 'Test leader email',
+            email_hint: 'The user who is assigned to the patient'
+        }
     },
     injuries: {
         left: 'Left',

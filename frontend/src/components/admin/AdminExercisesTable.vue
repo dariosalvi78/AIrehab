@@ -2,7 +2,7 @@
   <div>
     <q-table 
       class="q-ma-lg" 
-      title="Exercises"
+      :title="$t('admin.table.exercise.header')"
       :rows="rows"
       :columns="columns"
       row-key="patientName"
@@ -31,8 +31,8 @@
                   <q-avatar icon="book" size="lg"/>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Exercise</q-item-label>
-                  <q-item-label caption>Read notes</q-item-label>
+                  <q-item-label>{{ $t('admin.table.exercise.actions.read.header') }}</q-item-label>
+                  <q-item-label caption>{{ $t('admin.table.exercise.actions.read.caption') }}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item clickable v-close-popup @click="onRowClick('delete', props.row)">
@@ -40,8 +40,8 @@
                   <q-avatar icon="close" size="lg"/>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Delete</q-item-label>
-                  <q-item-label caption>Permanently delete {{props.row.type}}</q-item-label>
+                  <q-item-label>{{ $t('admin.table.exercise.actions.delete.header') }}</q-item-label>
+                  <q-item-label caption>{{ $t('admin.table.exercise.actions.delete.caption', { type: props.row.type }) }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-btn-dropdown>
@@ -64,13 +64,13 @@
     <q-dialog v-model="openExerciseInfoPrompt">
       <q-card class="q-ma-md" id="exerciseInfoDialog">
         <q-card-section>
-          <div class="text-body1">Exercise</div>
+          <div class="text-body1">{{ $t('admin.table.exercise.actions.read.header') }}</div>
           <div class="text-body2">
-            <div><b>Type of exercise:</b> {{selectedExercise.type}}</div>
+            <div><b>{{ $t('admin.table.exercise.columns.type') }}:</b> {{selectedExercise.type}}</div>
             <div style="margin:3px 0 0 -2px;">
               <q-icon style="bottom:2px;" size="sm" name="schedule" />
               {{ selectedExercise.startTimestamp }}
-              - {{ selectedExercise.endTimestamp ? '' + selectedExercise.endTimestamp : 'Ongoing exercise' }}
+              - {{ selectedExercise.endTimestamp ? '' + selectedExercise.endTimestamp : $t('exercises.ongoing') }}
             </div>
             <q-separator class="q-my-md" />
             <div style="white-space:break-spaces;">
@@ -81,25 +81,29 @@
             <q-separator class="q-mt-md" />
           </div>
         </q-card-section>
-        <q-card-actions align="center">
-          <q-btn flat label="Close" v-close-popup />
+        <q-card-actions align="center" class="q-pt-none">
+          <q-btn flat :label="$t('common.close')" no-caps v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="openExerciseDeletePrompt">
       <q-card class="q-pl-mx" style="min-width: 350px">
         <q-card-section>
-          <div class="text-body1">Delete exercise - {{selectedExercise.type}}</div>
-          <div class="text-body2">
-            <div><b>- Test leader:</b> {{selectedExercise.assignedTo}}</div>
-            <div><b>- Patient:</b> {{selectedExercise.patientName}}</div>
-            <div><b>- Date:</b> {{`${selectedExercise.startTimestamp} -  ${selectedExercise.endTimestamp ? selectedExercise.endTimestamp : 'Ongoing'}`}}</div>
-            <div><b>- Video:</b> {{selectedExercise.videoFile ? 'Uploaded' : 'No video uploaded'}}</div>
+          <div class="text-body1">{{ $t('admin.table.exercise.actions.delete.header', { type: selectedExercise.type }) }}</div>
+          <div class="text-body2" v-html="$t('admin.table.exercise.actions.delete.body', { 
+              type: selectedExercise.type,
+              assigned_to: selectedExercise.assignedTo,
+              name: selectedExercise.patientName,
+              created: selectedExercise.startTimestamp,
+              end: selectedExercise.endTimestamp ? selectedExercise.endTimestamp : $t('exercises.ongoing'),
+              videoFile: $t('admin.video.uploaded', selectedExercise.videoFile ? 0 : 1)
+            },
+          )">
           </div>
         </q-card-section>
         <q-card-actions align="center">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn label="Delete" type="submit" color="negative" v-close-popup class="q-ml-sm" @click="closeExercise"/>
+          <q-btn flat :label="$t('common.cancel')" no-caps v-close-popup />
+          <q-btn :label="$t('common.delete')" type="submit" color="negative" no-caps v-close-popup class="q-ml-sm" @click="closeExercise"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -115,7 +119,6 @@
 
 <script>
 import API from '../../API.js'
-import exerciseEnums from '../../utils/types/exerciseTypesEnum.js'
 import nicers from '../../utils/nicers.js'
 
 export default {
@@ -125,10 +128,10 @@ export default {
   data () {
     return {
       columns: [
-        { name: 'patientName', align:'left', label: 'Patient', field: 'patientName', sortable: true, required: true },
-        { name: 'assignedTo', align:'left', label: 'Test leader', field: 'assignedTo', sortable: true, required: true },
-        { name: 'type', align:'left' , label: 'Type', field: 'align', sortable: true },
-        { name: 'startTimestamp', align:'left' , label: 'Start', field: 'startTimestamp', sortable: true }
+        { name: 'patientName', align:'left', label: this.$t('admin.table.exercise.columns.patient'), field: 'patientName', sortable: true, required: true },
+        { name: 'assignedTo', align:'left', label: this.$t('admin.table.exercise.columns.assigned_to'), field: 'assignedTo', sortable: true, required: true },
+        { name: 'type', align:'left' , label: this.$t('admin.table.exercise.columns.type'), field: 'align', sortable: true },
+        { name: 'startTimestamp', align:'left' , label: this.$t('admin.table.exercise.columns.created'), field: 'startTimestamp', sortable: true }
       ],
       rows: [],
       isLoadingExercises: true,
@@ -145,7 +148,7 @@ export default {
       let exercises = newExercises
 
       exercises.map((exercise) => {
-        exercise["type"] = !exercise["type"] ? 'Not Specified' : exerciseEnums.typeToAsc(exercise["type"]) 
+        exercise["type"] = !exercise["type"] ? 'Not Specified' : this.$t(`exercises.form.types.${exercise["type"]}`) 
         exercise["startTimestamp"] = nicers.formattedDayOfMonth(exercise["startTimestamp"])
         exercise["endTimestamp"] = nicers.formattedDayOfMonth(exercise["endTimestamp"])
       })

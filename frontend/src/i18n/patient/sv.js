@@ -80,7 +80,13 @@ export default {
         no_injuries: 'Patient har inga skador',
         injured_side: 'Sidan av kroppen som är skadad',
         injured_part: 'Skadad kroppsdel',
-        injured_part_hint: 'Den skadade kroppsdelen'
+        injured_part_hint: 'Den skadade kroppsdelen',
+        admin: {
+            assigned_to: "Tilldelad: {email}",
+            created: "Skapad: {created}",
+            email: 'Test leader e-postadress',
+            email_hint: 'Personen som blir tilldelad patienten'
+        }
     },
     injuries: {
         left: 'Vänster',

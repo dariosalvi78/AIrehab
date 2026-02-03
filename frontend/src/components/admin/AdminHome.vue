@@ -5,17 +5,17 @@
         <q-btn padding="md" no-caps color="secondary" 
           @click="() => { newUserPrompt = !newUserPrompt }">
           <q-icon left name="person" />
-          <div>Add new Test leader</div>
+          <div>{{ $t('admin.actions.new_user') }}</div>
         </q-btn>
         <q-btn padding="md" no-caps color="accent"
           @click="() => { newPatientPrompt = !newPatientPrompt }">
           <q-icon left name="group_add" />
-          <div>Add new Patient</div>
+          <div>{{ $t('admin.actions.new_patient') }}</div>
         </q-btn>
         <q-btn padding="md" no-caps color="grey"
           @click="downloadLatestSurveyData">
           <q-icon left name="download" />
-          <div>Download survey data</div>
+          <div>{{ $t('admin.actions.download_data') }}</div>
         </q-btn>
       </q-btn-group>
     </div>
@@ -30,7 +30,7 @@
 <script>
 import nicers from 'src/utils/nicers.js'
 import API from '../../API.js'
-import NewUserForm from '../NewUserForm.vue'
+import NewUserForm from './NewUserForm.vue'
 import PatientEditForm from '../patients/PatientEditForm.vue'
 import AdminExercisesTable from './AdminExercisesTable.vue'
 import AdminSessionsTable from './AdminSessionsTable.vue'

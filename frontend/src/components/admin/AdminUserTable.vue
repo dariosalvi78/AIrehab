@@ -2,15 +2,15 @@
   <div>
      <div v-if="!isLoadingUsers" class="q-pl-lg fit row wrap justify-left">
       <q-chip :ripple="false" outline size="md" class="col-auto" icon="person">
-        Test leaders: {{this.users.therapists.length}}
+        {{ $t('admin.table.user.test_leaders') }}: {{this.users.therapists.length}}
       </q-chip>
        <q-chip :ripple="false" outline size="md" class="col-auto" icon="group">
-        Patients: {{this.users.patients.length}}
+        {{ $t('admin.table.user.patients') }}: {{this.users.patients.length}}
       </q-chip>
     </div>
     <q-table 
       class="q-ma-lg" 
-      title="Users"
+      :title="$t('admin.table.user.header')"
       :rows="rows"
       :columns="columns"
       row-key="name"
@@ -39,8 +39,8 @@
                 <q-avatar icon="person_add" size="lg"/>
               </q-item-section>
               <q-item-section>
-                <q-item-label>Add</q-item-label>
-                <q-item-label caption>Assign patient to test leader</q-item-label>
+                <q-item-label>{{ $t('admin.table.user.actions.add.header') }}</q-item-label>
+                <q-item-label caption>{{ $t('admin.table.user.actions.add.caption') }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item clickable v-close-popup @click="onRowClick('delete', props.row)">
@@ -48,8 +48,8 @@
                 <q-avatar icon="person_remove" size="lg"/>
               </q-item-section>
               <q-item-section>
-                <q-item-label>Delete</q-item-label>
-                <q-item-label caption>Permanently delete {{props.row.email}}</q-item-label>
+                <q-item-label>{{ $t('admin.table.user.actions.delete.header') }}</q-item-label>
+                <q-item-label caption>{{ $t('admin.table.user.actions.delete.caption', { email: props.row.email }) }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item v-show="props.row.role == 'physiotherapist'" clickable v-close-popup @click="onRowClick('mail', props.row)">
@@ -57,8 +57,8 @@
                 <q-avatar icon="mail" size="lg"/>
               </q-item-section>
               <q-item-section>
-                <q-item-label>Email</q-item-label>
-                <q-item-label caption>Send email to test leader</q-item-label>
+                <q-item-label>{{ $t('admin.table.user.actions.email.header') }}</q-item-label>
+                <q-item-label caption>{{ $t('admin.table.user.actions.email.caption') }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item v-show="props.row.role == 'patient'" clickable v-close-popup @click="onRowClick('edit', props.row)">
@@ -66,8 +66,8 @@
                 <q-avatar icon="edit" size="lg"/>
               </q-item-section>
               <q-item-section>
-                <q-item-label>Edit</q-item-label>
-                <q-item-label caption>Change information for {{props.row.email}}</q-item-label>
+                <q-item-label>{{ $t('admin.table.user.actions.edit.header') }}</q-item-label>
+                <q-item-label caption>{{ $t('admin.table.user.actions.edit.caption', { name: props.row.email }) }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item v-show="props.row.role == 'patient'" clickable v-close-popup @click="onRowClick('copy', props.row)">
@@ -75,8 +75,8 @@
                 <q-avatar icon="content_copy" size="lg"/>
               </q-item-section>
               <q-item-section>
-                <q-item-label>Verification</q-item-label>
-                <q-item-label caption>Copy verification link to clipboard</q-item-label>
+                <q-item-label>{{ $t('admin.table.user.actions.copy.header') }}</q-item-label>
+                <q-item-label caption>{{ $t('admin.table.user.actions.copy.caption') }}</q-item-label>
               </q-item-section>
             </q-item>
           </q-btn-dropdown>
@@ -99,46 +99,47 @@
     <q-dialog v-model="openUserDeletePrompt">
       <q-card class="q-pl-mx" style="min-width: 350px">
         <q-card-section>
-          <div class="text-body1">Delete {{selectedUser.role}}</div>
-          <div class="text-body2">
-            - {{selectedUser.email}}
+          <div class="text-body1">{{ $t('admin.table.user.actions.delete.header') }}</div>
+          <div class="text-body2" v-html="$t('admin.table.user.actions.delete.body', {
+            email: selectedUser.email, role: selectedUser.role, created: selectedUser.createdTimestamp
+          })">
           </div>
         </q-card-section>
         <q-card-actions align="center">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn label="Delete" type="submit" color="negative" v-close-popup class="q-ml-sm" @click="deleteUser()"/>
+          <q-btn flat :label="$t('common.cancel')" no-caps v-close-popup />
+          <q-btn :label="$t('common.delete')" type="submit" color="negative" no-caps v-close-popup class="q-ml-sm" @click="deleteUser()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="openUserMailPrompt">
-      <q-card class="q-pl-mx" style="min-width: 350px">
+      <q-card class="q-pl-mx" style="width: 600px">
         <q-card-section>
-            <div class="text-h6">New Email</div>
-            <div class="text-body2">To: {{selectedUser.email}}</div>
+          <div class="text-h6">{{ $t('admin.dialog.email.header') }}</div>
+          <div class="text-body2" v-html="$t('admin.dialog.email.description', { email: selectedUser.email })"></div>
         </q-card-section>
         <q-form class="q-px-lg">
           <q-input
             ref="qEmailSubject"
-            class="q-my-lg"            
+            class="q-my-md"            
             filled
             v-model="this.email.subject"
-            label="Subject"
+            :label="$t('admin.dialog.email.form.subject')"
             type="text"
-            :rules="[(subject) => !!subject || 'Please enter email subject']"
+            :rules="[(subject) => !!subject || $t('admin.dialog.email.form.subject_error')]"
           />
           <q-input
             ref="qEmailBody"
-            class="q-my-lg"            
+            class="q-my-md"            
             filled
             v-model="this.email.content"
-            label="Content"
+            :label="$t('admin.dialog.email.form.content')"
             type="textarea"
-            :rules="[(body) => !!body || 'Please enter message to send']"
+            :rules="[(body) => !!body || $t('admin.dialog.email.form.content_error')]"
           />
         </q-form>
         <q-card-actions align="right" class="q-px-lg text-primary">
-            <q-btn flat label="Cancel" v-close-popup />
-            <q-btn label="Submit" type="submit" color="primary" class="q-ml-sm" @click="sendEmail()"/>
+          <q-btn flat :label="$t('common.cancel')" no-caps v-close-popup />
+          <q-btn :label="$t('common.send')" type="submit" no-caps color="primary" class="q-ml-sm" @click="sendEmail()"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -172,15 +173,15 @@ export default {
   data () {
     return {
       columns: [
-        { name: 'username', align:'left', label: 'Username', field: 'email', sortable: true, required: true },
-        { name: 'role', align:'left' , label: 'Type', field: 'role', sortable: true },
-        { name: 'created', align:'left' , label: 'Created', field: 'createdTimestamp', sortable: true },
-        { name: 'lastLogIn', align:'left', label: 'Last log in', field: 'lastLoginTimestamp', sortable: true }
+        { name: 'username', align:'left', label: this.$t('admin.table.user.columns.username'), field: 'email', sortable: true, required: true },
+        { name: 'role', align:'left' , label: this.$t('admin.table.user.columns.type'), field: 'role', sortable: true },
+        { name: 'created', align:'left' , label: this.$t('admin.table.user.columns.created'), field: 'createdTimestamp', sortable: true },
+        { name: 'lastLogIn', align:'left', label: this.$t('admin.table.user.columns.last_login'), field: 'lastLoginTimestamp', sortable: true }
       ],
       rows: [],
       isLoadingUsers: true,
       selectedUser: {},
-      email: { subject: 'POE App', content: undefined },
+      email: { subject: 'Admin • POE Assessment', content: undefined },
       openUserDeletePrompt: false,
       openPatientForm: { status: false, form: 'adminNew' },
       openUserMailPrompt: false

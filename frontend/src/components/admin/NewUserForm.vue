@@ -1,9 +1,9 @@
 <template>
     <q-dialog ref="qDialog">
-        <q-card class="q-pl-mx" style="min-width: 350px">
+        <q-card class="q-pl-mx q-ma-md">
             <q-card-section>
-                <div class="text-h6">New Test leader</div>
-                <div class="text-body2">Account details will be sent to the specified email</div>
+                <div class="text-h6">{{ $t('admin.dialog.new_user.header') }}</div>
+                <div class="text-body2" v-html="$t('admin.dialog.new_user.description')"></div>
             </q-card-section>
             <q-form class="q-px-lg">
                 <q-input
@@ -11,7 +11,7 @@
                     class="q-my-lg"
                     filled
                     v-model="this.email"
-                    label="Email"
+                    :label="$t('admin.dialog.new_user.form.email')"
                     type="email"
                     hint="e.g. user@email.com"
                     :rules="patterns.email"
@@ -22,9 +22,9 @@
                     class="q-my-lg"
                     filled
                     v-model="this.password"
-                    label="Password"
+                    :label="$t('admin.dialog.new_user.form.password')"
                     type="password"
-                    :hint="'Password for Test leader ' + getPwdFeedback"
+                    :hint="$t('admin.dialog.new_user.form.password_hint', { feedback: getPwdFeedback })"
                     :rules="patterns.password"
                 />
                 <q-input
@@ -32,22 +32,22 @@
                     class="q-my-lg"
                     filled
                     v-model="this.passwordConfirm"
-                    label="Confirm password"
+                    :label="$t('admin.dialog.new_user.form.password_confirm')"
                     type="password"
-                    hint="Must be the same password"
+                    :hint="$t('admin.dialog.new_user.form.password_confirm_hint')"
                     :rules="patterns.passwordConfirm"
                 />
             </q-form>
             <q-card-actions align="right" class="q-px-lg text-primary">
-                <q-btn flat label="Cancel" v-close-popup />
-                <q-btn label="Submit" type="submit" color="primary" class="q-ml-sm" @click="formSubmit"/>
+                <q-btn flat :label="$t('common.cancel')" no-caps v-close-popup />
+                <q-btn :label="$t('common.send')" no-caps type="submit" color="primary" class="q-ml-sm" @click="formSubmit"/>
             </q-card-actions>
         </q-card>
     </q-dialog>
 </template>
 
 <script>
-import pwd from '../utils/passwordValidation.js'
+import pwd from '../../utils/passwordValidation.js'
 import { patterns } from 'quasar'
 export default {
     name: 'NewUserForm',
@@ -59,9 +59,9 @@ export default {
             password: undefined,
             passwordConfirm: undefined,
             patterns: {
-                email: [(val) => patterns.testPattern.email(val) || 'Provide valid email address'],
+                email: [(val) => patterns.testPattern.email(val) || this.$t('admin.dialog.new_user.form.email_error')],
                 password: [() => !this.getPwdStrength || this.getPwdStrength],
-                passwordConfirm: [(pwd) => pwd === this.password || 'Please enter the same password']
+                passwordConfirm: [(pwd) => pwd === this.password || this.$t('admin.dialog.new_user.form.password_confirm_error')]
             }
         }
     },

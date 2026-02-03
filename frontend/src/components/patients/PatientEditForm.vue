@@ -7,11 +7,11 @@
             <q-card-section v-if="mode == 'adminEdit'">
                 <div class="text-body2">
                     <q-icon style="bottom: 2px" size="sm" name="person"/>
-                    {{ 'Assigned to: ' + user.physiotherapistEmail }}
+                    {{  $t('patient.form.admin.assigned_to', { email: user.physiotherapistEmail }) }}
                 </div>
                 <div class="text-body2">
                     <q-icon style="bottom: 2px" size="sm" name="calendar_month"/>
-                    {{ 'Created: ' + formatDate(user.createdTimestamp) }}
+                    {{ $t('patient.form.admin.created', { created: formatDate(user.createdTimestamp) }) }}
                 </div>
             </q-card-section>
             <q-form class="q-px-sm">
@@ -43,9 +43,9 @@
                             v-if="mode == 'adminNew'"
                             filled
                             v-model="this.physiotherapistEmail"
-                            label="Test leader email"
+                            :label="$t('patient.form.admin.email')"
                             type="email"
-                            :hint="!user.physiotherapistEmail ? 'e.g. user@email.com' : 'Assigned to test leader'"
+                            :hint="!user.physiotherapistEmail ? 'e.g. user@email.com' : $t('patient.form.admin.email_hint')"
                             :readonly="!!user.physiotherapistEmail"
                         />
                         <q-input

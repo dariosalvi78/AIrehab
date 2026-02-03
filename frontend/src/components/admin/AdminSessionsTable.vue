@@ -2,15 +2,15 @@
   <div>
     <div v-if="!isLoadingSessions" class="q-pl-lg fit row wrap justify-left">
       <q-chip :ripple="false" outline size="md" class="col-auto" icon="workspaces">
-        Sessions: {{this.rows.length}}
+        {{ $t('admin.table.session.sessions') }}: {{this.rows.length}}
       </q-chip>
        <q-chip :ripple="false" outline size="md" class="col-auto" icon="accessibility">
-        Exercises: {{this.exercisesTotal}}
+        {{ $t('admin.table.exercise.exercises') }}: {{this.exercisesTotal}}
       </q-chip>
     </div>
     <q-table 
       class="q-ma-lg" 
-      title="Sessions"
+      :title="$t('admin.table.session.header')"
       :rows="rows"
       :columns="columns"
       row-key="sessionid"
@@ -39,8 +39,8 @@
                   <q-avatar icon="accessibility" size="lg"/>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Delete</q-item-label>
-                  <q-item-label caption>Delete session {{props.row.sessionID}}</q-item-label>
+                  <q-item-label>{{ $t('admin.table.session.actions.delete.header') }}</q-item-label>
+                  <q-item-label caption>{{ $t('admin.table.session.actions.delete.caption', { date: props.row.sessionStartTimestamp }) }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-btn-dropdown>
@@ -63,15 +63,14 @@
     <q-dialog v-model="openSessionDeletePrompt">
       <q-card class="q-pl-mx" style="min-width: 350px">
         <q-card-section>
-          <div class="text-body1">Delete session</div>
-          <div class="text-body2">
-            <div><b>- ID:</b> {{selectedSession.sessionID}}</div>
-            <div><b>- Created:</b> {{selectedSession.sessionStartTimestamp}}</div>
-          </div>
+          <div class="text-body1">{{ $t('admin.table.session.actions.delete.header') }}</div>
+          <div class="text-body2" v-html="$t('admin.table.session.actions.delete.body', 
+            { id: selectedSession.sessionID, created: selectedSession.sessionStartTimestamp })
+          "></div>
         </q-card-section>
         <q-card-actions align="center">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn label="Delete" type="submit" color="negative" v-close-popup class="q-ml-sm" @click="deleteSession"/>
+          <q-btn flat :label="$t('common.cancel')" no-caps v-close-popup />
+          <q-btn :label="$t('common.delete')" type="submit" color="negative" no-caps v-close-popup class="q-ml-sm" @click="deleteSession"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -96,10 +95,10 @@ export default {
   data () {
     return {
       columns: [
-        { name: 'patientName', align:'left', label: 'Patient', field: 'patientName', sortable: true, required: true },
-        { name: 'numOfExercises', align:'left' , label: 'Exercises', field: 'numOfExercises', sortable: true },
-        { name: 'sessionEndTimestamp', align:'left' , label: 'End date', field: 'sessionEndTimestamp', sortable: true },
-        { name: 'sessionStartTimestamp', align:'left' , label: 'Created', field: 'sessionStartTimestamp', sortable: true }
+        { name: 'patientName', align:'left', label: this.$t('admin.table.session.columns.patient'), field: 'patientName', sortable: true, required: true },
+        { name: 'numOfExercises', align:'left' , label: this.$t('admin.table.session.columns.exercises'), field: 'numOfExercises', sortable: true },
+        { name: 'sessionEndTimestamp', align:'left' , label: this.$t('admin.table.session.columns.end'), field: 'sessionEndTimestamp', sortable: true },
+        { name: 'sessionStartTimestamp', align:'left' , label: this.$t('admin.table.session.columns.created'), field: 'sessionStartTimestamp', sortable: true }
       ],
       rows: [],
       exercisesTotal: 0,
