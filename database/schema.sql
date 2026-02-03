@@ -85,6 +85,6 @@ BEGIN
     )
     ALTER TABLE survey_answer ADD 
         CONSTRAINT [content record should be formatted as JSON] CHECK (ISJSON([content])=1),
-        CONSTRAINT survey_answer_physiotherapist_id_fk FOREIGN KEY (physiotherapistId) REFERENCES [user] (id),
-        CONSTRAINT survey_answer_patient_id_fk FOREIGN KEY (patientId) REFERENCES patient (id);
+        CONSTRAINT survey_answer_physiotherapist_id_fk FOREIGN KEY (physiotherapistId) REFERENCES [user] (id) ON DELETE CASCADE,
+        CONSTRAINT survey_answer_patient_id_fk FOREIGN KEY (patientId) REFERENCES patient (id) ON DELETE CASCADE;
 END
