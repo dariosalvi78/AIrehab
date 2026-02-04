@@ -46,5 +46,10 @@ export default {
         confirm_description: 'Once you have made your decision, check the box below.',
         confirm_checkbox: 'I agree to the terms in the information letter',
         continue_to_survey: 'Continue to questionnaire' 
+    },
+    new_survey: {
+        header: 'A new survey is available',
+        description: 'As part of this study, you will be asked to complete a few surveys. A new survey has been made available on {date}.<br><br>After you have submitted your answers, you can continue to use the POE app.',
+        action: 'Go to latest survey'
     }
 }
