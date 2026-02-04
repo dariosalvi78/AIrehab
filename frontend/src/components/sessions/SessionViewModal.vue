@@ -47,11 +47,13 @@ import ExerciseForm from '../exercises/ExerciseForm.vue'
 import ExercisesList from '../exercises/ExercisesList.vue'
 import API from '../../API'
 import nicers from '../../utils/nicers'
+import { mergeLocaleMessages } from 'src/boot/i18n';
 
 export default {
   name: 'SessionViewModal',
   components: { ExerciseForm, ExercisesList },
   props: { sessionID: String },
+  i18n: await mergeLocaleMessages(['exercises']),
   data () {
     return {
       session: undefined,

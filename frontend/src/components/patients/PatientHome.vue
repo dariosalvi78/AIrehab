@@ -177,9 +177,11 @@ import nicers from '../../utils/nicers'
 import TermsModal from '../UserTermsModal.vue'
 import PoeViewModal from '../exercises/PoeViewModal.vue'
 import SurveyForm from '../SurveyForm.vue'
+import { mergeLocaleMessages } from 'src/boot/i18n'
 
 export default {
   name: 'PatientHome',
+  i18n: await mergeLocaleMessages(['patient', 'exercises']),
   props: { patientID: String },
   components: { TermsModal, PoeViewModal, SurveyForm },
   data () {

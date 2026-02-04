@@ -119,10 +119,12 @@
 </template>
 
 <script>
+import { mergeLocaleMessages } from 'src/boot/i18n';
 import poeTypesEnum from '../../utils/types/poeTypesEnum'
 
 export default {
     name: 'PoeViewModal',
+    i18n: await mergeLocaleMessages(['poe']),
     props: { assessmentResults: Object },
     emits: ['getPOEBracket'],
     data () {

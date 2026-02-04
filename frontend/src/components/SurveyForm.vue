@@ -50,10 +50,12 @@
 </template>
 
 <script>
+import { mergeLocaleMessages } from 'src/boot/i18n';
 import API from '../API'
 
 export default {
   name: 'SurveyForm',
+  i18n: await mergeLocaleMessages(['survey']),
   props: { incomingSurvey: Object },
   emits: ['panelFormGoBack'], 
   data () {

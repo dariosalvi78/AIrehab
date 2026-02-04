@@ -35,10 +35,12 @@ import PatientEditForm from '../patients/PatientEditForm.vue'
 import AdminExercisesTable from './AdminExercisesTable.vue'
 import AdminSessionsTable from './AdminSessionsTable.vue'
 import AdminUserTable from './AdminUserTable.vue'
+import { mergeLocaleMessages } from 'src/boot/i18n.js'
 
 export default {
   components: { AdminUserTable, AdminSessionsTable, PatientEditForm, NewUserForm, AdminExercisesTable },
   name: 'AdminHome',
+  i18n: await mergeLocaleMessages(['admin', 'exercises', 'patient']),
   data () {
     return {
       users: [],

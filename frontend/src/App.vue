@@ -15,7 +15,7 @@ export default {
     return { }
   },
   beforeMount () {
-    console.debug(`[Quasar app: ${this.$q.version}]`)
+    console.debug(`[Quasar app: ${this.$q.version}]\n[Mode: ${process.env.NODE_ENV}]`)
 
     if (
       !store.getItem('isLoggedIn') 

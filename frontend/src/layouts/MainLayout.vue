@@ -35,7 +35,7 @@
                   </q-list>
                 </q-menu>
               </q-item>
-              <q-item clickable to="/home/consent" exact>
+              <q-item v-if="user.role !== 'admin'" clickable to="/home/consent" exact>
                 <q-item-section>{{ $t('common.header.consent') }}</q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
@@ -68,6 +68,7 @@
 import API from '../API'
 import nicers from '../utils/nicers';
 import store from '../utils/storage.js';
+import { updateI18nLocale } from 'src/boot/i18n.js';
 
 export default {
   name: 'MainLayout',
@@ -104,7 +105,7 @@ export default {
       store.setItem('locale', newLocale)
       console.info('updated locale: ' + newLocale)
       nicers.updateLocale(newLocale)
-      return this.$i18n.locale = newLocale
+      updateI18nLocale(newLocale)
     }
   },
   computed: {

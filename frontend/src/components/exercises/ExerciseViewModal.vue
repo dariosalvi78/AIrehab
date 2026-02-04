@@ -118,6 +118,7 @@
 </template>
 
 <script>
+import { mergeLocaleMessages } from 'src/boot/i18n'
 import API from '../../API'
 import nicers from '../../utils/nicers'
 import exerciseTypes from '../../utils/types/exerciseTypesEnum'
@@ -127,6 +128,7 @@ import PoeViewModal from './PoeViewModal.vue'
 export default {
   components: { ExerciseInstructions, PoeViewModal },
   name: 'ExerciseViewModal',
+  i18n: await mergeLocaleMessages(['exercises']),
   props: {
     sessionID: String,
     exerciseID: String

@@ -78,11 +78,13 @@ import PatientViewModal from '../patients/PatientViewModal.vue'
 import SessionsList from '../sessions/SessionsList.vue'
 import SurveyForm from '../SurveyForm.vue'
 import h from '../../utils/nicers.js'
+import { mergeLocaleMessages } from 'src/boot/i18n'
 
 export default {
   name: 'TestLeaderHome',
   components: { PatientEditForm, SessionsList, PatientViewModal, PatientsList, SurveyForm },
   props: { user: Object },
+  i18n: await mergeLocaleMessages(['exercises', 'patient']),
   data () {
     return {
       newUserPrompt: false,
