@@ -1,7 +1,7 @@
 
 import * as Types from '../datamodel/modeljdocs.mjs'
 import bcrypt from 'bcrypt'
-import { signAccessToken, signResetPwdToken, verifyAuthToken, session_cookie } from "../utils/tokenAuth.js"
+import { signAccessToken, signResetPwdToken, verifyAuthToken, session_cookie, signInvitationToken } from "../utils/tokenAuth.js"
 import users from "../DOM/usersCollection.js"
 import physiotherapist from "../DOM/physiotherapistCollection.js"
 import logger from "../utils/logger.js"
@@ -109,33 +109,37 @@ export default {
      * @returns {Promise<Types.User>} added user
      */
     addNewUser: async (req, res) => {
-        if (!req.user || req.user.role !== 'admin') return res.sendStatus(403)
+        if (!req.body) return res.sendStatus(403)
         let body = req.body
 
-        if (!body.role || !body.email || !body.password) {
+        if (!body.token || !body.role || !body.email || !body.password) {
             res.sendStatus(400)
             return
         }
 
         const isUser = await users.getUserByEmail(body.email)
         if (isUser) {
-            res.status(409).send(`${body.email} is already registered`)
+            res.status(409).send(`${email} is already registered`)
             return
         }
 
         try {
-            const reset_token = await signResetPwdToken(body.email)
-            await mailer.sendPhysiotherapistEmailCreated(body.email, body.password, reset_token)
+            const data_decoded = await verifyAuthToken(body.token),
+                email = data_decoded.email
+
             let hash = bcrypt.hashSync(body.password, 8)
-            const user = await users.createUser(body.email, hash, body.role)
+            const user = await users.createUser(email, hash, body.role)
             logger.info({ data: user }, 'new user created: ')
 
-            const token = await signAccessToken({ userID: user.id })
-            return res.status(201).json({
-                status: 'created', token, data: { newUser: user }
-            })
+            const token = await signAccessToken(user)
+            res.cookie(session_cookie.name, token, session_cookie.options)
+            return res.status(201).json({ status: 'created', user })
         }
         catch (err) {
+            if ((err.expiredAt * 1000) >= new Date().getTime()) {
+                logger.error({ ...err, email: body.email }, 'user invitation expired:')
+                return res.sendStatus(410)
+            }
             logger.error({ error: err }, 'something went wrong when adding user')
             res.sendStatus(500)
             return
@@ -166,6 +170,27 @@ export default {
             return res.sendStatus(204)
         } catch (err) {
             logger.error({ error: err }, 'error deleting user: ')
+            res.sendStatus(500)
+            return
+        }
+    },
+
+    sendUserInvitationEmail: async (req, res) => {
+        if (req.user.role !== 'admin') return res.sendStatus(403)
+        let email = req.body.email
+        try {
+            const isUser = await users.getUserByEmail(email)
+            if (isUser) return res.sendStatus(409)
+
+            const token = await signInvitationToken(email)
+            await mailer.sendPhysiotherapistInvitation(email, token)
+            logger.debug({ 
+                email: email,
+                sent_at: new Date().toISOString()
+            }, 'sent invitation to user')
+            return res.send({ data: { email } })
+        } catch (err) {
+            logger.error({ error: err }, 'error sending invitation email: ')
             res.sendStatus(500)
             return
         }

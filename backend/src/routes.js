@@ -7,6 +7,7 @@ import exercises from "./controllers/exercises.js";
 import poe from "./controllers/poe.js";
 import attachments from "./controllers/attachments.js";
 import surveys from "./controllers/surveys.js";
+import { verifyAuthToken } from "./utils/tokenAuth.js";
 
 const API_PREFIX = '/api'
 
@@ -29,7 +30,7 @@ export default async (app, isAuth) => {
 
     app.get(`${API_PREFIX}/users`, isAuth, users.getUsers)
     app.get(`${API_PREFIX}/users/:userID`, isAuth, users.getUser)
-    app.post(`${API_PREFIX}/users`, isAuth, users.addNewUser)
+    app.post(`${API_PREFIX}/users`, users.addNewUser)
     app.delete(`${API_PREFIX}/users/:userID`, isAuth, users.deleteUser)
     app.put(`${API_PREFIX}/users/activate`, isAuth, users.updateParticipation)
 
@@ -59,6 +60,7 @@ export default async (app, isAuth) => {
     app.post(`${API_PREFIX}/attachments/:exerciseID`, isAuth, attachments.uploadExerciseFile)
 
     app.post(`${API_PREFIX}/email/`, isAuth, users.sendEmail)
+    app.post(`${API_PREFIX}/email/invitation`, isAuth, users.sendUserInvitationEmail)
     app.post(`${API_PREFIX}/email/resetpassword`, users.sendPasswordResetEmail)
     app.post(`${API_PREFIX}/email/consent`, physiotherapists.sendPatientConsentEmail)
     app.post(`${API_PREFIX}/resetpassword`, users.resetPassword)

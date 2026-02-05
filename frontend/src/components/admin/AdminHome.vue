@@ -20,7 +20,9 @@
       </q-btn-group>
     </div>
     <patient-edit-form :user="{}" formMode="adminNew" v-model="newPatientPrompt" @addNewPatient="addNewPatient" />
-    <new-user-form role="physiotherapist" v-model="newUserPrompt" @newUser="addNewUser" />
+    <q-dialog ref="qDialogInvitation" v-model="newUserPrompt">
+      <new-user-form :user="{ role: 'admin' }" @send-invitation="sendUserInvitation" />
+    </q-dialog>
     <admin-user-table :users="users" @getUsers="getUsers()" @addPatient="addNewPatient" />
     <admin-sessions-table :sessions="sessions" @getSessions="getSessions()" />
     <admin-exercises-table :exercises="exercises" @getExercises="getExercises()" />
@@ -47,7 +49,8 @@ export default {
       sessions: [],
       exercises: [],
       newUserPrompt: false,
-      newPatientPrompt: false
+      newPatientPrompt: false,
+      newUser: undefined
     }
   },
   async created () {
@@ -57,7 +60,7 @@ export default {
     await this.getExercises()
   },
   methods: {
-    async addNewUser (newUser) {
+    async sendUserInvitation (userEmail) {
       const createdNotify = this.$q.notify({
         group: false,
         color: 'secondary',
@@ -66,13 +69,12 @@ export default {
         spinner: true
       })
       try {
-        let user = newUser
-        let resp = await API.addUser(user.role, user.email, user.password)
-        if (resp) {
+        const response = await API.sendUserInvitationEmail(userEmail)
+        if (response) {
           createdNotify({
             type: 'positive',
             color: 'positive',
-            message: 'Test leader created: ' + resp.data.newUser.email,
+            message: 'Invitation sent to: ' + response.data.email,
             spinner: false
           })
         }
@@ -81,12 +83,12 @@ export default {
         return createdNotify({
           color: 'negative',
           position: 'top',
-          message: 'User registration failed: ' + errorMsg,
+          message: 'Could not send invitation: ' + errorMsg,
           icon: 'report_problem',
           spinner: false
         })
       }
-      await this.getUsers()
+      this.$refs.qDialogInvitation.hide()
     },
     async addNewPatient (newPatient) {
       try {
