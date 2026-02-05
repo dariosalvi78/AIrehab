@@ -10,7 +10,7 @@
                   <div class="text-subtitle2">POE App v. {{appVersion}}</div>
                 </q-item-section>
               </q-item>
-              <q-item>
+              <q-item v-if="this.user?.lastLoginTimestamp">
                 <q-item-section>
                   <div class="text-subtitle2">Login: {{formatloginTimestamp}}</div>
                 </q-item-section>
@@ -75,11 +75,18 @@ export default {
   data () {
     return {
       appVersion: JSON.parse(process.env.APP_VERSION),
-      user: undefined
+      user: undefined,
+      showUserInvitation: false
     }
   },
   async beforeMount () {
-    this.user = await this.getLoggedInUser()
+    let q = new URLSearchParams(window.location.search)
+    if (!window.location.href.includes('invitation')) this.user = await this.getLoggedInUser()
+    else {
+      const token = q.get('token'), email = q.get('email'), role = q.get('role')
+      this.showUserInvitation = true
+      this.user = { email, role, token }
+    }
   },
   methods: {
     async logout () {

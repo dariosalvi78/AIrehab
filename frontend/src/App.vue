@@ -19,6 +19,7 @@ export default {
 
     if (
       !store.getItem('isLoggedIn') 
+      && !window.location.href.includes('invitation') 
       && !window.location.href.includes('resetpassword') 
       && !window.location.href.includes('patient')
     ) {

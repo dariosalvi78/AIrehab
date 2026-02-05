@@ -26,6 +26,7 @@ const routes = [
       { path: 'sessions/:sessionID', component: () => import('components/sessions/SessionViewModal.vue'), props: true },
       { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true },
       { path: 'consent', component: () => import('components/test_leader/TestLeaderConsentPage.vue'), props: true },
+      { path: 'invitation', component: () => import('components/admin/NewUserForm.vue'), props: true },
     ]
   },
   {

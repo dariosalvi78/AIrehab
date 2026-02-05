@@ -50,13 +50,18 @@ let API = {
     return response.data
   },
 
-  async addUser (role, email, password) {
-    let response = await axios.post('/users', { role, email, password })
+  async addUser (role, email, password, token) {
+    let response = await axios.post('/users', { role, email, password, token })
     return response.data
   },
 
   async deleteUser (userID) {
     let response = await axios.delete('/users/' + userID, {})
+    return response.data
+  },
+
+  async sendUserInvitationEmail (email) {
+    let response = await axios.post('/email/invitation', email)
     return response.data
   },
 
