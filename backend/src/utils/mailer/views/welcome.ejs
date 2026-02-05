@@ -44,22 +44,16 @@
                                                 </tr>
                                                 <tr>
                                                     <td align="left" style="position: relative; width: 100%">
-                                                        <p>Ditt POE-konto har nu skapats. Använd följande inloggningsuppgifter:</p>
-                                                        <p>
-                                                            <b>E-postadress:</b> <%= recipient %><br>
-                                                            <b>Lösenord:</b> <%= password %>
-                                                        </p>
-                                                        <p>
-                                                            Om du inte vill använda ditt nuvarande lösenord, <a href="<%= domain %>/resetpassword?token=<%= resetToken %>&email=<%= recipient %>" target="_blank">klicka här för att byta</a>. <b>Länken är giltig i en timme</b>.
-                                                            Det går också att ändra lösenordet vid ett senare tillfälle.<br><br>                                                            
-                                                            Första gången som du loggar in så kommer du att få ge samtycke till att delta i studien samt svara på en kort enkät. Tryck på knappen nedan för att komma igång med ditt POE-konto.
-                                                        </p>
+                                                        <p>Hej,<br><br>Du har blivit inbjuden till POE assessment och ditt konto är nu redo att skapas. Din email för inloggning är följande:</p>
+                                                        <p><b>E-postadress:</b> <%= recipient %></p>
+                                                        <p>Första gången som du loggar in så kommer du att få ange ett lösenord till ditt konto samt ge samtycke till att delta i studien. Därefter så finns det en kort enkät att svara på innan man kan börja med övningar.</p>
+                                                        <p>Tryck på knappen nedan för att komma igång med ditt POE-konto. <b>Länken är giltig i 3 dagar.</b></p>
                                                     </td>
                                                 </tr>
                                                 <tr class="line"></tr>
                                                 <tr>
                                                     <td align="center" valign="top">
-                                                        <div class="cta-btn"><a href="<%= domain %>/login" target="_blank">Logga in på ditt konto</a></div>
+                                                        <div class="cta-btn"><a href="<%= domain %>/home/invitation?token=<%= invitationToken %>&email=<%= recipient %>" target="_blank">Kom igång med ditt konto</a></div>
                                                     </td>
                                                 </tr>
                                                 <tr style="height: 32px"></tr>

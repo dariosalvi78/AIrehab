@@ -24,6 +24,10 @@ const signPatientAccessToken = async (patient) => {
     return jwt.sign({ patient }, config.JWT.SECRET_KEY, { expiresIn: '30 days' })
 }
 
+const signInvitationToken = async (email) => {
+    return jwt.sign({ email }, config.JWT.SECRET_KEY, { expiresIn: '3 days' })
+}
+
 const session_cookie = cookies.session, patient_cookie = cookies.patient
 
 /**
@@ -101,6 +105,7 @@ export {
     verifyAuthToken,
     createAdmin,
     signPatientAccessToken,
+    signInvitationToken,
     session_cookie,
     patient_cookie
 }

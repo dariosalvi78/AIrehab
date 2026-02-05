@@ -16,6 +16,7 @@ import mailer from './utils/mailer/mailer.js'
 import http from 'http'
 import https from 'https'
 import fs from 'node:fs'
+import logger from './utils/logger.js'
 
 (async () => {
 
@@ -57,19 +58,26 @@ import fs from 'node:fs'
 
     await setRoutes(app, authenticateToken)
 
-    let server
-    if (config.certs.key_file && config.certs.chain_file) {
-        const key = fs.readFileSync(config.certs.key_file, 'utf8')
-        const cert = fs.readFileSync(config.certs.chain_file, 'utf8')
+    let server, certs = null
+    try {
+        if (config.certs.key_file && config.certs.chain_file) {
+            const key = fs.readFileSync(config.certs.key_file, 'utf8')
+            const cert = fs.readFileSync(config.certs.chain_file, 'utf8')
+            certs = { key, cert }
+        }
+        certs
+            ? server = https.createServer({ ...certs }, app)
+            : // HTTP no certificate
+            server = http.createServer(app)
 
-        server = https.createServer({ key: key, cert: cert }, app)
-    } else {
-        // HTTP no certificate
+    } catch (err) {
+        logger.error({ error: err, certificates: config.certs, environment: config.environment }, 'could not verify certificates: ')
         server = http.createServer(app)
+        certs = null
     }
 
     server.listen(port, () => {
-        console.log(`Server running on http://${hostname}:${port}`)
+        console.log(`Server running on ${certs ? 'https' : 'http'}://${hostname}:${port}\nEnvironment: ${config.environment}`)
     })
 
 })()

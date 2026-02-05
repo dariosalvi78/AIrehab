@@ -49,12 +49,12 @@ export default {
   },
 
   /**
-   * Send email to new physiotherapist with login details
+   * Send invitation email to new physiotherapist
    * @param {String} recipient 
-   * @param {String} password 
+   * @param {String} invitationToken 
    */
-  sendPhysiotherapistEmailCreated: async (recipient, password, resetToken) => {
-    const template = await renderFile(import.meta.dirname + '/views/welcome.ejs', { recipient, password, domain, resetToken })
+  sendPhysiotherapistInvitation: async (recipient, invitationToken) => {
+    const template = await renderFile(import.meta.dirname + '/views/welcome.ejs', { recipient, domain, invitationToken })
     const options = {
       from: config.mailer.from_address,
       to: recipient,
