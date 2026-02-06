@@ -17,14 +17,11 @@ export default {
      * @returns {Promise<Types.User>}
     */
     login: async (req, res) => {
-        if (!req.body.email || !req.body.password) {
-            res.status(400).send('Please enter email and password')
-            return
-        }
+        if (!req.body.email || !req.body.password) return res.sendStatus(400)
         try {
             const user = await users.getUserByEmail(req.body.email)
 
-            if (!user) return res.status(404).send('Wrong credentials')
+            if (!user) return res.sendStatus(404)
 
             if (bcrypt.compareSync(req.body.password, user.hashedPassword)) {
                 // user OK, continue
@@ -39,7 +36,7 @@ export default {
                 res.cookie(session_cookie.name, token, session_cookie.options)
                 return res.send({ user })
             } else {
-                res.status(404).send('Wrong credentials')
+                res.sendStatus(404)
                 return
             }
         } catch (err) {
@@ -118,14 +115,12 @@ export default {
         }
 
         const isUser = await users.getUserByEmail(body.email)
-        if (isUser) {
-            res.status(409).send(`${email} is already registered`)
-            return
-        }
+        if (isUser) return res.sendStatus(410)
 
         try {
             const data_decoded = await verifyAuthToken(body.token),
                 email = data_decoded.email
+            if (email !== body.email) return res.sendStatus(410) 
 
             let hash = bcrypt.hashSync(body.password, 8)
             const user = await users.createUser(email, hash, body.role)
@@ -264,6 +259,7 @@ export default {
         if (!req.user) return res.sendStatus(401)
         try {
             const user = await users.getUserByEmail(req.user.email)
+            if (!user) return res.sendStatus(404)
             const response = {
                 email: user.email,
                 lastLoginTimestamp: user.lastLoginTimestamp,

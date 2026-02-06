@@ -61,7 +61,7 @@ export default {
       return this.$q.notify({
         color: 'negative',
         position: 'top',
-        message: 'Error: ' + err,
+        message: this.$t('common.notification.error_generic', { error: err }),
         icon: 'report_problem'
       })
     }
@@ -77,7 +77,7 @@ export default {
             color: 'secondary',
             icon: 'info',
             position: 'top',
-            message: 'Updated consent status',
+            message: this.$t('common.update_consent_status'),
           })
           let q = this.user?.newSurveyAvailable ? '?redirect=survey' : ''
           return this.$router.push(`/home${q}`)
@@ -86,7 +86,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Could not update user consent: ' + err,
+          message: this.$t('common.update_consent_status_error', { error: err }),
           icon: 'warning'
         })
       }

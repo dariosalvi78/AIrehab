@@ -35,7 +35,7 @@
                   </q-list>
                 </q-menu>
               </q-item>
-              <q-item v-if="user.role !== 'admin'" clickable to="/home/consent" exact>
+              <q-item v-if="!this.$route.path.includes('invitation') && user.role !== 'admin'" clickable to="/home/consent" exact>
                 <q-item-section>{{ $t('common.header.consent') }}</q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
@@ -75,18 +75,12 @@ export default {
   data () {
     return {
       appVersion: JSON.parse(process.env.APP_VERSION),
-      user: undefined,
-      showUserInvitation: false
+      user: undefined
     }
   },
   async beforeMount () {
-    let q = new URLSearchParams(window.location.search)
-    if (!window.location.href.includes('invitation')) this.user = await this.getLoggedInUser()
-    else {
-      const token = q.get('token'), email = q.get('email'), role = q.get('role')
-      this.showUserInvitation = true
-      this.user = { email, role, token }
-    }
+    await this.isOnInvitedPage()
+    if (!this.user) this.user = await this.getLoggedInUser()
   },
   methods: {
     async logout () {
@@ -113,6 +107,15 @@ export default {
       console.info('updated locale: ' + newLocale)
       nicers.updateLocale(newLocale)
       updateI18nLocale(newLocale)
+    },
+    async isOnInvitedPage () {
+      if (!this.$route.path.includes('invitation')) return
+      if (store.getItem('isLoggedIn')) this.$router.push('/home')
+
+      let q = new URLSearchParams(window.location.search)
+      const token = q.get('token'), email = q.get('email')
+      this.user = { email, token }
+      return
     }
   },
   computed: {
