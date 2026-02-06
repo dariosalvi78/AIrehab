@@ -1,5 +1,5 @@
 <template>
-    <q-card class="q-pl-mx q-ma-md" flat>
+    <q-card v-if="!loading" lass="q-pl-mx q-ma-md" flat>
         <q-card-section v-if="role == 'admin'" >
             <div class="text-h6">{{ $t('admin.dialog.new_user.header') }}</div>
             <div class="text-body2" v-html="$t('admin.dialog.new_user.description')"></div>
@@ -8,18 +8,16 @@
             <div class="text-h6">{{ $t('common.new_user.header') }}</div>
             <div class="text-body2" v-html="$t('common.new_user.description')"></div>
         </q-card-section>
-        <q-form class="q-px-md">
+        <q-form v-if="role == 'admin'" class="q-px-md">
             <q-input
                 ref="qEmail"
                 class="q-my-lg"
-                :filled="role === 'admin'"
                 v-model="email"
                 :label="$t('common.new_user.form.email')"
                 type="email"
                 :hint="$t('common.new_user.form.email_hint')"
                 :rules="patterns.email"
                 :lazy-rules="true"
-                :readonly="role !== 'admin'"
             />
         </q-form>
         <q-form v-if="role !== 'admin'" class="q-px-md">
@@ -27,21 +25,23 @@
                 ref="qPass"
                 class="q-my-lg"
                 filled
-                v-model="this.password"
+                v-model="password"
                 :label="$t('common.new_user.form.password')"
                 type="password"
                 :hint="$t('common.new_user.form.password_hint', { feedback: getPwdFeedback })"
                 :rules="patterns.password"
+                :lazy-rules="true"
             />
             <q-input
                 ref="qConfirmPass"
                 class="q-my-lg"
                 filled
-                v-model="this.passwordConfirm"
+                v-model="passwordConfirm"
                 :label="$t('common.new_user.form.password_confirm')"
                 type="password"
                 :hint="$t('common.new_user.form.password_confirm_hint')"
                 :rules="patterns.passwordConfirm"
+                :lazy-rules="true"
             />
         </q-form>
         <q-card-actions v-if="role == 'admin'" align="right" class="q-px-lg text-primary">
@@ -49,7 +49,7 @@
             <q-btn :label="$t('common.send')" no-caps type="submit" color="primary" class="q-ml-sm" @click="formSubmit"/>
         </q-card-actions>
         <q-card-actions v-else align="center" class="text-primary full-width">
-            <q-btn :label="$t('common.confirm')" no-caps type="submit" color="secondary" size="16px" class="full-width" @click="formSubmit"/>
+            <q-btn :label="$t('common.new_user.create')" no-caps type="submit" color="secondary" size="16px" class="full-width" @click="formSubmit"/>
         </q-card-actions>
     </q-card>
 </template>
@@ -73,7 +73,8 @@ export default {
                 email: [(val) => patterns.testPattern.email(val) || this.$t('common.new_user.form.email_error')],
                 password: [() => !this.getPwdStrength || this.getPwdStrength],
                 passwordConfirm: [(pwd) => pwd === this.password || this.$t('common.new_user.form.password_confirm_error')]
-            }
+            },
+            loading: true
         }
     },
     beforeMount () {
@@ -81,6 +82,7 @@ export default {
             this.email = this.user.email
             this.role = this.user.role
         }
+        this.loading = !this.loading
     },
     updated () {
         this.resetForm()
@@ -96,14 +98,17 @@ export default {
     methods: {
         async formSubmit (e) {
             e.preventDefault()
-            this.$refs.qEmail.validate()
-            this.$refs.qPass.validate()
-            this.$refs.qConfirmPass.validate()
-            if (this.$refs.qEmail.hasError || this.$refs.qPass.hasError || this.$refs.qConfirmPass.hasError) {
+            let refs = Object.keys(this.$refs), formError = false
+            for (const r in refs) {
+                let refInput = this.$refs[refs[r]]
+                refInput.validate()
+                if (refInput.hasError) formError = true
+            }
+            if (formError) {
                 return this.$q.notify({
                     color: 'negative',
                     position: 'top',
-                    message: 'Please review fields and try again',
+                    message: this.$t('common.notification.error'),
                     icon: 'report_problem'
                 })
             }

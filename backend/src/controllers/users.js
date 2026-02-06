@@ -237,7 +237,7 @@ export default {
 
             const user = await users.getUserByEmail(data_decoded.email)
             const isSamePWD = await bcrypt.compare(newPassword, user.hashedPassword)
-            if (isSamePWD) return res.status(400).send('New password cannot match old password')
+            if (isSamePWD) return res.sendStatus(409)
 
             const newHashedPWD = bcrypt.hashSync(newPassword, 8)
             await users.updateUserNewLogin(user.id, newHashedPWD)

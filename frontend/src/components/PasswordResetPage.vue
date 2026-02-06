@@ -3,12 +3,12 @@
     <q-page-container>
       <q-page class="flex flex-center">
         <q-form class="resetForm">
-          <q-card flat class="q-pa-sm">
-            <q-card-section>
+          <q-card flat class="q-py-sm">
+            <q-card-section class="q-pa-sm">
               <div class="text-h4">POE Assessment</div>
               <div class="text-h5">{{ $t('common.password_reset.title') }}</div>
             </q-card-section>
-            <q-card-section>
+            <q-card-section class="q-pa-sm">
               <form autocomplete="on">
                 <q-input
                   class="q-my-md"            
@@ -24,10 +24,8 @@
                   type="password"
                   :label="$t('common.password')"
                   :hint="`${$t('common.password_reset.password_hint')} ${password ? getPwdFeedback: ''}`"
-                  :rules="[ 
-                    (pwd) => !!pwd || $t('common.password_reset.password_hint'),
-                    (pwd) => !getPwdStrength || getPwdStrength
-                  ]"
+                  :rules="patterns.password"
+                  :lazy-rules="true"
                 />
                   <q-input 
                   ref="qConfirmPass"
@@ -36,13 +34,14 @@
                   type="password"
                   :label="$t('common.password_reset.password_confirm')"
                   :hint="$t('common.password_reset.password_confirm_hint')"
-                  :rules="[(pwd) => pwd === this.password || $t('common.password_reset.password_confirm_error')]"
+                  :rules="patterns.passwordConfirm"
+                  :lazy-rules="true"
                 />
               </form>
             </q-card-section>
-            <q-card-actions class="flex flex-center">
-              <q-btn size="md" :label="$t('common.password_reset.reset')" color="primary" @click="resetPassword()" />
-              <q-btn outline size="md" :label="$t('common.password_reset.go_back')" color="secondary" @click="$router.push('login')" />
+            <q-card-actions class="q-mt-sm justify-between">
+              <q-btn outline size="16px" :label="$t('common.password_reset.go_back')" color="secondary" no-caps @click="$router.push('login')" />
+              <q-btn size="16px" :label="$t('common.password_reset.reset')"  color="primary" no-caps @click="resetPassword()" />
             </q-card-actions>
           </q-card>
         </q-form>
@@ -60,10 +59,14 @@ export default {
   name: 'PasswordResetPage',
   data () {
     return {
-        email: undefined,
-        password: undefined,
-        passwordConfirm: undefined,
-        token: undefined
+      email: undefined,
+      password: undefined,
+      passwordConfirm: undefined,
+      token: undefined,
+      patterns: {
+        password: [() => !this.getPwdStrength || this.getPwdStrength],
+        passwordConfirm: [(pwd) => pwd === this.password || this.$t('common.new_user.form.password_confirm_error')]
+      }
     }
   },
   computed: {
@@ -90,28 +93,28 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Please review fields and try again',
+          message: this.$t('common.notification.error'),
           icon: 'report_problem'
         })
       }
       try {
         this.$q.loading.show()
-        await API.passwordReset(this.password, this.token)
         await nicers.delay(200)
+        await API.passwordReset(this.password, this.token)
         this.$q.notify({
           type: 'positive',
           color: 'positive',
           position: 'top',
-          message: 'Your password has been updated',
+          message: this.$t('common.notification.password_updated'),
         })
         this.$router.push('login')
       } catch (err) {
         let errMsg = err
-        if (err.response.status == 400) errMsg = err.response.data
+        if (err.response.status == 409) errMsg = this.$t('common.notification.password_same_error')
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Cannot reset password: ' + errMsg,
+          message: this.$t('common.notification.password_updated_error', { error: errMsg }),
           icon: 'report_problem'
         })
       }
