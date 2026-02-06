@@ -84,8 +84,8 @@ export default {
    },
    watch: {
     async selectedExercise () {
-        await this.populateEdit()
-      }
+      await this.populateEdit()
+    }
    },
    methods: {
     formSubmit () {
@@ -95,7 +95,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Please review fields and try again',
+          message: this.$t('common.notification.error'),
           icon: 'report_problem'
         })
       }

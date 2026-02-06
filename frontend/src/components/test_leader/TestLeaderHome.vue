@@ -127,14 +127,14 @@ export default {
             this.$q.notify({
               type: 'positive',
               position: 'top',
-              message: 'Created test exercise',
+              message: this.$t('exercises.notification.created_test_exercise'),
             })
             return this.goToTestExercise(resp.data.sessionID, resp.data.exerciseID)
           }
           this.$q.notify({
             type: 'positive',
             position: 'top',
-            message: 'Added new patient',
+            message: this.$t('patient.notification.add_patient'),
           })
         }
       } catch (e) {
@@ -143,7 +143,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Patient registration failed: ' + errorMsg,
+          message: this.$t('patient.notification.add_patient_error', { error: errorMsg }),
           icon: 'report_problem'
         })
       }
@@ -162,7 +162,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Something went wrong when retrieving patients: ' + err,
+          message: this.$t('patient.notification.get_patients_error', { error: err.message }),
           icon: 'warning'
         })
       }

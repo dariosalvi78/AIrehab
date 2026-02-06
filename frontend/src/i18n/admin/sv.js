@@ -73,17 +73,8 @@ export default {
     },
     dialog: {
         new_user: {
-            header: 'Skapa ny användare',
-            description: 'Lägg till en ny användare (Test leader).<br>Inloggningsuppgifter med instruktioner skickas till den angivna e-postadressen.',
-            form: {
-                email: 'E-postadress',
-                email_error: 'Vänligen ange giltig e-postadress',
-                password: 'Lösenord',
-                password_hint: 'Lösenord för användare {feedback}',
-                password_confirm: '@:common.password_reset.password_confirm',
-                password_confirm_hint: '@:common.password_reset.password_confirm_hint',
-                password_confirm_error: '@:common.password_reset.password_confirm_error'
-            }
+            header: 'Skicka inbjudan till användare',
+            description: 'Lägg till en ny användare (Test leader). Instruktioner för hur man skapar sina inloggningsuppgifter skickas till den angivna e-postadressen.'
         },
         email: {
             header: 'Nytt e-postmeddelande',

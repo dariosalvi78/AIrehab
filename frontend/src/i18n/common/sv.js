@@ -9,7 +9,7 @@ export default {
     continue: 'Fortsätt',
     delete: 'Ta bort',
     signin: 'Inloggning',
-    email: 'Email',
+    email: 'E-postadress',
     password: 'Lösenord',
     forgot_password: 'Glömt lösenord',
     header: {
@@ -54,5 +54,54 @@ export default {
         header: 'En ny enkät är tillgänglig',
         description: 'Som en del av denna studie så kommer du att få svara på ett par enkäter. Det finns en ny enkät som har blivit tillgänglig {date}.<br><br>Efter att du har skickat in dina svar, så kan du fortsätta att använda POE appen.',
         action: 'Gå till senaste enkäten'
+    },
+    new_user: {
+        header: 'Välkommen till POE assessment!',
+        description: 'Innan du kan fortsätta så behöver du skapa konto genom att ange ett lösenord. Ditt konto kommer att skapas efter du har skickat in dina uppgifter.<br><br>Vänligen ange dina inloggningsuppgifter nedan.',
+        form: {
+            email: 'E-postadress',
+            email_hint: 'Din e-postadress för inloggning',
+            email_error: 'Vänligen ange giltig e-postadress',
+            password: 'Lösenord',
+            password_hint: 'Ange ett lösenord {feedback}',
+            password_error: "Ange ett lösenord som innehåller minst 8 tecken, en stor & liten bokstav, en siffra & ett specialtecken",
+            password_error_weak: 'Ange ett starkare lösenord med minst 8 tecken',
+            password_confirm: '@:common.password_reset.password_confirm',
+            password_confirm_hint: '@:common.password_reset.password_confirm_hint',
+            password_confirm_error: '@:common.password_reset.password_confirm_error'
+        },
+        password_check: {
+            warnings: {
+                lowScore: 'Lösenordet är inte tillträckligt starkt.',
+                common: 'Detta är ett väldigt vanligt lösenord.',
+                similarCommon: 'Detta liknar ett vanligt lösenord.',
+                repeated: 'Undvik att använda upprepningar på tecken.',
+                commonNames: 'Vanliga namn är lätta att gissa.'
+            },
+            score: {
+                medium: 'Godkänt lösenord',
+                high: 'Bra lösenord'
+            }
+        },
+        create: 'Skapa konto',
+        suggestion: 'Lägg till ett eller två ord till. Ovanliga ord är bättre.'
+    },
+    notification: {
+        error: 'Vänligen kontrollera fälten och försök igen',
+        error_generic: 'Felmeddelande: ',
+        login_error: 'Inloggning misslyckades: {error}',
+        login_missing: 'Ange e-postadress och lösenord',
+        login_wrong: 'Felaktiga inloggningsuppgifter',
+        account_created: 'Ditt konto har skapats',
+        account_error: 'Kunde inte skapa konto: {error}',
+        invitation_expired: 'Länken är inte giltig längre, kontakta administratör.',
+        password_reset_email: 'Vänligen ange din e-postadress.',
+        password_updated: 'Ditt lösenord har uppdaterats.',
+        password_updated_error: 'Kunde inte uppdatera lösenord: {error}',
+        password_same_error: 'Får inte vara samma lösenord som gamla',
+        password_reset_sent: 'Mejl med lösenordsåterställning har skickats, se din e-post inkorg.',
+        update_consent_status: 'Uppdaterad medgivande status',
+        update_consent_status_error: 'Kunde inte uppdatera medgivande: {error}',
+        copied_to_clipboard: 'Verifieringslänk kopierad till urklipp'
     }
 }

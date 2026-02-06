@@ -237,7 +237,7 @@ export default {
                     return this.$q.notify({
                         color: 'negative',
                         position: 'top',
-                        message: 'Please review fields and try again',
+                        message: this.$t('common.notification.error'),
                         icon: 'report_problem'
                     })
                 }
@@ -268,7 +268,7 @@ export default {
                 return this.$q.notify({
                     color: 'negative',
                     position: 'top',
-                    message: 'Please review fields and try again',
+                    message: this.$t('common.notification.error'),
                     icon: 'report_problem'
                 })
             }

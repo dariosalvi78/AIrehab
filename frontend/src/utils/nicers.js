@@ -6,6 +6,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/sv.js'
 import 'dayjs/locale/en.js'
+import { i18n } from 'src/boot/i18n'
 
 dayjs.extend(utc)
 dayjs.extend(localizedFormat)
@@ -77,7 +78,7 @@ export default {
         Notify.create({
             color: 'info',
             position: 'top',
-            message: 'Verification link copied to clipboard',
+            message: i18n.global.t('common.notification.copied_to_clipboard'),
             icon: 'info'
         })
         return

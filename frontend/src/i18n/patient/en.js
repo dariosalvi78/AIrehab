@@ -107,5 +107,16 @@ export default {
     activate_instructions: 'Your patient needs to consent in order to participate in this study. Start by letting your patient scan the QR-code below.',
     activate_copy: 'Copy verification link',
     delete: 'Delete patient',
-    delete_confirm: 'Are you sure you want to permanently delete patient <b>{name}</b>?'
+    delete_confirm: 'Are you sure you want to permanently delete patient <b>{name}</b>?',
+    notification: {
+        add_patient: 'Added new patient',
+        add_patient_error: 'Patient registration failed: {error}',
+        get_patients_error: 'Something went wrong when retrieving patients: {error}',
+        patient_consent_needed: 'Patienten måste samtycka till forskningsstudien innan sessionen skapas.',
+        edit_patient: 'Updated patient {name}',
+        edit_patient_error: 'Patient update failed: {error}',
+        delete_patient: 'Deleted patient {name}',
+        delete_patient_error: 'Could not delete {name}: {error}',
+        generate_url_error: 'Cannot generate patient url: {error}'
+    }
 }

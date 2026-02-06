@@ -137,7 +137,7 @@ export default {
           return this.$q.notify({
             type: 'negative',
             position: 'top',
-            message: 'Patient needs to consent to research study before creating session',
+            message: this.$t('patient.notification.patient_consent_needed'),
             icon: 'report_problem'
           })
         }
@@ -148,7 +148,7 @@ export default {
           this.$q.notify({
             type: 'positive',
             position: 'top',
-            message: 'Created new session for ' + selectedPatient.names,
+            message: this.$t('patient.notification.exercises.add_session', { name: selectedPatient.names }),
           })
           this.navigateToSession(resp.data.session.id)
         }
@@ -156,7 +156,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Creating new session failed: ' + err,
+          message: this.$t('patient.notification.exercises.add_session_error', { error: err }),
           icon: 'report_problem'
         })
       }
@@ -170,7 +170,7 @@ export default {
         this.$q.notify({
           color: 'secondary',
           position: 'top',
-          message: 'Updated ' + fullName,
+          message: this.$t('patient.notification.patient.edit_patient', { name: fullName }),
           icon: 'info'
         })
         this.$emit('openView', { patientID: this.selectedPatient.id })
@@ -180,7 +180,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Patient update failed: ' + errMsg,
+          message: this.$t('patient.notification.patient.edit_patient_error', { error: errMsg }),
           icon: 'report_problem'
         })
       }
@@ -204,7 +204,7 @@ export default {
           this.$q.notify({
             color: 'info',
             position: 'top',
-            message: `Deleted ${deleted.names}`,
+            message: this.$t('patient.notification.patient.delete_patient', { name: deleted.names }),
             icon: 'info'
           })
           this.$emit('panelFormGoBack')
@@ -214,7 +214,7 @@ export default {
           this.$q.notify({
             color: 'negative',
             position: 'top',
-            message: `Cannot delete ${deleted.names}: ${errMsg}`,
+            message: this.$t('patient.notification.patient.delete_patient_error', { name: deleted.names, error: errMsg }),
             icon: 'warning'
           })
         }
@@ -241,7 +241,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Cannot generate patient url: ${err}`,
+          message: this.$t('patient.notification.patient.generate_url_error', { error: err }),
           icon: 'warning'
         })
       }

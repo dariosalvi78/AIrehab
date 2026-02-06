@@ -36,7 +36,7 @@
       <q-spinner-dots color="primary" size="3em" />
     </div>
     <div v-else class="q-pa-lg flex flex-center column">
-      <div class="q-py-md text-h6">No session found</div>
+      <div class="q-py-md text-h6">{{ $t('exercises.sessions.does_not_exist') }}</div>
       <q-btn color="secondary" size="md" label="Go back" icon="chevron_left" @click="this.$router.go(-1)" />
     </div>
   </q-page-container>
@@ -81,7 +81,9 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: err.response.status == 404 ? 'Found no session with the given ID' : 'Cannot fetch current session: ' + err,
+          message: err.response.status == 404 
+            ? this.$t('exercises.notification.session_not_found')
+            : this.$t('exercises.notification.get_session_error', { error: err }),
           icon: 'warning'
         })
         this.isloadingSession = false
@@ -98,7 +100,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Something went wrong when updating session: ' + err,
+          message: this.$t('exercises.notification.update_session_error', { error: err }),
           icon: 'warning'
         })
       }
@@ -112,7 +114,7 @@ export default {
         this.$q.notify({
           color: 'info',
           position: 'top',
-          message: 'Session has been deleted',
+          message: this.$t('exercises.notification.session_deleted'),
           icon: 'info'
         })
         this.$router.push('/home')
@@ -122,7 +124,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Cannot delete session: ' + errMsg,
+          message: this.$t('exercises.notification.session_deleted_error', { error: errMsg }),
           icon: 'warning'
         })
       }
@@ -134,7 +136,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Patient has not consented to be part of exercise',
+          message: this.$t('exercises.notification.patient_consent_missing'),
           icon: 'warning'
         })
       }

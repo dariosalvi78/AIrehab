@@ -53,7 +53,8 @@ export default {
         no_exercises: 'No exercises',
         no_exercises_in_session: 'No exercises in session',
         no_end_date: 'No end date',
-        not_found: 'No sessions found'
+        not_found: 'No sessions found',
+        does_not_exist: 'Session does not exist'
     },
     instructions: {
         title: 'Exercise instructions',
@@ -70,5 +71,17 @@ export default {
             <b>Placement and recording</b><br>
             Record the participant from the front with a mobile phone/tablet in portrait mode, making sure the whole body is visible in the video. Ideally, place the phone/tablet on a stable surface while recording. 
         `
+    },
+    notification: {
+        created_test_exercise: 'Created temporary test exercise',
+        get_sessions_error: 'Something went wrong when retrieving sessions: {error}',
+        session_not_found: 'Found no session with the given ID',
+        get_session_error: 'Cannot fetch current session: {error}',
+        update_session_error: 'Something went wrong when updating session: {error}',
+        session_deleted: 'Session has been deleted',
+        session_deleted_error: 'Cannot delete session: {error}',
+        add_session: 'Created new session for: {name}',
+        add_session_error: 'Creating new session failed: {error}',
+        patient_consent_missing: 'Patient has not consented to be part of exercise'
     }
 }

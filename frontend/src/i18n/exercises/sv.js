@@ -53,7 +53,8 @@ export default {
         no_exercises: 'Inga övningar',
         no_exercises_in_session: 'Inga övningar i denna session',
         no_end_date: 'Inget slutdatum',
-        not_found: 'Inga sessioner hittades'
+        not_found: 'Inga sessioner hittades',
+        does_not_exist: 'Sessionen finns inte'
     },
     instructions: {
         title: 'Övningsinstruktioner',
@@ -70,5 +71,17 @@ export default {
             <b>Placering och filmning</b><br>
             Filma personen rakt framifrån med mobilen/läsplatta i stående format, se till så att hela kroppen kommer med i videon. Placera helst telefonen/läsplattan på något stabilt underlag när du spelar in filmen.
         `
+    },
+    notification: {
+        created_test_exercise: 'Skapade tillfällig övning',
+        get_sessions_error: 'Något gick fel vid hämtning av sessioner: {error}',
+        session_not_found: 'Hittade ingen session med angivna ID:et',
+        get_session_error: 'Kan inte hämta nuvarande session: {error}',
+        update_session_error: 'Något gick fel vid uppdatering av session: {error}',
+        session_deleted: 'Session har blivit borttagen',
+        session_deleted_error: 'Kan inte ta bort session: {error}',
+        add_session: 'Skapade ny session för: {name}',
+        add_session_error: 'Kunde inte skapa ny session: {error}',
+        patient_consent_missing: 'Patient har inte gett medgivande till deltagande i övning'
     }
 }

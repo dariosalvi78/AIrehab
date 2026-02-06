@@ -107,5 +107,16 @@ export default {
     activate_instructions: 'Din patient behöver ge samtycke för att delta i denna studie. Börja med att låta din patient skanna QR-koden nedan.',
     activate_copy: 'Kopiera verifieringslänk',
     delete: 'Ta bort patient',
-    delete_confirm: 'Är du säker på att du vill permanent ta bort patienten <b>{name}</b>?'
+    delete_confirm: 'Är du säker på att du vill permanent ta bort patienten <b>{name}</b>?',
+    notification: {
+        add_patient: 'Ny patient tillagd',
+        add_patient_error: 'Kunde inte lägga till patient: {error}',
+        get_patients_error: 'Något gick fel vid hämtning av patienter: {error}',
+        patient_consent_needed: 'Patient needs to consent to research study before creating session',
+        edit_patient: 'Uppdaterade patient {name}',
+        edit_patient_error: 'Kunde inte uppdatera patient: {error}',
+        delete_patient: 'Tog bort patient {name}',
+        delete_patient_error: 'Kunde inte ta bort {name}: {error}',
+        generate_url_error: 'Kan inte hämta patient länk: {error}'
+    }
 }

@@ -89,10 +89,11 @@ export default {
         }
       } catch (err) {
         let errMsg = err
-        if (err.response.status === 400 || err.response.status === 404) errMsg = err.response.data
+        err.response.status === 400 ? errMsg = this.$t('common.notification.login_missing')
+          : err.response.status === 404 ? errMsg = this.$t('common.notification.login_wrong') : ''
         this.$q.notify({
           color: 'negative',
-          message: 'Login failed: ' + errMsg,
+          message: this.$t('common.notification.login_error', { error: errMsg }),
           icon: 'report_problem'
         })
       }
@@ -102,7 +103,7 @@ export default {
       if (!this.email) {
         return this.$q.notify({
           color: 'negative',
-          message: 'Please enter email address',
+          message: this.$t('common.notification.password_reset_email'),
           icon: 'report_problem'
         })
       } 
@@ -118,7 +119,7 @@ export default {
         await API.sendPasswordResetEmail(this.email.toLowerCase())
         return this.$q.notify({
           color: 'secondary',
-          message: 'Password reset link has been sent, check your inbox',
+          message: this.$t('common.notification.password_reset_sent'),
           icon: 'info'
         })   
       })

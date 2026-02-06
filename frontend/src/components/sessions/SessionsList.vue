@@ -107,7 +107,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Something went wrong when retrieving sessions: ' + err,
+          message: this.$t('exercises.notification.get_sessions_error', { error: err }),
           icon: 'warning'
         })
       }
