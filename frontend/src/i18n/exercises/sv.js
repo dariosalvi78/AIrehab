@@ -82,6 +82,16 @@ export default {
         session_deleted_error: 'Kan inte ta bort session: {error}',
         add_session: 'Skapade ny session för: {name}',
         add_session_error: 'Kunde inte skapa ny session: {error}',
-        patient_consent_missing: 'Patient har inte gett medgivande till deltagande i övning'
+        patient_consent_missing: 'Patient har inte gett medgivande till deltagande i övning',
+        video_not_available: 'Video är inte tillgänglig: {error}',
+        recording_error: 'Inspelningsfel: {error}',
+        camera_not_available: 'Bakkamera ej tillgänglig: {error}',
+        uploading_video: 'Laddar upp video till servern, vänligen vänta...',
+        uploading_video_error: 'Inspelning kan inte sparas: {error}',
+        video_upload_success: '<b>Inspelning är redo</b><br>Påbörjar videoanalys inom kort<br>Vänligen vänta...',
+        processing_started: 'Videon har skickats för analysering',
+        get_video_exercise: 'Kan inte hitta övning: {error}',
+        upload_rejected: 'Filen har inte ett giltigt format: {file}',
+        web_recording_not_supported: 'Webbläsaren har inte stöd för .mp4 inspelning, prova en annan webbläsare.'
     }
 }

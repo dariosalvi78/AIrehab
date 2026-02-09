@@ -12,6 +12,7 @@ export default {
     email: 'E-postadress',
     password: 'Lösenord',
     forgot_password: 'Glömt lösenord',
+    home: 'Hem',
     header: {
         language: 'Språk',
         about: 'Mer info',

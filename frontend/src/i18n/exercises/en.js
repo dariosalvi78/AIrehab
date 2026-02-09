@@ -82,6 +82,16 @@ export default {
         session_deleted_error: 'Cannot delete session: {error}',
         add_session: 'Created new session for: {name}',
         add_session_error: 'Creating new session failed: {error}',
-        patient_consent_missing: 'Patient has not consented to be part of exercise'
+        patient_consent_missing: 'Patient has not consented to be part of exercise',
+        video_not_available: 'Video not available: {error}',
+        recording_error: 'Recording error: {error}',
+        camera_not_available: 'Rear-facing camera not available: {error}',
+        uploading_video: 'Uploading video to server, please wait...',
+        uploading_video_error: 'Video cannot be saved: {error}',
+        video_upload_success: '<b>Video uploaded</b><br>Processing will start in a moment<br>Please wait...',
+        processing_started: 'Video has been sent for processing',
+        get_video_exercise: 'Cannot get exercise: {error}',
+        upload_rejected: 'File is not in a valid format: {file}',
+        web_recording_not_supported: 'Browser does not support .mp4 web recording, use a different web browser.'
     }
 }

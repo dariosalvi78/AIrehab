@@ -12,6 +12,7 @@ export default {
     email: 'Email',
     password: 'Password',
     forgot_password: 'Forgot password',
+    home: 'Home',
     header: {
         language: 'Language',
         about: 'About',
