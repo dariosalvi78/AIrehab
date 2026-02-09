@@ -41,33 +41,31 @@
             <q-btn v-show="uploadedFile" class="q-my-md q-pa-md full-width" push :label="$t('exercises.record.begin')" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
           </q-card-section>
         </q-card>
-        <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal" maximized>
-          <q-card class="full-width">
+        <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal" maximized class="q-pa-none">
+          <q-card class="full-width q-my-none q-py-none">
             <q-card-section class="q-pb-none flex justify-between">
               <div class="text-body1">{{ $t('exercises.record.dialog.title') }}</div>
               <q-btn class="q-pa-none q-pb-sm" flat :label="$t('common.close')" v-close-popup  @click="stopRecording" />
             </q-card-section>
-            <q-checkbox class="q-mx-md q-mb-md text-weight-light" dense v-model="saveVideoToDevice" :label="$t('exercises.record.dialog.save')" />
             <q-separator />
-            <q-card-section class="flex flex-center column q-px-xl">
+            <q-card-section class="flex flex-center column q-pa-sm">
               <div class="video-container col text-center flex flex-center">
                 <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls controlsList="nodownload">
                   <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
                 </video>
+                <div class="action-btn flex flex-center">
+                  <div class="col flex flex-center">
+                    <q-btn v-show="!isRecording" padding="md" round color="white" size="xl" push @click="startRecording">
+                      <q-icon size="xl" name="photo_camera" color="negative"/>
+                    </q-btn>
+                    <q-btn v-show="isRecording" padding="md" round color="white" size="xl" push @click="stopRecording">
+                      <q-icon size="xl" name="stop" color="negative"/>
+                    </q-btn>
+                  </div>
+                  <div class="text-subtitle2 text-center text-white">{{!isRecording ? $t('exercises.record.dialog.start'): $t('exercises.record.dialog.stop')}}</div>
+                </div>
               </div>
-            </q-card-section>
-            <q-separator />
-            <q-card-section class="q-pa-md">
-              <div class="col flex flex-center">
-                <q-btn v-show="!isRecording" padding="md" round color="white" size="xl" push @click="startRecording">
-                  <q-icon size="xl" name="photo_camera" color="negative"/>
-                </q-btn>
-                <q-btn v-show="isRecording" round push @click="stopRecording">
-                  <q-icon size="84px" name="stop" color="negative"/>
-                </q-btn>
-              </div>
-              <div class="text-subtitle2 text-center">{{!isRecording ? $t('exercises.record.dialog.start'): $t('exercises.record.dialog.stop')}}</div>
             </q-card-section>
           </q-card>
         </q-dialog>
@@ -158,7 +156,7 @@ export default {
           bits: 2500000
         },
         audio: false,
-        codec: 'video/mp4; codecs="vp9"'
+        codecs: ['video/mp4; codecs="vp9"', 'video/mp4;']
       },
     }
   },
@@ -186,7 +184,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Video not available: '+ err.message,
+          message: this.$t('exercises.notification.video_not_available', { error: err.message }),
           icon: 'report_problem'
         })
       }
@@ -194,14 +192,16 @@ export default {
     },
     async videoCapture () {
       const MEDIA_CONSTRAINTS = this.constraints
+      let supported_codec = undefined
       this.showPreview = false
       this.videoChunks = []
 
       navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
         .then((stream) => {
-          if (!MediaRecorder.isTypeSupported(this.constraints.codec)) throw new Error('Browser does not support .mp4 web recording, use a different web browser.')
+          for (const codec of this.constraints.codecs) if (MediaRecorder.isTypeSupported(codec)) { supported_codec = codec; break }
+          if (!supported_codec) throw new Error(this.$t('exercises.notification.web_recording_not_supported'))
           this.$refs.videoOutput.srcObject = stream
-          const mediaRecorder = new MediaRecorder(stream, { mimeType: this.constraints.codec, videoBitsPerSecond: this.constraints.bits  })
+          const mediaRecorder = new MediaRecorder(stream, { mimeType: supported_codec, videoBitsPerSecond: this.constraints.bits  })
           this.mediaRecorder = mediaRecorder
 
           this.mediaRecorder.ondataavailable = (e) => {
@@ -211,8 +211,8 @@ export default {
             console.error(err)
             this.$q.notify({
               color: 'negative',
-              position: 'top',
-              message: 'Recording error: ' + err,
+              position: 'bottom',
+              message: this.$t('exercises.notification.recording_error', { error: err }),
               icon: 'report_problem'
             })
           }
@@ -223,8 +223,8 @@ export default {
           console.error(err)
           return this.$q.notify({
             color: 'negative',
-            position: 'top',
-            message: 'Rear-facing camera not available: ' + err,
+            position: 'bottom',
+            message: this.$t('exercises.notification.camera_not_available', { error: err }),
             icon: 'report_problem'
           })
         })
@@ -281,7 +281,7 @@ export default {
         let loading = this.$q.loading
         try {
           loading.show({
-            message: 'Uploading video to server, please wait...'
+            message: this.$t('exercises.notification.uploading_video')
           })
           await nicers.delay(300)
           const form = new FormData()
@@ -295,7 +295,7 @@ export default {
               console.error(err)
             }
             loading.show({
-              message: '<b>Video uploaded</b><br>Processing will start in a moment<br>Please wait...',
+              message: this.$t('exercises.notification.video_upload_success'),
               html: true
             })
             let formattedType = exerciseTypes.typeToAsc(results.type), exerciseDate = nicers.formattedDayOfMonth(results.date)
@@ -307,7 +307,7 @@ export default {
               this.$q.notify({
                 type: 'info',
                 position: 'top',
-                message: 'Video has been sent for processing',
+                message: this.$t('exercises.notification.processing_started'),
                 icon: 'info'
               })
               await this.getVideoPathForExercise()
@@ -321,7 +321,7 @@ export default {
           this.$q.notify({
             type: 'negative',
             position: 'top',
-            message: 'Video cannot be saved: ' + errMsg,
+            message: this.$t('exercises.notification.uploading_video_error', { error: errMsg }),
             icon: 'warning'
           })
           this.uploadedFile = undefined
@@ -344,7 +344,7 @@ export default {
         return this.$q.notify({
           type: 'negative',
           position: 'top',
-          message: 'Cannot get exercise: ' + errMsg,
+          message: this.$t('exercises.notification.get_video_exercise', { error: errMsg }),
           icon: 'warning'
         })
       }
@@ -380,7 +380,7 @@ export default {
       this.$q.notify({
         color: 'negative',
         position: 'top',
-        message: 'Uploaded file is not a video: ' + file[0].file.name,
+        message: this.$t('exercises.notification.upload_rejected', { file: file[0].file.name }),
         icon: 'report_problem'
       })
       this.$refs.uploader.removeFile(this.uploadedFile)
@@ -450,8 +450,9 @@ export default {
 
 #recordModal .video-container > #videoPreview {
   max-height: 100%;
-  height: fit-content;
+  height: 100%;
   margin: 0 auto;
+  border-radius: 1em;
 }
 
 .recording {
@@ -459,8 +460,15 @@ export default {
   box-shadow: 0px 0px 5px 1px var(--q-negative)
 }
 
+.action-btn {
+  position: absolute;
+  flex-direction: column;
+  bottom: 10vh;
+}
+
 @media only screen and (max-width: 550px) {
   .video-container {
+    width: 100%;
     max-width: 100%;
   }
 }
