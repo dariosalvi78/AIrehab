@@ -16,8 +16,8 @@
           </q-card-section>
           <q-card-section v-if="showUploadPrompt" class="column items-center q-pa-sm">
             <div v-show="!uploadedFile" class="text-body2 text-center q-my-md">{{ $t('exercises.record.upload_desc') }}</div>
-            <q-file class="q-mb-sm full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" color="secondary" :label="$t('exercises.record.upload')" 
-              v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload"
+            <q-file class="full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" color="secondary" :label="$t('exercises.record.upload')" 
+              v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload" :readonly="!!uploadedFile"
             >
               <template v-slot:prepend>
                 <q-icon name="attach_file" />
@@ -28,43 +28,57 @@
             </q-file>
             <form ref="form" action="" method="POST" enctype="multipart/form-data" @submit.prevent="saveVideo">
             </form>
-            <div class="video-container col" v-show="uploadedFile">
+            <q-list bordered separator class="text-body2 full-width row justify-evenly" v-if="uploadedFile">
+              <q-item>
+                <q-item-section>
+                  <q-item-label overline>{{ $t('exercises.record.recorded') }}</q-item-label>
+                  <q-item-label> {{ formatModifiedDate }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label overline>{{ $t('exercises.record.size') }}</q-item-label>
+                  <q-item-label>{{getUploadedFileSize}}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <div class="video-container col q-py-lg" v-show="uploadedFile">
               <video ref="uploadedVideoPreview" controls autoplay playsinline webkit-playsinline controlsList="nodownload">
                 <source src="" type="video/mp4">
                 Your browser does not support HTML5 video.
               </video>
             </div>
-            <div class="q-mt-md text-body2" v-if="uploadedFile">
-              {{ $t('exercises.record.recorded') }}: {{formatModifiedDate}}<br/>
-              {{ $t('exercises.record.size') }}: {{getUploadedFileSize}}
-            </div>
-            <q-btn v-show="uploadedFile" class="q-my-md q-pa-md full-width" push :label="$t('exercises.record.begin')" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
+            <q-btn v-show="uploadedFile" class="q-mt-sm q-mb-lg q-pa-md full-width" push :label="$t('exercises.record.begin')" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
           </q-card-section>
         </q-card>
         <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal" maximized class="q-pa-none">
           <q-card class="full-width q-my-none q-py-none">
             <q-card-section class="q-pb-none flex justify-between">
+              <q-btn class="q-pa-none q-pb-sm" icon="close" :label="$t('common.close')" flat no-caps v-close-popup  @click="stopRecording" />
               <div class="text-body1">{{ $t('exercises.record.dialog.title') }}</div>
-              <q-btn class="q-pa-none q-pb-sm" flat :label="$t('common.close')" v-close-popup  @click="stopRecording" />
             </q-card-section>
             <q-separator />
             <q-card-section class="flex flex-center column q-pa-sm">
               <div class="video-container col text-center flex flex-center">
-                <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline controls controlsList="nodownload">
+                <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline :controls="false" disable-picture-in-picture controlsList="nodownload">
                   <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
                 </video>
-                <div class="action-btn flex flex-center">
+                <div v-show="!mediaRecorder?.error" class="recording-actions flex flex">
+                  <div v-show="isRecording" class="text-subtitle2 text-center text-white">{{ displayTimer }}</div>
                   <div class="col flex flex-center">
-                    <q-btn v-show="!isRecording" padding="md" round color="white" size="xl" push @click="startRecording">
-                      <q-icon size="xl" name="photo_camera" color="negative"/>
-                    </q-btn>
-                    <q-btn v-show="isRecording" padding="md" round color="white" size="xl" push @click="stopRecording">
-                      <q-icon size="xl" name="stop" color="negative"/>
+                    <q-btn padding="md" round color="white" size="xl" class="shadow-8" push
+                      @click="!isRecording ? startRecording() : stopRecording()" 
+                    >
+                      <q-icon size="xl" :name="!isRecording ? 'photo_camera' : 'stop'" color="negative"/>
                     </q-btn>
                   </div>
                   <div class="text-subtitle2 text-center text-white">{{!isRecording ? $t('exercises.record.dialog.start'): $t('exercises.record.dialog.stop')}}</div>
                 </div>
+                <div v-if="mediaRecorder?.loading" class="q-mt-md flex flex-center">
+                  <q-spinner-dots color="primary" size="3em" />
+                </div>
+                <div v-show="mediaRecorder.error" class="text-subtitle2" v-html="mediaRecorder.error"></div>
               </div>
             </q-card-section>
           </q-card>
@@ -145,6 +159,7 @@ export default {
       openRecordModal: false,
       saveVideoToDevice: false,
       openExerciseVideo: false,
+      timer: { elapsed: 0, interval: null },
       /** @type {MediaStreamConstraints} */
       constraints: {
         video: {
@@ -220,7 +235,7 @@ export default {
         })
         .catch((err) => {
           this.isRecording = false
-          console.error(err)
+          this.mediaRecorder = { ...this.mediaRecorder, error: `${err}<br><br>${this.$q.platform.userAgent}` }
           return this.$q.notify({
             color: 'negative',
             position: 'bottom',
@@ -263,11 +278,16 @@ export default {
         this.mediaRecorder.stream.getTracks().forEach( track => track.stop() )
         this.mediaRecorder.stop()
       }
+      if (this.timer?.interval) clearInterval(this.timer.interval)
+      this.timer.elapsed = 0
     },
     async startRecording () {
       this.isRecording = true
       this.$refs.videoOutput.classList.toggle('recording')
       this.mediaRecorder.start(1000)
+      this.timer.interval = setInterval(() => {
+        this.timer.elapsed++
+      }, 1000)
     },
     uploadedRecordedVideo(e) {
       const output = this.$refs.uploadedVideoPreview
@@ -386,9 +406,14 @@ export default {
       this.$refs.uploader.removeFile(this.uploadedFile)
     },
     async openRecordingModal () {
+      this.mediaRecorder = { loading: true }
       this.openRecordModal = !this.openRecordModal
       await nicers.delay(500)
-      if (this.$refs.videoOutput) await this.videoCapture()
+      if (this.$refs.videoOutput) {
+        await this.videoCapture()
+        this.mediaRecorder.loading = false
+        document.querySelector('.recording-actions').classList.add('visible')
+      }
     },
     async openExerciseVideoDialog () {
       this.uploadedFile = true
@@ -412,7 +437,8 @@ export default {
       let formatFileSize = this.uploadedFile.size
       return (formatFileSize / Math.pow(1024, 2)).toFixed(1) + ' MB'
     },
-    showUploadPrompt () { return process.env.DEV || (this.showPreview) }
+    showUploadPrompt () { return process.env.DEV || (this.showPreview) },
+    displayTimer() { if (this.timer?.interval) return nicers.formattedTimer(this.timer.elapsed) }
   },
   unmounted () {
     this.isGettingPOEStatus = false
@@ -432,6 +458,7 @@ export default {
 .video-container video {
   width: 100%;
   height: auto;
+  border-radius: 8px;
 }
 .evaluation-card {
   margin: 0 auto;
@@ -452,7 +479,7 @@ export default {
   max-height: 100%;
   height: 100%;
   margin: 0 auto;
-  border-radius: 1em;
+  transition: 0.5s ease-in-out;
 }
 
 .recording {
@@ -460,11 +487,16 @@ export default {
   box-shadow: 0px 0px 5px 1px var(--q-negative)
 }
 
-.action-btn {
+.recording-actions {
   position: absolute;
   flex-direction: column;
-  bottom: 10vh;
+  bottom: 8vh;
+  gap: 8px;
+  opacity: 0;
+  transition: 0.5s ease-in-out;
 }
+
+.visible { opacity: 1; }
 
 @media only screen and (max-width: 550px) {
   .video-container {
