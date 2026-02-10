@@ -47,6 +47,19 @@ export default {
         return dateFormatter.utc(date).fromNow()
     },
 
+    /** 
+     * @param {Number} elapsed
+     * @returns Timer with format mm:ss
+    */
+    formattedTimer (elapsed) {
+        if (!elapsed) return
+        const minutes = Math.floor((elapsed % 3600) / 60).toString()
+        const seconds = (elapsed % 60).toString()
+
+        const formattedTime = `${minutes.padStart(2, "0")}:${seconds.padStart(2, "0")}`
+        return formattedTime
+    },
+
     /**
      * @param {String} qDate
      * @param {'exercise' | 'patient'} form 
