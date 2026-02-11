@@ -139,12 +139,13 @@
                 </q-tab-panels>
             </q-form>
             <q-card-actions align="right" class="text-primary" v-if="!this.testPatient">
-                <q-btn flat :label="$t('common.cancel')" v-close-popup />
+                <q-btn flat :label="$t('common.cancel')" v-close-popup no-caps />
                 <q-btn 
                     :label="$t('common.confirm')" 
                     type="submit" 
                     color="primary" 
                     class="q-ml-sm" 
+                    no-caps
                     @click="formSubmit()"
                 />
             </q-card-actions>
@@ -168,6 +169,8 @@
                     :label="$t('common.go_to_exercise')" 
                     type="submit" 
                     color="secondary" 
+                    no-caps
+                    icon-right="chevron_right"
                     @click="formSubmitMockPatient()"
                 />
             </q-card-actions>
@@ -187,7 +190,7 @@ export default {
     data () {
         return {
             patterns: {
-                name: [injuries => !injuries ? true : injuries.length <= 25 || this.$t('patient.form.name_error')],
+                name: [name => (!!name && name.length <= 25) || this.$t('patient.form.name_error')],
                 dob: [(date) => this.dateRestrictions(date) || this.$t('patient.form.date_error')],
                 measurements: (type) => [m => !m ? true : m <= 200 && m >= 0 || this.$t(`patient.form.${type}_error`)],
                 notes: [injuries => !injuries ? true : injuries.length <= 150 || this.$t('exercises.form.notes_error')],
@@ -230,17 +233,19 @@ export default {
     methods: {
         formSubmit () {
             let refs = Object.keys(this.$refs), formError = false
+            refs.shift()
             for (const r of refs) {
                 let refInput = this.$refs[r]
-                if (refInput.hasError) {
-                    refInput.validate()
-                    return this.$q.notify({
-                        color: 'negative',
-                        position: 'top',
-                        message: this.$t('common.notification.error'),
-                        icon: 'report_problem'
-                    })
-                }
+                if (refInput?.validate) refInput.validate()
+                if (refInput?.hasError) formError = true
+            }
+            if (formError) {
+                return this.$q.notify({
+                    color: 'negative',
+                    position: 'top',
+                    message: this.$t('common.notification.error'),
+                    icon: 'report_problem'
+                })
             }
             let userSubmitted = {
                 fullName: this.new.fullName,

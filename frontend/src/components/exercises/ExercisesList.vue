@@ -118,7 +118,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Cannot fetch current exercises: ' + err,
+          message: this.$t('exercises.notification.get_exercises_error', { error: err }),
           icon: 'warning'
         })
       }
@@ -136,7 +136,7 @@ export default {
             this.$q.notify({
               type: 'positive',
               position: 'top',
-              message: 'Created new exercise for current session',
+              message: this.$t('exercises.notification.add_exercise'),
             })
             await this.getExercises()
             this.navigateToExercise(resp.data.exercise.id)
@@ -144,11 +144,11 @@ export default {
         }
       } catch (err) {
         let errMsg = err
-        if (err.response && err.response.status == 400) errMsg = err.response.data
+        if (err.response?.status == 400) errMsg = this.$t('common.notification.error')
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Creating new exercise failed: ' + errMsg,
+          message:  this.$t('exercises.notification.add_exercise_error', { error: errMsg }),
           icon: 'report_problem'
         })
       }
@@ -159,18 +159,17 @@ export default {
       try {
         await API.deleteExercise(exercise.id, this.sessionID, exercise.videoFile)
         this.$q.notify({
-            color: 'info',
-            position: 'top',
-            message: 'Deleted exercise',
-            icon: 'info'
-          })
+          type: 'positive',
+          position: 'top',
+          message: this.$t('exercises.notification.delete_exercise')
+        })
         this.$emit('deletedExercise')
         return this.getExercises()
       } catch (err) {
-         this.$q.notify({
+        this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Cannot delete selected exercise from session: ' + err,
+          message: this.$t('exercises.notification.delete_exercise_error', { error: errMsg }),
           icon: 'warning'
         })
         return
@@ -183,19 +182,19 @@ export default {
           const { type, notes, videoFile } = exercise
           await API.editExercise(exercise.exerciseID, type, notes, videoFile)
           this.$q.notify({
-            type: 'positive',
+            type: 'info',
             position: 'top',
-            message: 'Updated exercise for current session',
+            message: this.$t('exercises.notification.update_exercise'),
           })
           await this.getExercises()
         }
       } catch (err) {
         let errMsg = err
-        if (err.response && err.response.status == 400) errMsg = err.response.data
+        if (err.response?.status == 400) errMsg = this.$t('common.notification.error')
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Updating exercise failed: ' + errMsg,
+          message: this.$t('exercises.notification.update_exercise_error', { error: errMsg }),
           icon: 'report_problem'
         })
       }

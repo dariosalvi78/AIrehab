@@ -273,10 +273,10 @@ export default {
     },
     async stopRecording () {
       this.isRecording = false
-      this.showPreview = true
-      if (this.mediaRecorder) {
+      if (this.mediaRecorder?.stream) {
         this.mediaRecorder.stream.getTracks().forEach( track => track.stop() )
         this.mediaRecorder.stop()
+        this.showPreview = true
       }
       if (this.timer?.interval) clearInterval(this.timer.interval)
       this.timer.elapsed = 0

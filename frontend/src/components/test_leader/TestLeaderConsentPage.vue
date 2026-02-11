@@ -72,21 +72,20 @@ export default {
       try {
         const updatedParticipation = this.participationStatus
         let response = await API.updateUserActivation(updatedParticipation)
-        if (response) {
+        if (response?.updatedStatus) {
           this.$q.notify({
             color: 'secondary',
             icon: 'info',
             position: 'top',
-            message: this.$t('common.update_consent_status'),
+            message: this.$t('common.notification.update_consent_status', response?.updatedStatus.activated ? 1 : 0),
           })
-          let q = this.user?.newSurveyAvailable ? '?redirect=survey' : ''
-          return this.$router.push(`/home${q}`)
+          return this.$router.push({ path: '/home', query: this.user?.newSurveyAvailable ? { redirect: 'survey' } : null })
         }
       } catch (err) {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: this.$t('common.update_consent_status_error', { error: err }),
+          message: this.$t('common.notification.update_consent_status_error', { error: err }),
           icon: 'warning'
         })
       }

@@ -109,12 +109,18 @@ export default {
   },
   async mounted () {
     this.resetForm()
+    let query = new URLSearchParams(window.location.search).get('p')
+    if (query) this.openPatientView({ patientID: query })
     this.$refs.panelForm.goTo('main')
     await this.getPatients()
   },
   watch: {
     async panel(updatedView) {
       if (!this.incomingSurvey && updatedView == 'main') await this.isNewSurveyAvailable()
+    },
+    $route(up) {
+      if (up.path == '/home' && !Object.keys(up?.query).length) return this.$refs.panelForm.goTo('main')
+      else if (up.query.p) return this.openPatientView({ patientID: up.query.p })
     }
   },
   methods: {
@@ -138,8 +144,9 @@ export default {
           })
         }
       } catch (e) {
-        let errorMsg = e
-        if (e.status === 409 || e.status === 400) errorMsg = e.response.data
+        let errorMsg = 
+          e.status === 400 ? this.$t('common.notification.error') :
+          e.status === 409 ? this.$t('patient.notification.patient_exist_error', { name: newUser.fullName }) : e
         this.$q.notify({
           color: 'negative',
           position: 'top',
@@ -157,6 +164,7 @@ export default {
           this.users = res.patients
           this.pagination.maxPageNo = res.maxPageNo
           this.isLoadingPatients = false
+          console.log('patients', this.users)
         }
       } catch (err) {
         return this.$q.notify({
@@ -185,18 +193,23 @@ export default {
           ok: { color: 'primary', label:this.$t('common.new_survey.action'), noCaps: true, push: true, size: 'lg', style: 'width: 100%;' },
           persistent: true,
           html: true,
-        }).onOk(() => { return this.$refs.panelForm.goTo('survey') })
+        }).onOk(() => {
+          this.$refs.panelForm.goTo('survey')
+          this.$router.push({ path: this.$route.path, query: { redirect: 'survey' } })
+        })
       } catch (err) { return }
     },
     async openPatientView (selectedUser) {
       let resp = await API.getPatient(selectedUser.patientID)
       this.selectedPatient = resp
       this.$refs.panelForm.goTo('view')
+      this.$router.push({ path: this.$route.path, query: { p: selectedUser.patientID } })
     },
     async openHomePage () {
       await this.getPatients()
       this.$refs.panelForm.goTo('main')
       this.incomingSurvey = undefined
+      this.$router.push(this.$route.path)
       window.scrollTo({ top: 0 })
     },
     resetForm () {

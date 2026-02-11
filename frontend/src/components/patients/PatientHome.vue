@@ -141,7 +141,7 @@
     <q-dialog ref="qDialogAuth" position="top">
       <q-card>
         <q-card-section>
-          <div class="text-h6">Patient is authenticated</div>
+          <div class="text-h6">{{ $t('patient.authentication.success.title') }}</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
           <span v-html="$refs.qDialogAuth.data" />
@@ -226,14 +226,12 @@ export default {
           return response.patient.activated
         }
       } catch (err) {
-        let errMsg = err
         this.authenticated = false
-        if (err.response.data.message) {
-          errMsg = err.response.data.message
+        if (err.response.status == 403) {
           this.$q.dialog({
             color: 'primary',
-            title: 'Authentication not possible',
-            message: errMsg,
+            title: this.$t('patient.authentication.error.title'),
+            message: this.$t('patient.authentication.error.description', { supportEmail: err.response.data.support }),
             ok: { color: 'primary' },
             position: 'top',
             cancel: true,
@@ -243,7 +241,7 @@ export default {
           this.$q.notify({
             color: 'negative',
             position: 'top',
-            message: 'Could not retrieve patient: ' + errMsg,
+            message: this.$t('patient.notification.get_patient_error', { error: err }),
             icon: 'report_problem'
           })
         }
@@ -262,7 +260,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Could not retrieve exercises: ' + err,
+          message: this.$t('exercises.notification.get_exercises_error', { error: err }),
           icon: 'report_problem'
         })
       }
@@ -280,9 +278,9 @@ export default {
             isValid: val => emailPattern(val), 
             type: 'text'
           },
-          ok: { color: 'primary', label: this.$t('common.confirm') },
+          ok: { color: 'primary', label: this.$t('common.confirm'), noCaps: true },
           persistent: true,
-          cancel: { class: 'q-btn--flat text-black', color: 'white', label: this.$t('common.cancel') },
+          cancel: { class: 'q-btn--flat text-black', color: 'white', label: this.$t('common.cancel'), noCaps: true },
           html: true
         }).onOk(async (email) => {
           this.$q.loading.show()
@@ -296,7 +294,7 @@ export default {
               this.$q.notify({
                 color: 'negative',
                 position: 'bottom',
-                message: 'Please provide another email address',
+                message: this.$t('patient.notification.email_error'),
                 icon: 'report_problem'
               })
               return this.sendPatientActivationLink()
@@ -306,7 +304,7 @@ export default {
             this.$q.notify({
               color: 'secondary',
               position: 'top',
-              message: 'Patient information has been sent to the provided email',
+              message: this.$t('patient.notification.email_sent'),
               icon: 'info'
             })
             this.updateParticipationStatus()
@@ -318,7 +316,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Not possible to send patient access link',
+          message: this.$t('common.notification.error_generic', { error: err }),
           icon: 'report_problem'
         })
       }
@@ -331,16 +329,21 @@ export default {
         this.$q.loading.show()
         await nicers.delay(200)
         let response = await API.updatePatientActivation(this.patientID, secret)
-        if (response.token && response.message) {
+        if (response.token) {
           this.authenticated = true
-          this.$refs.qDialogAuth.data = response.message
-          this.$refs.qDialogAuth.show()
+          let q = new URLSearchParams(window.location.search)
+          if (q?.get('scan') == 'new') {
+            this.$router.push({ path: this.$route.path, query: { access: this.secret } })
+            await nicers.delay(100)
+            this.$refs.qDialogAuth.data = this.$t('patient.authentication.success.description')
+            this.$refs.qDialogAuth.show()
+          }
         }
       } catch (err) {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Not possible to authenticate patient',
+          message: this.$t('patient.notification.authentication_error'),
           icon: 'report_problem'
         })
       }
@@ -361,7 +364,7 @@ export default {
           this.$q.notify({
             color: 'info',
             position: 'top',
-            message: 'Updated participation status',
+            message: this.$t('common.notification.update_consent_status', status ? 1 : 0),
             icon:'info'
           })
           await this.getPatientInfo()
@@ -370,7 +373,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Could not update participation: ' + err,
+          message: this.$t('common.notification.update_consent_status_error', { error: err }),
           icon: 'report_problem'
         })
         this.participationStatus = false
@@ -384,9 +387,9 @@ export default {
         color: 'primary',
         title: this.$t('patient.home.consent.withdraw.title'),
         message: this.$t('patient.home.consent.withdraw.description'),
-        ok: { color: 'primary', label: this.$t('patient.home.consent.withdraw.title') },
+        ok: { color: 'primary', label: this.$t('patient.home.consent.withdraw.title'), noCaps: true },
         persistent: true,
-        cancel: { class: 'q-btn--flat text-black', color: 'white', label: this.$t('common.cancel') },
+        cancel: { class: 'q-btn--flat text-black', color: 'white', label: this.$t('common.cancel'), noCaps: true },
         html: true
       }).onOk(() => {
         this.updateParticipationStatus()
@@ -433,10 +436,10 @@ export default {
     },
     async setManifestFile () {
       let manifest = null, template = await import('../../../manifest.json'),
-        patientURL = window.location.href
+        patientURL = window.location.href, display_name = `${this.patient.names} - ${this.$t('common.home')}`
       manifest = Object.assign(template.default, {
         start_url: patientURL, scope: patientURL,
-        name: `${this.patient.names} - POE assessment`
+        name: display_name, short_name: display_name
       })
 
       let content = JSON.stringify(manifest)

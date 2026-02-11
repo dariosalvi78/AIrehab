@@ -39,13 +39,14 @@
         />
     </q-form>
       <q-card-actions align="right" class="text-primary">
-          <q-btn flat :label="$t('common.cancel')" v-close-popup @click="resetForm"/>
+          <q-btn flat :label="$t('common.cancel')" no-caps v-close-popup @click="resetForm"/>
           <q-btn 
             :label="$t('common.confirm')"
             type="submit" 
             color="primary" 
             class="q-ml-sm" 
             @click="formSubmit"
+            no-caps
           />
       </q-card-actions>
     </q-card>

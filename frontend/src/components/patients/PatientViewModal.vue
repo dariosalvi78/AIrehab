@@ -191,9 +191,9 @@ export default {
         color: 'primary',
         title: this.$i18n.t('patient.delete'),
         message: this.$i18n.t('patient.delete_confirm', { name: deleted.names }),
-        ok: { color: 'negative', label: this.$i18n.t('common.delete') },
+        ok: { color: 'negative', label: this.$i18n.t('common.delete'), noCaps: true },
         persistent: false,
-        cancel: { flat: true, label: this.$i18n.t('common.cancel') },
+        cancel: { flat: true, label: this.$i18n.t('common.cancel'), noCaps: true },
         html: true
       })
       .onOk(async () => {
@@ -204,7 +204,7 @@ export default {
           this.$q.notify({
             color: 'info',
             position: 'top',
-            message: this.$t('patient.notification.patient.delete_patient', { name: deleted.names }),
+            message: this.$t('patient.notification.delete_patient', { name: deleted.names }),
             icon: 'info'
           })
           this.$emit('panelFormGoBack')
@@ -214,7 +214,7 @@ export default {
           this.$q.notify({
             color: 'negative',
             position: 'top',
-            message: this.$t('patient.notification.patient.delete_patient_error', { name: deleted.names, error: errMsg }),
+            message: this.$t('patient.notification.delete_patient_error', { name: deleted.names, error: errMsg }),
             icon: 'warning'
           })
         }
@@ -233,7 +233,7 @@ export default {
       try {
         let response = await API.getPatient(this.selectedPatient.id)
         if (response.access) {
-          let patientURL = '/patient/' + this.selectedPatient.id + '/profile?access=' + response.access
+          let patientURL = '/patient/' + this.selectedPatient.id + '/profile?access=' + response.access + '&scan=new'
           this.qr.value = window.origin + patientURL
           return this.qr.value
         }
