@@ -97,8 +97,6 @@ export default {
         }
     },
 
-    // TODO: let user complete registration using email
-    // allow physiotherapist to add user for now
     /**
      * Add one new patient and assigns them to a physiotherapist
      * @param {Object} req - express request
@@ -110,18 +108,12 @@ export default {
     addNewPatient: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
         let patient = req.body, results
-        if (!patient || !patient.fullName || !patient.dateOfBirth) {
-            return res.status(400).send('Please enter required fields')
-        }
+        if (!patient || !patient.fullName || !patient.dateOfBirth) return res.sendStatus(400)
 
         const checkIfPatient = await physiotherapist.getOnePatientByName(patient.fullName)
-        if (checkIfPatient) {
-            return res.status(409).send(`${patient.fullName} is already a patient`)
-        }
+        if (checkIfPatient) return res.sendStatus(409)
 
-        if (req.user.role == 'admin' && !req.query.physiotherapistEmail) {
-            return res.status(400).send('Please enter physiotherapist email')
-        }
+        if (req.user.role == 'admin' && !req.query.physiotherapistEmail) return res.status(400)
 
         try {
             if (req.user.role == 'physiotherapist') {
@@ -251,12 +243,7 @@ export default {
             const token = await signPatientAccessToken({ id, names, physiotherapistId, createdTimestamp, secret })
             res.cookie(patient_cookie.name, token, patient_cookie.options)
             logger.info({ patientID, assignedTo: physiotherapistId }, 'patient has authenticated to physiotherapist')
-            return res.send({ token: token, message: `
-                This patient has now been authenticated.
-                <br><br>Once you have decided to consent, we will send you an email so you can keep this page private.
-                <br><br>You can also bookmark this page if you prefer to view your results, or change your preferences.
-                <br><br>If you need to authenticate again, contact your physiotherapist to scan the QR-code or send verification link.
-            `}).status(200)
+            return res.send({ token: token }).status(200)
         }
         catch (err) {
             if ((err.expiredAt * 1000) >= new Date().getTime()) {
@@ -279,20 +266,14 @@ export default {
      * @returns {Promise<Types.User>}
      */
     getInfo: async (req, res) => {
-        if (!req.params.patientID || !req.query.secret) return res.sendStatus(403)
+        if (!req.params.patientID || !req.query.secret) return res.sendStatus(400)
         let patientID = req.params.patientID, secret = req.query.secret, response = {}
         try {
             if (req.cookies[session_cookie.name]) res.clearCookie(session_cookie.name, session_cookie.options)
             const cookie = req.cookies[patient_cookie.name]
             if (!cookie) {
                 const supportEmail = (await import('../utils/config.js')).default.admin.username 
-                return res.status(403).send({ 
-                    message: `
-                        Could not authenticate patient to physiotherapist.
-                        <br><br>Contact your physiotherapist to scan the QR-code again or tell them to send verification link.
-                        <br><br>If you need verification link right now, please contact <a href="mailto:${supportEmail}">${supportEmail}</a> 
-                    `
-                })
+                return res.status(403).send({ support: supportEmail })
             }
             let decoded_data = await verifyAuthToken(cookie)
             const patient = await physiotherapist.getOnePatientByID(decoded_data.patient.id)

@@ -104,7 +104,7 @@ export default {
                 else if (!sessionAssignedTo.activated) return res.sendStatus(400)
             }
 
-            if (!exercise || !exercise.sessionID) return res.status(400).send('Please enter required fields')
+            if (!exercise?.type || !exercise?.sessionID) return res.sendStatus(400)
 
             const addedExercise = await exercises.createExercise(exercise.sessionID, exercise)
             delete addedExercise.type
@@ -177,7 +177,7 @@ export default {
         if (!req.user || !req.params.exerciseID) return res.sendStatus(403)
         let exercise = req.body, exerciseID = req.params.exerciseID
         try {
-            if (!exercise) return res.status(400).send('Please enter required fields')
+            if (!exercise?.type || !exerciseID) return res.sendStatus(400)
 
             const updatedExercise = await exercises.updateOneExercise(exerciseID, exercise)
 
