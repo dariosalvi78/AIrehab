@@ -65,7 +65,7 @@ export default {
         `,
         name: 'Full name',
         name_hint: 'Patient full name',
-        name_error: 'Please enter a shorter name',
+        name_error: 'Please enter a valid name',
         date: 'Date',
         date_hint: 'Date of birth',
         date_error: 'Please enter valid date',
@@ -108,15 +108,39 @@ export default {
     activate_copy: 'Copy verification link',
     delete: 'Delete patient',
     delete_confirm: 'Are you sure you want to permanently delete patient <b>{name}</b>?',
+    authentication: {
+        error: {
+            title: 'Authentication not possible',
+            description: `
+                Could not authenticate current session to physiotherapist.
+                <br><br>Contact your physiotherapist to scan the QR-code again or tell them to send verification link.
+                <br><br>If you would like to get in contact with the administrator, contact <a href="mailto:{supportEmail}">{supportEmail}</a> 
+            `
+        },
+        success: {
+            title: 'Your personal page',
+            description: `
+                Welcome to your personal page,
+                <br><br>Once you have decided to consent, we will send you an email so you can keep this page private.
+                <br><br>You can also bookmark this page if you prefer to view your results, or change your preferences.
+                <br><br>If you need to authenticate again, contact your physiotherapist to scan the QR-code or send verification link.
+            `
+        }
+    },
     notification: {
         add_patient: 'Added new patient',
         add_patient_error: 'Patient registration failed: {error}',
+        patient_exist_error: '{name} is already a patient',
+        get_patient_error: 'Could not retrieve patient: {error}',
         get_patients_error: 'Something went wrong when retrieving patients: {error}',
-        patient_consent_needed: 'Patienten måste samtycka till forskningsstudien innan sessionen skapas.',
+        patient_consent_needed: 'Patient needs to consent to research study before creating session',
         edit_patient: 'Updated patient {name}',
         edit_patient_error: 'Patient update failed: {error}',
         delete_patient: 'Deleted patient {name}',
         delete_patient_error: 'Could not delete {name}: {error}',
-        generate_url_error: 'Cannot generate patient url: {error}'
+        generate_url_error: 'Cannot generate patient url: {error}',
+        email_sent: 'Information about the study has been sent to the provided email',
+        email_error: 'Please provide another email address',
+        authentication_error: 'Not possible to authenticate session'
     }
 }

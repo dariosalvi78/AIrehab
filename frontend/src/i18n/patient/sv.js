@@ -20,7 +20,7 @@ export default {
                 description: `
                     Innan du kan samtycka till att delta i studien måste du ange en e-postadress så att vi kan skicka viktiga påminnelser.
                     <br><br>
-                    <b>- Genom att klicka på "@.upper:{'common.confirm'}", godkänner du villkoren i informationsbrevet.</b>
+                    <b>- Genom att klicka på "@:{'common.confirm'}", godkänner du villkoren i informationsbrevet.</b>
                     <br><br>
                     Vänligen ange din e-postadress nedan.
                 `
@@ -36,7 +36,7 @@ export default {
                     <br><br>
                     Mer information finns i informationsbrevet.
                     <br><br>
-                    Tryck på "@.upper:{'patient.home.consent.withdraw.title'}" knappen för att ta bort ditt samtycke till studien.
+                    Tryck på "@:{'patient.home.consent.withdraw.title'}" knappen för att ta bort ditt samtycke till studien.
                 `
             }
         }
@@ -65,7 +65,7 @@ export default {
         `,
         name: 'Fullständiga namn',
         name_hint: 'Hela namnet på patienten',
-        name_error: 'Vänligen ange ett kortare namn',
+        name_error: 'Vänligen ange ett giltigt namn',
         date: 'Datum',
         date_hint: 'Födelsedatum',
         date_error: 'Vänligen ange ett giltigt datum',
@@ -108,15 +108,39 @@ export default {
     activate_copy: 'Kopiera verifieringslänk',
     delete: 'Ta bort patient',
     delete_confirm: 'Är du säker på att du vill permanent ta bort patienten <b>{name}</b>?',
+    authentication: {
+        error: {
+            title: 'Verifiering är inte möjligt',
+            description: `
+                Kunde inte verifiera att sessionen tillhör fysioterapeut/tränare.
+                <br><br>Kontakta din fysioterapeut/tränare för att få skanna QR-koden igen, eller be dem att skicka verifieringslänk.
+                <br><br>Om du vill kontakta administratören, hör av dig till <a href="mailto:{supportEmail}">{supportEmail}</a> 
+            `
+        },
+        success: {
+            title: 'Din personliga sida',
+            description: `
+                Välkommen till din personliga sida! Här kan du se dina utförda övningar, inställningar och frivilliga enkäter.<br><br>
+                När du har beslutat att ge samtycke till studien så skickar vi ett e-postmeddelande till dig så att du kan hålla denna sida privat.
+                <br><br>Det går också bra att lägga till denna sida som ett bokmärke för att ha smidig tillgång till dina resultat.
+                <br><br>Om du behöver autentisera dig igen, kontakta din fysioterapeut/tränare för att skanna QR-koden eller skicka verifieringslänken.
+            `
+        }
+    },
     notification: {
         add_patient: 'Ny patient tillagd',
         add_patient_error: 'Kunde inte lägga till patient: {error}',
+        patient_exist_error: '{name} är redan en patient',
+        get_patient_error: 'Kunde inte hämta patient: {error}',
         get_patients_error: 'Något gick fel vid hämtning av patienter: {error}',
-        patient_consent_needed: 'Patient needs to consent to research study before creating session',
+        patient_consent_needed: 'Patienten måste samtycka till forskningsstudien innan sessionen skapas.',
         edit_patient: 'Uppdaterade patient {name}',
         edit_patient_error: 'Kunde inte uppdatera patient: {error}',
         delete_patient: 'Tog bort patient {name}',
         delete_patient_error: 'Kunde inte ta bort {name}: {error}',
-        generate_url_error: 'Kan inte hämta patient länk: {error}'
+        generate_url_error: 'Kan inte hämta patient länk: {error}',
+        email_sent: 'Information om studien har skickats till den angivna e-postadressen',
+        email_error: 'Vänligen ange en annan e-postadress',
+        authentication_error: 'Det går inte att verifiera sessionen.'
     }
 }

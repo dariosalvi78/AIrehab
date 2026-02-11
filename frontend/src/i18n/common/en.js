@@ -86,7 +86,7 @@ export default {
     },
     notification: {
         error: 'Please review fields and try again',
-        error_generic: 'Error message: ',
+        error_generic: 'Error message: {error}',
         login_error: 'Login failed: {error}',
         login_missing: 'Enter email and password',
         login_wrong: 'Wrong credentials',
@@ -98,8 +98,9 @@ export default {
         password_updated_error: 'Could not reset password: {error}',
         password_same_error: 'Can not use same password as old one',
         password_reset_sent: 'Password reset link has been sent, check your inbox',
-        update_consent_status: 'Updated consent status',
-        update_consent_status_error: 'Could not update user consent: {error}',
-        copied_to_clipboard: 'Verification link copied to clipboard'
+        update_consent_status: 'You have agreed to participate in the study | You have withdrawn your consent',
+        update_consent_status_error: 'Could not update consent status: {error}',
+        copied_to_clipboard: 'Verification link copied to clipboard',
+        session_expired: 'Session expired, please log in again'
     }
 }

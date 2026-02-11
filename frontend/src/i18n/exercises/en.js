@@ -74,6 +74,13 @@ export default {
     },
     notification: {
         created_test_exercise: 'Created temporary test exercise',
+        get_exercises_error: 'Could not retrieve exercises: {error}',
+        add_exercise: 'Created new exercise for current session',
+        add_exercise_error: 'Creating new exercise failed: {error}',
+        delete_exercise: 'Exercise has been deleted',
+        delete_exercise_error: 'Cannot delete exercise from session: {error}',
+        update_exercise: 'Updated exercise for current session',
+        update_exercise_error: 'Could not update exercise: {error}',
         get_sessions_error: 'Something went wrong when retrieving sessions: {error}',
         session_not_found: 'Found no session with the given ID',
         get_session_error: 'Cannot fetch current session: {error}',

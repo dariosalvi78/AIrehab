@@ -89,7 +89,7 @@ export default {
     },
     notification: {
         error: 'Vänligen kontrollera fälten och försök igen',
-        error_generic: 'Felmeddelande: ',
+        error_generic: 'Felmeddelande: {error}',
         login_error: 'Inloggning misslyckades: {error}',
         login_missing: 'Ange e-postadress och lösenord',
         login_wrong: 'Felaktiga inloggningsuppgifter',
@@ -101,8 +101,9 @@ export default {
         password_updated_error: 'Kunde inte uppdatera lösenord: {error}',
         password_same_error: 'Får inte vara samma lösenord som gamla',
         password_reset_sent: 'Mejl med lösenordsåterställning har skickats, se din e-post inkorg.',
-        update_consent_status: 'Uppdaterad medgivande status',
+        update_consent_status: 'Du har godkänt till att delta i studien | Du har tagit bort ditt medgivande till studien',
         update_consent_status_error: 'Kunde inte uppdatera medgivande: {error}',
-        copied_to_clipboard: 'Verifieringslänk kopierad till urklipp'
+        copied_to_clipboard: 'Verifieringslänk kopierad till urklipp',
+        session_expired: 'Sessionen har gått ut, vänligen logga in igen'
     }
 }

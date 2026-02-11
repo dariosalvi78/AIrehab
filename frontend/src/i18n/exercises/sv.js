@@ -74,6 +74,13 @@ export default {
     },
     notification: {
         created_test_exercise: 'Skapade tillfällig övning',
+        get_exercises_error: 'Kan inte hämta övningar: {error}',
+        add_exercise: 'Skapade ny övning för nuvarande session',
+        add_exercise_error: 'Kunde inte skapa ny övning: {error}',
+        delete_exercise: 'Övning har tagits bort',
+        delete_exercise_error: 'Kunde inte ta bort övning från session: {error}',
+        update_exercise: 'Uppdaterade övning för session',
+        update_exercise_error: 'Kunde inte uppdatera övning: {error}',
         get_sessions_error: 'Något gick fel vid hämtning av sessioner: {error}',
         session_not_found: 'Hittade ingen session med angivna ID:et',
         get_session_error: 'Kan inte hämta nuvarande session: {error}',
