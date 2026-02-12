@@ -1,7 +1,7 @@
 <template>
   <q-page-container class="q-pb-md" style="padding-top: 16px;">
     <q-page v-if="session">
-      <q-btn round dense class="q-ml-md" color="primary" size="lg" icon="chevron_left" @click="this.$router.push('/home')" />        
+      <q-btn round dense class="q-ml-md" color="primary" size="lg" icon="chevron_left" @click="this.$router.push('/home?view=sessions')" />        
        <q-card flat class="q-pb-lg q-mt-sm">
         <q-card-section>
           <div class="text-h6">

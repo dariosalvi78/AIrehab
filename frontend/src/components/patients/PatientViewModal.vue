@@ -1,6 +1,5 @@
 <template>
   <div>
-    <q-separator />
     <q-btn class="q-ma-md" round dense color="primary" size="lg" icon="chevron_left" @click="$emit('panelFormGoBack')" />
     <div class="q-pa-md flex justify-between patient-view-width">
       <q-btn-group class="full-width" spread>
@@ -62,7 +61,7 @@
         </div>
       </q-card-section>
       <q-separator />
-      <q-card-section>
+      <q-card-section style="min-height: 300px;">
         <div class="text-subtitle1 q-mb-sm flex">
           <q-icon class="q-mr-sm" size="sm" name="notes"/>
           {{ $t('patient.profile.notes') }}
@@ -148,15 +147,17 @@ export default {
           this.$q.notify({
             type: 'positive',
             position: 'top',
-            message: this.$t('patient.notification.exercises.add_session', { name: selectedPatient.names }),
+            message: this.$t('exercises.notification.add_session', { name: selectedPatient.names }),
           })
           this.navigateToSession(resp.data.session.id)
         }
       } catch (err) {
+        let errMsg = err
+        if (!err.response?.data.activated) errMsg = this.$t('exercises.notification.user_consent_missing')
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: this.$t('patient.notification.exercises.add_session_error', { error: err }),
+          message: this.$t('exercises.notification.add_session_error', { error: errMsg }),
           icon: 'report_problem'
         })
       }

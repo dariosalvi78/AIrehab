@@ -144,7 +144,8 @@ export default {
         }
       } catch (err) {
         let errMsg = err
-        if (err.response?.status == 400) errMsg = this.$t('common.notification.error')
+        err.response?.status == 400 ? errMsg = this.$t('common.notification.error') :
+          !err.response.data?.activated ? errMsg = this.$t('exercises.notification.user_consent_missing') : ''
         this.$q.notify({
           color: 'negative',
           position: 'top',

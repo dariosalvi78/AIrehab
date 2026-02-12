@@ -43,7 +43,7 @@ export default {
         this.$q.notify({
           color: 'secondary',
           position: 'top',
-          message: 'Session expired, please log in again',
+          message: this.$t('common.notification.session_expired'),
           icon: 'info'
         })
       }

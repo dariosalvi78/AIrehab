@@ -1,20 +1,22 @@
 <template>
-   <q-layout>
+   <q-layout v-touch-swipe.mouse.right.left="showNewUserPrompt ? handleSwipe : ''">
     <q-page-container>
-      <q-card-actions v-show="!isLoadingPatients" class="flex flex-center" v-if="showNewUserPrompt">      
-        <q-btn class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
-          <q-icon left name="group_add"/>
-          <div>{{ $t('patient.add') }}</div>
-        </q-btn>
-        <patient-edit-form
-          :user="{}"
-          formMode="new" 
-          v-model="newUserPrompt" 
-          @addNewPatient="addNewUser"
-        />
-      </q-card-actions>
-      <q-tab-panels v-model="panel" ref="panelForm" vertical class="shadow-2 rounded-borders">
-        <q-tab-panel id="panel" name="main" class="q-px-none" v-show="users.length >= 1 && pagination.maxPageNo >= 1" >
+      <q-tab-panels v-model="panel" ref="panelForm" class="shadow-2 rounded-borders" animated>
+        <q-tab-panel id="panel" name="patients" class="q-px-none" v-show="users.length >= 1 && pagination.maxPageNo >= 1">
+          <div class="text-h4 q-mx-md q-mb-md">{{ $t('common.tabs.patients') }}</div>
+          <q-separator />
+          <q-card-actions v-show="!isLoadingPatients" class="flex flex-center q-mt-md" v-if="showNewUserPrompt">      
+            <q-btn class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+              <q-icon left name="group_add"/>
+              <div>{{ $t('patient.add') }}</div>
+            </q-btn>
+            <patient-edit-form
+              :user="{}"
+              formMode="new" 
+              v-model="newUserPrompt" 
+              @addNewPatient="addNewUser"
+            />
+          </q-card-actions>
           <patients-list
             @openView="openPatientView"
             @handleSortOrder="(sort) => handleSortOrder(sort)"
@@ -37,14 +39,12 @@
             gutter="sm"
           />
         </q-tab-panel>
-        <q-tab-panel name="view" class="q-px-none" v-show="users.length >= 1 && pagination.maxPageNo >= 1">
-          <transition appear enter-active-class="animated fadeIn">
-            <patient-view-modal 
-              :selectedPatient="selectedPatient" 
-              @openView="openPatientView"
-              @panelFormGoBack="openHomePage"
-            />
-          </transition>
+        <q-tab-panel name="view" class="q-pa-none" v-show="users.length >= 1 && pagination.maxPageNo >= 1">
+          <patient-view-modal 
+            :selectedPatient="selectedPatient" 
+            @openView="openPatientView"
+            @panelFormGoBack="openHomePage"
+          />
         </q-tab-panel>
         <q-tab-panel name="survey" class="q-my-md">
           <survey-form
@@ -52,20 +52,18 @@
             @panelFormGoBack="openHomePage"
           />
         </q-tab-panel>
+        <div v-if="isLoadingPatients" class="q-ma-md flex flex-center">
+          <q-spinner-dots color="primary" size="3em" />
+        </div>
+        <div v-else-if="this.panel !== 'survey' && pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
+          <q-chip outline :ripple="false" icon="people" color="primary" text-color="white" >{{ $t('patient.not_found') }}</q-chip>
+        </div>
+        <q-tab-panel name="sessions" class="q-px-none">
+          <div class="text-h4 q-mx-md q-mb-md">{{ $t('common.tabs.sessions') }}</div>
+          <q-separator />
+          <sessions-list />
+        </q-tab-panel>
       </q-tab-panels>
-      <div v-if="isLoadingPatients" class="q-ma-md flex flex-center">
-        <q-spinner-dots
-          color="primary"
-          size="3em"
-        />
-      </div>
-      <div v-else-if="this.panel !== 'survey' && pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
-        <q-chip outline :ripple="false" icon="people" color="primary" text-color="white" >{{ $t('patient.not_found') }}</q-chip>
-      </div>
-      <div v-if="panel == 'main'">
-        <q-separator />
-        <sessions-list v-if="!isLoadingPatients" :selectedPatient="selectedPatient" />
-      </div>
     </q-page-container>
   </q-layout>
 </template>
@@ -83,12 +81,13 @@ import { mergeLocaleMessages } from 'src/boot/i18n'
 export default {
   name: 'TestLeaderHome',
   components: { PatientEditForm, SessionsList, PatientViewModal, PatientsList, SurveyForm },
-  props: { user: Object },
+  props: { user: Object, currentTab: String },
+  emits: ['handle:swipe'],
   i18n: await mergeLocaleMessages(['exercises', 'patient']),
   data () {
     return {
       newUserPrompt: false,
-      panel: undefined,
+      panel: this.currentTab,
       users: [],
       selectedPatient: undefined,
       isLoadingPatients: true,
@@ -109,18 +108,23 @@ export default {
   },
   async mounted () {
     this.resetForm()
-    let query = new URLSearchParams(window.location.search).get('p')
-    if (query) this.openPatientView({ patientID: query })
-    this.$refs.panelForm.goTo('main')
-    await this.getPatients()
+    let qPatientID = new URLSearchParams(window.location.search).get('p')
+    if (this.panel == 'patients') {
+      await this.getPatients()
+      if (qPatientID) this.openPatientView({ patientID: qPatientID })
+    }
   },
   watch: {
     async panel(updatedView) {
-      if (!this.incomingSurvey && updatedView == 'main') await this.isNewSurveyAvailable()
+      if (!this.incomingSurvey && updatedView == 'patients') {
+        await this.getPatients()
+        await this.isNewSurveyAvailable()
+      }
     },
     $route(up) {
-      if (up.path == '/home' && !Object.keys(up?.query).length) return this.$refs.panelForm.goTo('main')
+      if (up.path == '/home' && !Object.keys(up?.query).length) return this.$refs.panelForm.goTo('patients')
       else if (up.query.p) return this.openPatientView({ patientID: up.query.p })
+      else if (up.query.view) return this.$refs.panelForm.goTo(up.query.view)
     }
   },
   methods: {
@@ -164,7 +168,6 @@ export default {
           this.users = res.patients
           this.pagination.maxPageNo = res.maxPageNo
           this.isLoadingPatients = false
-          console.log('patients', this.users)
         }
       } catch (err) {
         return this.$q.notify({
@@ -207,7 +210,7 @@ export default {
     },
     async openHomePage () {
       await this.getPatients()
-      this.$refs.panelForm.goTo('main')
+      this.$refs.panelForm.goTo('patients')
       this.incomingSurvey = undefined
       this.$router.push(this.$route.path)
       window.scrollTo({ top: 0 })
@@ -230,7 +233,8 @@ export default {
     },
     async goToTestExercise (sessionID, exerciseID) {
       return this.$router.push('home/sessions/' + sessionID + '/exercise/' + exerciseID)
-    }
+    },
+    handleSwipe (e) { return this.$emit('handle:swipe', e) }
   },
   computed: { showNewUserPrompt () { return this.panel !== 'consent' && this.panel !== 'survey' } }
 }

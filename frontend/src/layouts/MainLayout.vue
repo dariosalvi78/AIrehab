@@ -1,13 +1,13 @@
 <template>
   <q-layout v-if="isLoggedIn" view="lHh Lpr lFf" class="mainLayout m-width">
-    <q-header elevated class="header m-width shadow-2">
+    <q-header elevated class="header m-width shadow-2 bg-blue-grey-1 text-blue-grey-10">
       <q-toolbar>
         <q-btn flat round dense icon="menu">
           <q-menu>
             <q-list dense style="min-width: 100px">
               <q-item>
                 <q-item-section>
-                  <div class="text-subtitle2">POE App v. {{appVersion}}</div>
+                  <div class="text-subtitle2">POE Assessment v. {{appVersion}}</div>
                 </q-item-section>
               </q-item>
               <q-item v-if="this.user?.lastLoginTimestamp">
@@ -35,7 +35,7 @@
                   </q-list>
                 </q-menu>
               </q-item>
-              <q-item v-if="!this.$route.path.includes('invitation') && user.role !== 'admin'" clickable to="/home/consent" exact>
+              <q-item v-if="isTestleader" clickable to="/home/consent" exact>
                 <q-item-section>{{ $t('common.header.consent') }}</q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
@@ -50,14 +50,22 @@
             </q-list>
           </q-menu>
         </q-btn>
-        <q-chip outline square size="12px" class="q-mr-none text-white">
+        <q-chip outline square size="12px" class="q-mr-none" color="blue-grey-9">
           {{user.email}}
         </q-chip>
         <q-space />
         <q-btn flat dense icon="logout" :label="$t('common.logout')" no-caps @click="logout()" />
       </q-toolbar>
     </q-header>
-    <router-view :user="this.user" />
+    <router-view :user="this.user" :currentTab="tab" @handle:swipe="setTabFromDirection"/>
+    <q-footer v-if="isLoggedIn && user.role !== 'admin'" bordered class="bg-blue-grey-1 m-width">
+      <q-tabs v-model="tab" dense align="justify">
+        <q-tab 
+          v-for="tab in tabs" :key="tab" no-caps :name="tab.name" :label="`${this.$t(`common.tabs.${tab.name}`)} · ${tab.count}`" 
+          :icon="tab.name == 'patients' ? 'group' : 'accessibility'" :class="tab.name == 'patients' ? 'text-primary' : 'text-secondary'"
+        />
+      </q-tabs>
+    </q-footer>
   </q-layout>
   <div v-else class="q-ma-md flex flex-center">
     <q-spinner-dots color="primary" size="3em" />
@@ -75,12 +83,23 @@ export default {
   data () {
     return {
       appVersion: JSON.parse(process.env.APP_VERSION),
-      user: undefined
+      user: undefined,
+      tab: undefined,
+      tabs: {
+        patients: { name: 'patients', count: 0 },
+        sessions: { name: 'sessions', count: 0 }
+      }
     }
   },
   async beforeMount () {
     await this.isOnInvitedPage()
     if (!this.user) this.user = await this.getLoggedInUser()
+
+    if (this.isTestleader) {
+      const data = this.user.count
+      for (const d of Object.keys(data)) this.tabs[d].count = this.user.count[d]
+      this.tab = this.updateTabs()
+    }
   },
   methods: {
     async logout () {
@@ -116,14 +135,40 @@ export default {
       const token = q.get('token'), email = q.get('email')
       this.user = { email, token }
       return
+    },
+    updateTabs () {
+      if (this.$route.path !== '/home') return
+      let found = Object.keys(this.tabs)[0], qTab = new URLSearchParams(window.location.search).get('view')
+      for (const t of Object.keys(this.tabs)) {
+        if (t == qTab) { found = qTab; break }
+      }
+      return found
+    },
+    setTabFromDirection (e) {
+      if (!e.direction) return
+      return e.direction == 'left'
+        ? this.tab = 'sessions'
+        : this.tab = 'patients'
     }
   },
-  computed: {
+  computed: { 
     isLoggedIn () {
       if (this.user) return this.$route.path !== '/login' && this.user.email
     },
     formatloginTimestamp () {
       return nicers.formattedDayOfMonth(this.user.lastLoginTimestamp)
+    },
+    isTestleader () {
+      if (!this.user) return
+      return !this.$route.path.includes('invitation') && this.user.role !== 'admin'
+    }
+  },
+  watch: {
+    tab (up) {
+      if (up) this.$router.push({ path: '/home', query: { view: up } })
+    },
+    $route () {
+      this.tab = this.updateTabs()
     }
   }
 }
@@ -134,7 +179,6 @@ export default {
   background-color: #fff;
 }
 .header {
-  margin: auto auto 1em auto;
   position: sticky;
   position: -webkit-sticky;
 }
