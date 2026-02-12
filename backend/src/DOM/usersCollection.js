@@ -85,8 +85,14 @@ export default {
     getUserByEmail: async function (email) {
         const response = await db.query(`
             SELECT TOP 1 
-            id, email, hashedPassword, role, createdTimestamp, lastLoginTimestamp, activated FROM [user]
-            WHERE email = '${email}';
+            u.id, u.email, u.hashedPassword, u.role, u.createdTimestamp, u.lastLoginTimestamp, u.activated, 
+                COUNT(p.id) as patientCount,
+                COUNT(s.patientId) as sessionCount
+            FROM [user] u
+                INNER JOIN [patient] p ON p.physiotherapistId = u.id
+                LEFT JOIN [physiotherapy_session] s ON p.id = s.patientId
+            WHERE u.email = '${email}'
+                GROUP BY u.id, u.email, u.hashedPassword, u.role, u.createdTimestamp, u.lastLoginTimestamp, u.activated;
         `)
         return response.recordset[0]
     },

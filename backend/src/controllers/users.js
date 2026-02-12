@@ -30,6 +30,8 @@ export default {
                 delete user.hashedPassword
                 delete user.createdTimestamp
                 delete user.lastLoginTimestamp
+                delete user.patientCount
+                delete user.sessionCount
 
                 logger.debug({ data: user }, 'user logged in')
                 const token = await signAccessToken(user)
@@ -264,7 +266,8 @@ export default {
                 email: user.email,
                 lastLoginTimestamp: user.lastLoginTimestamp,
                 activated: user.activated,
-                role: user.role
+                role: user.role,
+                count: { patients: user.patientCount, sessions: user.sessionCount }
             }
             if (user?.role !== 'admin') response.newSurveyAvailable = await scheduler.isSurveyAvailable(user.id, user.role)
             return res.json(response)

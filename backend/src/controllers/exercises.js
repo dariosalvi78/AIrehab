@@ -99,6 +99,7 @@ export default {
         let exercise = req.body
         try {
             if (req.user.role == 'physiotherapist') {
+                if (!req.user?.activated) return res.status(403).send({ activated: req.user.activated })
                 const sessionAssignedTo = await sessions.getSessionByID(exercise.sessionID, req.user.email)
                 if (sessionAssignedTo.id !== exercise.sessionID) return res.sendStatus(403)
                 else if (!sessionAssignedTo.activated) return res.sendStatus(400)

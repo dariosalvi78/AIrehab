@@ -70,6 +70,7 @@ export default {
 
         try {
             if (req.user.role == 'physiotherapist') {
+                if (!req.user?.activated) return res.status(403).send({ activated: req.user.activated })
                 const isAssignedTo = await physiotherapist.getOnePatientByEmail(req.user.email, patientID)
                 if (!isAssignedTo) return res.sendStatus(403)
             }
