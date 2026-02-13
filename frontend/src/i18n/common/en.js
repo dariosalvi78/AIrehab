@@ -13,10 +13,15 @@ export default {
     password: 'Password',
     forgot_password: 'Forgot password',
     home: 'Home',
+    go_back: 'Go back',
     header: {
         language: 'Language',
         about: 'About',
         consent: 'Change consent'
+    },
+    tabs: {
+        patients: 'Your patients',
+        sessions: 'All sessions'
     },
     password_reset: {
         title: 'Password reset',

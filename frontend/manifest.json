@@ -33,7 +33,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#1976D2",
+  "theme_color": "#eceff1",
   "orientation": "any",
   "background_color": "#ffffff"
 }

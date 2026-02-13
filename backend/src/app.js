@@ -29,7 +29,8 @@ import logger from './utils/logger.js'
         contentSecurityPolicy: {
             directives: {
                 'media-src': [`'self' blob:`],
-                'img-src': [`'self' data:`]
+                'img-src': [`'self' data:`],
+                'manifest-src': [`'self' blob:`]
             }
         }
     }))

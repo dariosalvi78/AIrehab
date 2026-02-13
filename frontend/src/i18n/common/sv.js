@@ -13,10 +13,15 @@ export default {
     password: 'Lösenord',
     forgot_password: 'Glömt lösenord',
     home: 'Hem',
+    go_back: 'Gå tillbaka',
     header: {
         language: 'Språk',
         about: 'Mer info',
         consent: 'Ändra samtycke'
+    },
+    tabs: {
+        patients: 'Dina patienter',
+        sessions: 'Alla sessioner'
     },
     password_reset: {
         title: 'Lösenordsåterställning',
