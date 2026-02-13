@@ -1,6 +1,6 @@
 <template>
   <q-layout v-if="patient" view="lHh Lpr lFf" class="m-width">
-    <q-header elevated class="header m-width shadow-2">
+    <q-header elevated class="header m-width shadow-2 layout-theme">
       <q-toolbar>
         <q-avatar>
           <img src="/icons/favicon-maskable.ico">

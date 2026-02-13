@@ -1,6 +1,6 @@
 <template>
   <q-layout v-if="isLoggedIn" view="lHh Lpr lFf" class="mainLayout m-width">
-    <q-header elevated class="header m-width shadow-2 bg-blue-grey-1 text-blue-grey-10">
+    <q-header elevated class="header m-width shadow-2 layout-theme">
       <q-toolbar>
         <q-btn flat round dense icon="menu">
           <q-menu>
@@ -50,15 +50,19 @@
             </q-list>
           </q-menu>
         </q-btn>
-        <q-chip outline square size="12px" class="q-mr-none" color="blue-grey-9">
+        <q-chip outline square size="12px" class="q-mr-none layout-secondary">
           {{user.email}}
         </q-chip>
         <q-space />
-        <q-btn flat dense icon="logout" :label="$t('common.logout')" no-caps @click="logout()" />
+        <q-btn flat dense icon="logout" :label="!onInvitationPage ? $t('common.logout') : $t('common.go_back')" no-caps @click="logout()" />
       </q-toolbar>
     </q-header>
-    <router-view :user="this.user" :currentTab="tab" @handle:swipe="setTabFromDirection"/>
-    <q-footer v-if="isLoggedIn && user.role !== 'admin'" bordered class="bg-blue-grey-1 m-width">
+    <router-view v-slot="{ Component }" :user="this.user" :currentTab="tab" @handle:swipe="setTabFromDirection" @update:tabs="setTabs">
+      <transition appear enter-active-class="animated fadeIn">
+        <component :is="Component"></component>
+      </transition>
+    </router-view>
+    <q-footer v-if="isLoggedIn && isTestleader" bordered class="layout-theme m-width">
       <q-tabs v-model="tab" dense align="justify">
         <q-tab 
           v-for="tab in tabs" :key="tab" no-caps :name="tab.name" :label="`${this.$t(`common.tabs.${tab.name}`)} · ${tab.count}`" 
@@ -149,6 +153,11 @@ export default {
       return e.direction == 'left'
         ? this.tab = 'sessions'
         : this.tab = 'patients'
+    },
+    setTabs (name, newCount) {
+      newCount == 'add'
+        ? this.tabs[name].count++
+        : this.tabs[name].count = newCount
     }
   },
   computed: { 
@@ -161,15 +170,14 @@ export default {
     isTestleader () {
       if (!this.user) return
       return !this.$route.path.includes('invitation') && this.user.role !== 'admin'
-    }
+    },
+    onInvitationPage () { return this.$route.path.includes('invitation') }
   },
   watch: {
     tab (up) {
-      if (up) this.$router.push({ path: '/home', query: { view: up } })
+      if (up && !this.$route.query?.redirect) this.$router.push({ path: '/home', query: { view: up } })
     },
-    $route () {
-      this.tab = this.updateTabs()
-    }
+    $route (up) { this.tab = this.updateTabs() }
   }
 }
 </script>

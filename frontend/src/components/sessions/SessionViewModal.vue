@@ -117,10 +117,9 @@ export default {
           message: this.$t('exercises.notification.session_deleted'),
           icon: 'info'
         })
-        this.$router.push('/home')
+        this.$router.push('/home?view=sessions')
       } catch (err) {
-        let errMsg = err
-        if (err.response && err.response.status == 409) errMsg = err.response.data
+        let errMsg = err.response?.status == 409 ? this.$t('exercises.notification.session_ongoing') : err
         this.$q.notify({
           color: 'negative',
           position: 'top',

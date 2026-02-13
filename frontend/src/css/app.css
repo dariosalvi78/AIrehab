@@ -1,9 +1,23 @@
 /* app global css */
 
+:root {
+    --layout-bg: #eceff1;
+    --layout-color: '#263238';
+}
+
 .m-width {
-    max-width: 800px;
+    max-width: 1080px;
     width: 100%;
     margin: 0 auto;
+}
+
+.layout-theme {
+    background-color: var(--layout-bg);
+    color: var(--layout-color);
+}
+
+.layout-secondary {
+    color: var(--layout-color);
 }
 
 .list-line {

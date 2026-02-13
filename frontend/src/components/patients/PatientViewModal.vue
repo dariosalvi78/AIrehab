@@ -112,7 +112,7 @@ import { QrcodeSvg } from 'qrcode.vue'
 export default {
   name: 'PatientViewModal',
   props: { selectedPatient: Object },
-  emits: ['openView', 'panelFormGoBack'],
+  emits: ['openView', 'panelFormGoBack', 'update:tabs'],
   components: { PatientEditForm, QrcodeSvg },
   data () {
     return {
@@ -150,6 +150,7 @@ export default {
             message: this.$t('exercises.notification.add_session', { name: selectedPatient.names }),
           })
           this.navigateToSession(resp.data.session.id)
+          this.$emit('update:tabs', 'sessions', 'add')
         }
       } catch (err) {
         let errMsg = err

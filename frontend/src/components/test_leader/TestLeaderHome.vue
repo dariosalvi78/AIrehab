@@ -2,10 +2,10 @@
    <q-layout v-touch-swipe.mouse.right.left="showNewUserPrompt ? handleSwipe : ''">
     <q-page-container>
       <q-tab-panels v-model="panel" ref="panelForm" class="shadow-2 rounded-borders" animated>
-        <q-tab-panel id="panel" name="patients" class="q-px-none" v-show="users.length >= 1 && pagination.maxPageNo >= 1">
-          <div class="text-h4 q-mx-md q-mb-md">{{ $t('common.tabs.patients') }}</div>
+        <q-tab-panel v-show="!isLoadingPatients" id="panel" name="patients" class="q-px-none">
+          <div class="text-h4 q-mx-md q-mb-md text-weight-light">{{ $t('common.tabs.patients') }}</div>
           <q-separator />
-          <q-card-actions v-show="!isLoadingPatients" class="flex flex-center q-mt-md" v-if="showNewUserPrompt">      
+          <q-card-actions class="flex flex-center q-mt-md" v-if="showNewUserPrompt">      
             <q-btn class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
               <q-icon left name="group_add"/>
               <div>{{ $t('patient.add') }}</div>
@@ -18,11 +18,18 @@
             />
           </q-card-actions>
           <patients-list
+            v-if="users.length >= 1 && pagination.maxPageNo >= 1"
             @openView="openPatientView"
             @handleSortOrder="(sort) => handleSortOrder(sort)"
             :patients="users"
             :pagination="pagination"
           />
+          <div v-else-if="panel !== 'survey' && pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
+            <q-chip outline :ripple="false" icon="people" color="primary" text-color="white" >{{ $t('patient.not_found') }}</q-chip>
+          </div>
+          <div v-else class="q-ma-md flex flex-center">
+            <q-spinner-dots color="primary" size="3em" />
+          </div>
           <q-pagination
             v-if="pagination.maxPageNo >= 1"
             v-model="pagination.pageNo"
@@ -44,26 +51,21 @@
             :selectedPatient="selectedPatient" 
             @openView="openPatientView"
             @panelFormGoBack="openHomePage"
+            @update:tabs="updateTabs"
           />
         </q-tab-panel>
-        <q-tab-panel name="survey" class="q-my-md">
-          <survey-form
-            :incomingSurvey="this.incomingSurvey"
-            @panelFormGoBack="openHomePage"
-          />
-        </q-tab-panel>
-        <div v-if="isLoadingPatients" class="q-ma-md flex flex-center">
-          <q-spinner-dots color="primary" size="3em" />
-        </div>
-        <div v-else-if="this.panel !== 'survey' && pagination.maxPageNo <= 0" class="q-py-md text-body1 flex flex-center">
-          <q-chip outline :ripple="false" icon="people" color="primary" text-color="white" >{{ $t('patient.not_found') }}</q-chip>
-        </div>
         <q-tab-panel name="sessions" class="q-px-none">
-          <div class="text-h4 q-mx-md q-mb-md">{{ $t('common.tabs.sessions') }}</div>
+          <div class="text-h4 q-mx-md q-mb-md text-weight-light">{{ $t('common.tabs.sessions') }}</div>
           <q-separator />
-          <sessions-list />
+          <sessions-list @update:tabs="updateTabs" />
         </q-tab-panel>
       </q-tab-panels>
+      <div v-if="panel == 'survey'" id="survey" class="q-ma-md">
+        <survey-form
+          :incomingSurvey="this.incomingSurvey"
+          @panelFormGoBack="openHomePage"
+        />
+      </div>
     </q-page-container>
   </q-layout>
 </template>
@@ -82,7 +84,7 @@ export default {
   name: 'TestLeaderHome',
   components: { PatientEditForm, SessionsList, PatientViewModal, PatientsList, SurveyForm },
   props: { user: Object, currentTab: String },
-  emits: ['handle:swipe'],
+  emits: ['handle:swipe', 'update:tabs'],
   i18n: await mergeLocaleMessages(['exercises', 'patient']),
   data () {
     return {
@@ -109,6 +111,7 @@ export default {
   async mounted () {
     this.resetForm()
     let qPatientID = new URLSearchParams(window.location.search).get('p')
+    await this.isNewSurveyAvailable()
     if (this.panel == 'patients') {
       await this.getPatients()
       if (qPatientID) this.openPatientView({ patientID: qPatientID })
@@ -116,10 +119,8 @@ export default {
   },
   watch: {
     async panel(updatedView) {
-      if (!this.incomingSurvey && updatedView == 'patients') {
-        await this.getPatients()
-        await this.isNewSurveyAvailable()
-      }
+      if (updatedView !== 'survey') await this.isNewSurveyAvailable()
+      if (!this.incomingSurvey && updatedView == 'patients') await this.getPatients()
     },
     $route(up) {
       if (up.path == '/home' && !Object.keys(up?.query).length) return this.$refs.panelForm.goTo('patients')
@@ -168,6 +169,7 @@ export default {
           this.users = res.patients
           this.pagination.maxPageNo = res.maxPageNo
           this.isLoadingPatients = false
+          this.updateTabs(this.currentTab, res.count)
         }
       } catch (err) {
         return this.$q.notify({
@@ -187,7 +189,7 @@ export default {
         this.incomingSurvey = newSurveyAvailable
 
         let q = new URLSearchParams(window.location.search)
-        if (q?.get('redirect') === 'survey') return this.$refs.panelForm.goTo('survey')
+        if (q?.get('redirect') === 'survey') return this.panel = 'survey'
 
         this.$q.dialog({
           color: 'primary', 
@@ -197,7 +199,7 @@ export default {
           persistent: true,
           html: true,
         }).onOk(() => {
-          this.$refs.panelForm.goTo('survey')
+          this.panel = 'survey'
           this.$router.push({ path: this.$route.path, query: { redirect: 'survey' } })
         })
       } catch (err) { return }
@@ -234,7 +236,8 @@ export default {
     async goToTestExercise (sessionID, exerciseID) {
       return this.$router.push('home/sessions/' + sessionID + '/exercise/' + exerciseID)
     },
-    handleSwipe (e) { return this.$emit('handle:swipe', e) }
+    handleSwipe (e) { return this.$emit('handle:swipe', e) },
+    updateTabs(name, newCount) { return this.$emit('update:tabs', name, newCount) }
   },
   computed: { showNewUserPrompt () { return this.panel !== 'consent' && this.panel !== 'survey' } }
 }

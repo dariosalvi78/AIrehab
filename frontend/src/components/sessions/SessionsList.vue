@@ -78,6 +78,7 @@ import nicers from '../../utils/nicers'
 export default {
   name: 'ExerciseSessions',
   props: { selectedPatient: Object },
+  emits: ['update:tabs'],
   data () {
     return {
       sessions: [],
@@ -102,7 +103,8 @@ export default {
           this.sessions = resp.sessions
           this.pagination.maxPageNo = resp.maxPageNo
           this.isLoadingSessions = false
-        }     
+          this.$emit('update:tabs', 'sessions', resp.count)
+        }
       } catch (err) {
         return this.$q.notify({
           color: 'negative',
@@ -111,7 +113,6 @@ export default {
           icon: 'warning'
         })
       }
-   
     },
     async handlePageSession (no) {
       this.pagination.pageNo = no

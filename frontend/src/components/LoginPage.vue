@@ -14,7 +14,7 @@
             <q-card-section class="q-px-sm">
               <form autocomplete="on">
                 <q-input
-                  class="q-my-md"
+                  class="q-my-md text-body1"
                   v-model.trim="email"
                   type="email"
                   :label="$t('common.email')"
@@ -26,7 +26,7 @@
                   </template>
                 </q-input>
                 <q-input 
-                  class="q-my-md"
+                  class="q-my-md text-body1"
                   v-model.trim="password"
                   :type="(!showPassword) ? 'password' : 'text'"
                   :label="$t('common.password')"
