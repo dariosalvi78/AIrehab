@@ -24,7 +24,7 @@ export default {
                 physiotherapy_sessions = await sessions.getSessions()
             } else if (req.user.role == 'physiotherapist') {
                 let results = await sessions.getSessionsByEmail(req.user.email, req.query.pagination)
-                physiotherapy_sessions = { sessions: results[0], maxPageNo: results[results.length - 1][0].maxPage }
+                physiotherapy_sessions = { sessions: results[0], maxPageNo: results[results.length - 1][0].maxPage, count: results[results.length - 1][0].count }
             }
             res.send(physiotherapy_sessions)
             return
@@ -101,9 +101,7 @@ export default {
         try {
             if (req.user.role == 'physiotherapist') {
                 const checkIfExercises = await exercises.getExercisesInSessionByEmail(sessionID, req.user.email)
-                if (checkIfExercises.length >= 1) {
-                    return res.status(409).send('Session has ongoing exercises')
-                }
+                if (checkIfExercises.length >= 1) return res.sendStatus(409)
             }
             await files.closeDirectory(sessionID)
             await sessions.deleteOneSession(sessionID)

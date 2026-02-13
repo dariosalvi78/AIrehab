@@ -22,7 +22,7 @@ export default {
     */
     getPatients: async (req, res) => {
         if (!req.user) return res.sendStatus(403)
-        let patients, testPatientID
+        let patients, testPatientID, hasTestPatient = false
         try {
             if (req.user.role == 'admin') {
                 patients = await physiotherapist.getPatients()
@@ -34,6 +34,7 @@ export default {
                 for (const p_test in results[0]) {
                     if (results[0][p_test].isTestPatient) {
                         testPatientID = results[0][p_test].patientID
+                        hasTestPatient = true
                         const session = await sessions.getOneSessionByPatientID(testPatientID)
                         const exercise = await exercises.getExercisesInSessionByEmail(session.id, assignedTo.email)
 
@@ -52,8 +53,8 @@ export default {
                         }, 'deleted temporary patient and associated data:')
                     }
                 }
-                results = await physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
-                patients = { patients: results[0], maxPageNo: results[results.length - 1][0].maxPage }
+                if (hasTestPatient) results = await physiotherapist.getPatientsByEmail(req.user.email, req.query.pagination)
+                patients = { patients: results[0], maxPageNo: results[results.length - 1][0].maxPage, count: results[results.length - 1][0].count }
             }
             res.send(patients)
             return

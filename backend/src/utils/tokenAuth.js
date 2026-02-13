@@ -84,17 +84,17 @@ const verifyAuthToken = async (authToken) => {
  * Creates admin user if not in DB
  */
 const createAdmin = async () => {
-    const admin = await users.getUsersByRole('admin')
-    if (admin.length <= 0) {
+    try {
+        const admin = await users.getUsersByRole('admin')
+        if (admin.length) return  
         let hash = bcrypt.hashSync(config.admin.password, 8)
-        try {
-            const newUser = await users.createUser(config.admin.username, hash, 'admin')
-            delete newUser.hashedPassword
-            logger.info({ data: newUser }, 'no admin in db, new user created')
-            await signAccessToken(newUser)
-        } catch (err) {
-            logger.error({ error: err }, 'something went wrong when creating admin user')
-        }
+
+        const newUser = await users.createUser(config.admin.username, hash, 'admin')
+        delete newUser.hashedPassword
+        logger.info({ data: newUser }, 'no admin in db, new user created')
+        await signAccessToken(newUser)
+    } catch (err) {
+        logger.error({ error: err }, 'something went wrong when creating admin user')
     }
 }
 

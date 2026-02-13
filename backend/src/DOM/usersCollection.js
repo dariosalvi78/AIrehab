@@ -89,7 +89,7 @@ export default {
                 COUNT(p.id) as patientCount,
                 COUNT(s.patientId) as sessionCount
             FROM [user] u
-                INNER JOIN [patient] p ON p.physiotherapistId = u.id
+                LEFT JOIN [patient] p ON p.physiotherapistId = u.id
                 LEFT JOIN [physiotherapy_session] s ON p.id = s.patientId
             WHERE u.email = '${email}'
                 GROUP BY u.id, u.email, u.hashedPassword, u.role, u.createdTimestamp, u.lastLoginTimestamp, u.activated;

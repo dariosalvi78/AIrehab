@@ -23,11 +23,13 @@ export default {
     getPatientsByEmail: async function (therapistEmail, pagination) {
         const response = await db.query(`
             DECLARE @pageNo AS INT
+            DECLARE @count AS INT
             DECLARE @maxPage AS FLOAT
             SET @pageNo=${pagination.pageNo}
             SELECT @maxPage = COUNT(p.id) FROM [patient] p 
                 INNER JOIN [user] u ON p.physiotherapistId = u.id
                 WHERE u.email = '${therapistEmail}'
+            SET @count = @maxPage
             SET @maxPage = CEILING(@maxPage/${pagination.limit})
             WHILE @maxPage >= @pageNo
             BEGIN
@@ -54,7 +56,7 @@ export default {
                 FETCH NEXT ${pagination.limit} ROWS ONLY
                 SET @pageNo = @pageNo + 1
             END
-            SELECT @maxPage AS maxPage
+            SELECT @maxPage AS maxPage, @count AS count
         `)
         return response.recordsets
     },
