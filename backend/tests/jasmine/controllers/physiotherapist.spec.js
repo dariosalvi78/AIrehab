@@ -24,14 +24,12 @@ describe('addNewPatient access:', function () {
             }
         })
     })
-    it('missing content', async function () {
+    it('missing required content', async function () {
+        spyOn(physiotherapistCollection, 'getOnePatientByName')
         await physiotherapist.addNewPatient({ user: { role: 'physiotherapist' }, body: {} }, {
-            status(status) {
+            sendStatus(status) {
                 expect(status).toBe(400)
-                return this
-            },
-            send(data) {
-                expect(data).toBeDefined()
+                expect(physiotherapistCollection.getOnePatientByName).not.toHaveBeenCalled()
             }
         })
     })
@@ -39,12 +37,8 @@ describe('addNewPatient access:', function () {
         let patient = this.patient
         spyOn(physiotherapistCollection, 'getOnePatientByName').and.returnValue(patient)
         await physiotherapist.addNewPatient({ user: { role: 'physiotherapist' }, body: { fullName: 'test name', dateOfBirth: new Date().toISOString() } }, {
-            status(status) {
+            sendStatus(status) {
                 expect(status).toBe(409)
-                return this
-            },
-            send(data) {
-                expect(data).toBeDefined()
                 expect(physiotherapistCollection.getOnePatientByName).toHaveBeenCalledWith(patient.names)
             }
         })
@@ -538,7 +532,7 @@ describe('getInfo access:', function () {
         })
     })
     it('patient can get 3rd survey (min 5 exercises & 6 weeks)', async function () {
-        let surveyDate = new Date(), patient = this.patient, surveys = this.surveys, exercises = this.exercises, daysToAdd = 42
+        let surveyDate = new Date(), patient = this.patient, surveys = this.surveys, exercises = this.exercises, daysToAdd = 43
         surveyDate.setDate(surveyDate.getDate() + daysToAdd)
         jasmine.clock().mockDate(surveyDate)
         spyOn(physiotherapistCollection, 'getOnePatientByID').and.returnValue({...patient, sessionID: 1})

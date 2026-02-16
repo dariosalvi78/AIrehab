@@ -26,21 +26,20 @@ describe('addNewUser access:', function () {
             }
         })
     })
-    it('cant create user as physiotherapist', async function () {
-        spyOn(usersCollection, 'getUserByEmail')
-        await users.addNewUser({ user: { role: 'physiotherapist' }, body: {} }, {
+    it('missing required content', async function () {
+        await users.addNewUser({ user: { role: 'physiotherapist' }, body: undefined }, {
             sendStatus(status) {
                 expect(status).toBe(403)
-                expect(usersCollection.getUserByEmail).not.toHaveBeenCalled()
             }
         })
     })
-    it('missing content', async function () {
+    it('needs to have all required data for new user', async function () {
         spyOn(usersCollection, 'createUser').and.returnValue(this.physiotherapist)
         spyOn(usersCollection, 'getUserByEmail').and.returnValue(null)
-        await users.addNewUser({ user: { role: 'admin' }, body: {} }, {
+        await users.addNewUser({ user: { role: 'physiotherapist' }, body: { email: 'email@test.com', password: undefined} }, {
             sendStatus(status) {
                 expect(status).toBe(400)
+                expect(usersCollection.getUserByEmail).not.toHaveBeenCalled()
             }
         })
     })
@@ -48,48 +47,104 @@ describe('addNewUser access:', function () {
         spyOn(usersCollection, 'createUser').and.returnValue(this.physiotherapist)
         let userFind = spyOn(usersCollection, 'getUserByEmail').and.returnValue(this.physiotherapist)
         await users.addNewUser({
-            user: { role: 'admin' },
             body: {
+                token: '123',
                 email: 'email@test.com',
                 role: 'physiotherapist',
                 password: 'password'
             }
         }, {
-            status: function (status) {
+            sendStatus: function (status) {
                 expect(userFind).toHaveBeenCalled()
-                expect(status).toBe(409)
-                return this
-            },
-            send: function (data) {
-                expect(data).toBeDefined()
+                expect(status).toBe(410)
             }
         })
     })
-    it('create user as admin', async function () {
+    it('must be same physiotherapist email on sign up', async function () {
+        spyOn(jwt, 'verify').and.callFake((token, secret, callback) => callback(null, { email: 'email@test.com' }))
+        spyOn(usersCollection, 'getUserByEmail').and.returnValue(null)
+        spyOn(usersCollection, 'createUser')
+        await users.addNewUser({
+            body: {
+                token: '123',
+                email: 'different@email.com',
+                password: 'password',
+                role: 'physiotherapist'
+            }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(410)
+                expect(usersCollection.getUserByEmail).toHaveBeenCalled()
+                expect(usersCollection.createUser).not.toHaveBeenCalled()
+            }
+        })
+    })
+    it('can use invitation to create physiotherapist', async function () {
+        spyOn(jwt, 'verify').and.callFake((token, secret, callback) => callback(null, { email: 'email@test.com' }))
         spyOn(jwt, 'sign').and.returnValue({
             expiresIn: config.JWT.EXPIRE,
-            user: this.physiotherapist.id
+            user: this.physiotherapist
         })
-        spyOn(usersCollection, 'createUser').and.returnValue(this.physiotherapist)
-        spyOn(usersCollection, 'getUserByEmail').and.returnValue(null)
-
+        const spyUserEmail = spyOn(usersCollection, 'getUserByEmail').and.returnValue(null)
+        const spyCreateUser = spyOn(usersCollection, 'createUser').and.returnValue({ ...this.physiotherapist, activated: false })
         await users.addNewUser({
-            user: { role: 'admin' },
             body: {
+                token: '123',
                 email: 'email@test.com',
                 password: 'password',
                 role: 'physiotherapist'
             }
         }, {
-            sendStatus(status) { },
             status(status) {
                 expect(status).toBe(201)
                 return this
             },
-            json(user) {
-                expect(user.status).toBeDefined()
-                expect(user.token).toBeDefined()
-                expect(user.data.newUser).toBeDefined()
+            json(data) {
+                expect(data.status).toBeDefined()
+                expect(data.user).toBeDefined()
+                expect(data.user.activated).toBe(false)
+                expect(spyCreateUser).toHaveBeenCalled()
+                expect(spyUserEmail).toHaveBeenCalled()
+                spyCreateUser.calls.reset()
+                spyUserEmail.and.callFake((email) => email)
+            },
+            cookie(cookie) {
+                expect(cookie).toBeDefined()
+            }
+        })
+        // Cannot register using same credentials again
+        await users.addNewUser({
+            body: {
+                token: '123',
+                email: 'email@test.com',
+                password: 'password',
+                role: 'physiotherapist'
+            }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(410)
+                expect(spyUserEmail).toBeDefined()
+                expect(spyCreateUser).not.toHaveBeenCalled()
+            }
+        })
+    })
+    it('cannot create user if invitation link expired', async function () {
+        spyOn(jwt, 'verify').and.callFake((token, secret, callback) => callback({ expiredAt: new Date() }, null))
+        spyOn(jwt, 'sign').and.returnValue({ expiresIn: config.JWT.EXPIRE, user: this.physiotherapist })
+        spyOn(usersCollection, 'getUserByEmail').and.returnValue(null)
+        spyOn(usersCollection, 'createUser').and.returnValue({ ...this.physiotherapist, activated: false })
+        await users.addNewUser({
+            body: {
+                token: '123',
+                email: 'email@test.com',
+                password: 'password',
+                role: 'physiotherapist'
+            }
+        }, {
+            sendStatus(status) {
+                expect(status).toBe(410)
+                expect(usersCollection.getUserByEmail).toHaveBeenCalled()
+                expect(usersCollection.createUser).not.toHaveBeenCalled()
             }
         })
     })
@@ -100,12 +155,8 @@ describe('login access:', function () {
     it('wrong credentials', async function () {
         spyOn(usersCollection, 'getUserByEmail')
         await users.login({ body: {} }, {
-            status(status) {
+            sendStatus (status) {
                 expect(status).toBe(400)
-                return this
-            },
-            send(data) {
-                expect(data).toBe('Please enter email and password')
                 expect(usersCollection.getUserByEmail).not.toHaveBeenCalled()
             }
         })
@@ -114,12 +165,8 @@ describe('login access:', function () {
         spyOn(usersCollection, 'getUserByEmail').and.returnValue(null)
         spyOn(usersCollection, 'updateUserLoginTimestamp')
         await users.login({ body: { email: 'email@test.com', password: 'password' } }, {
-            status(status) {
+            sendStatus(status) {
                 expect(status).toBe(404)
-                return this
-            },
-            send(data) {
-                expect(data).toContain('Wrong credentials')
                 expect(usersCollection.updateUserLoginTimestamp).not.toHaveBeenCalled()
             }
         })
@@ -129,12 +176,8 @@ describe('login access:', function () {
         spyOn(usersCollection, 'updateUserLoginTimestamp')
         spyOn(usersCollection, 'getUserByEmail').and.returnValue({ email: 'test@email.com', password: 'notmatch123.' })
         await users.login({ body: { email: 'email@test.com', password: 'password' } }, {
-            status(status) {
+            sendStatus(status) {
                 expect(status).toBe(404)
-                return this
-            },
-            send(data) {
-                expect(data).toContain('Wrong credentials')
                 expect(usersCollection.updateUserLoginTimestamp).not.toHaveBeenCalled()
             }
         })
@@ -341,7 +384,7 @@ describe('getInfo access:', function () {
         })
     })
     it('physiotherapist can get 3rd survey (60 days past)', async function () {
-        let surveyDate = new Date(), surveys = this.surveys, daysToAdd = 60
+        let surveyDate = new Date(), surveys = this.surveys, daysToAdd = 61
         surveyDate.setDate(surveyDate.getDate() + daysToAdd)
         spyOn(usersCollection, 'getUserByEmail').and.returnValue({ email: this.physiotherapist.email, lastLoginTimestamp: new Date().toISOString(), activated: true, role: this.physiotherapist.role })
         spyOn(surveysCollection, 'getSurveysByPhysioID').and.returnValue(surveys)

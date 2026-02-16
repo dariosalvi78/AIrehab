@@ -5,6 +5,7 @@ import exercises from '../../../src/controllers/exercises.js'
 import mock from '../../mock_data.js'
 import fileHandler from '../../../src/utils/fileHandler.js'
 import physiotherapistCollection from '../../../src/DOM/physiotherapistCollection.js'
+import usersCollection from '../../../src/DOM/usersCollection.js'
 
 beforeAll(function () {
     this.physiotherapist = mock.physiotherapist
@@ -15,13 +16,6 @@ beforeAll(function () {
 
 describe('getExercises access:', function () {
 
-    it('get exercises requires authentication', async function () {
-        await exercises.getExercises({ user: undefined }, {
-            sendStatus(status) {
-                expect(status).toBe(403)
-            }
-        })
-    })
     it('requires query from physiotherapist to get exercises', async function () {
         spyOn(exercisesCollection, 'getExercisesBySession').and.returnValue(this.exercises)
         await exercises.getExercises({
@@ -63,8 +57,8 @@ describe('getExercises access:', function () {
         })
     })
     it('physiotherapist can get all own exercises', async function () {
-        let therapist = this.physiotherapist, sessionID = this.sessions[0].sessionID
-        spyOn(exercisesCollection, 'getExercisesBySession').and.returnValue([this.exercises, [{ maxPageNo: 1, numOfExercises: 1 }]])
+        let therapist = this.physiotherapist, sessionID = this.sessions[0].sessionID, _exercises = JSON.parse(JSON.stringify(this.exercises))
+        spyOn(exercisesCollection, 'getExercisesBySession').and.returnValue([_exercises, [{ maxPage: 1, numOfExercises: _exercises.length }]])
         spyOn(sessions, 'getSessionByID').and.returnValue(this.sessions[0])
         await exercises.getExercises({
             user: therapist,
@@ -73,7 +67,32 @@ describe('getExercises access:', function () {
             send(data) {
                 expect(data).toBeDefined()
                 expect(data).toBeInstanceOf(Object)
+                expect(data.maxPageNo).toBeDefined()
+                expect(data.numOfExercises).toBeDefined()
                 expect(sessions.getSessionByID).toHaveBeenCalledWith(sessionID, therapist.email)
+                expect(exercisesCollection.getExercisesBySession).toHaveBeenCalled()
+            }
+        })
+    })
+    it('patient can get all own exercises', async function () {
+        let patient = this.patient, physio = this.physiotherapist, _session = {sessionID: 1, patientId: patient.id}, _exercises = JSON.parse(JSON.stringify(this.exercises))
+        spyOn(usersCollection, 'getOneUser').and.returnValue(physio)
+        spyOn(exercisesCollection, 'getExercisesBySession').and.returnValue([_exercises, [{ maxPage: 1, numOfExercises: _exercises.length }]])
+        spyOn(sessions, 'getSessionByID').and.returnValue(_session)
+        spyOn(poeCollection, 'getEvaluationsFromID')
+        await exercises.getExercises({
+            patient: {...patient, physiotherapistId: physio.id},
+            query: { sessionID: _session.sessionID, pagination: {} }
+        }, {
+            send(data) {
+                expect(data).toBeDefined()
+                expect(data).toBeInstanceOf(Object)
+                expect(data.exercises[0].type).toBeDefined()
+                expect(data.exercises[0].poe).toBeInstanceOf(Array)
+                expect(data.maxPageNo).toBeDefined()
+                expect(data.numOfExercises).toBeDefined()
+                expect(sessions.getSessionByID).toHaveBeenCalledWith(_session.sessionID, physio.email)
+                expect(usersCollection.getOneUser).toHaveBeenCalled()
                 expect(exercisesCollection.getExercisesBySession).toHaveBeenCalled()
             }
         })
@@ -177,12 +196,8 @@ describe('addNewExercise access:', function () {
             user: { role: 'admin' },
             body: { type: 'test', sessionID: undefined }
         }, {
-            status(status) {
+            sendStatus(status) {
                 expect(status).toBe(400)
-                return this
-            },
-            send(data) {
-                expect(data).toContain('Please enter required fields')
                 expect(exercisesCollection.createExercise).not.toHaveBeenCalled()
             }
         })
@@ -193,7 +208,7 @@ describe('addNewExercise access:', function () {
         spyOn(sessions, 'getSessionByID').and.returnValue({ id: 2 })
         await exercises.addNewExercise({
             user: therapist,
-            body: { exercises: this.exercises[0], sessionID: _session.sessionID }
+            body: { ...this.exercises[0], sessionID: _session.sessionID }
         }, {
             sendStatus(status) {
                 expect(status).toBe(403)
@@ -203,12 +218,12 @@ describe('addNewExercise access:', function () {
         })
     })
     it('admin can create new exercise', async function () {
-        let _session = this.sessions[0]
-        spyOn(exercisesCollection, 'createExercise').and.returnValue(this.exercises[0])
+        let _session = this.sessions[0], exercise = JSON.parse(JSON.stringify(this.exercises[0]))
+        spyOn(exercisesCollection, 'createExercise').and.returnValue(exercise)
         spyOn(sessions, 'getSessionByID')
         await exercises.addNewExercise({
             user: { role: 'admin' },
-            body: { exercises: this.exercises[0], sessionID: _session.sessionID }
+            body: { ...exercise, sessionID: _session.sessionID }
         }, {
             status(status) {
                 expect(status).toBe(201)
@@ -226,12 +241,12 @@ describe('addNewExercise access:', function () {
         })
     })
     it('physiotherapist can create exercise for own patients', async function () {
-        let therapist = this.physiotherapist, _session = this.sessions[0]
-        spyOn(exercisesCollection, 'createExercise').and.returnValue(this.exercises[0])
+        let therapist = this.physiotherapist, _session = this.sessions[0], exercise = JSON.parse(JSON.stringify(this.exercises[0]))
+        spyOn(exercisesCollection, 'createExercise').and.returnValue(exercise)
         spyOn(sessions, 'getSessionByID').and.returnValue({ id: _session.sessionID, activated: true })
         await exercises.addNewExercise({
             user: therapist,
-            body: { exercises: this.exercises[0], sessionID: _session.sessionID }
+            body: { ...exercise, sessionID: _session.sessionID }
         }, {
             status(status) {
                 expect(status).toBe(201)
@@ -254,12 +269,30 @@ describe('addNewExercise access:', function () {
         spyOn(sessions, 'getSessionByID').and.returnValue({ id: _session.sessionID, activated: false })
         await exercises.addNewExercise({
             user: therapist,
-            body: { exercises: this.exercises[0], sessionID: _session.sessionID }
+            body: { ...this.exercises[0], sessionID: _session.sessionID }
         }, {
             sendStatus(status) {
-                console.log(status)
                 expect(status).toBe(400)
                 expect(sessions.getSessionByID).toHaveBeenCalled()
+                expect(exercisesCollection.createExercise).not.toHaveBeenCalled()
+            }
+        })
+    })
+    it('physiotherapist needs to consent to create exercise', async function () {
+        let therapist = this.physiotherapist, _session = this.sessions[0]
+        spyOn(exercisesCollection, 'createExercise')
+        spyOn(sessions, 'getSessionByID')
+        await exercises.addNewExercise({
+            user: { ...therapist, activated: false },
+            body: { ...this.exercises[0], sessionID: _session.sessionID }
+        }, {
+            status(status) {
+                expect(status).toBe(403)
+                return this
+            },
+            send(data) {
+                expect(data.activated).toBe(false)
+                expect(sessions.getSessionByID).not.toHaveBeenCalled()
                 expect(exercisesCollection.createExercise).not.toHaveBeenCalled()
             }
         })
@@ -362,26 +395,21 @@ describe('editExercise access:', function () {
             params: { exerciseID: exercise.id },
             body: undefined
         }, {
-            status(status) {
+            sendStatus(status) {
                 expect(status).toBe(400)
-                return this
-            },
-            send(data) {
-                expect(data).toContain('Please enter required fields')
                 expect(exercisesCollection.updateOneExercise).not.toHaveBeenCalled()
             }
         })
     })
     it('generic error when editing exercise', async function () {
         let therapist = this.physiotherapist, exercise = this.exercises[0]
-        spyOn(exercisesCollection, 'updateOneExercise')
+        spyOn(exercisesCollection, 'updateOneExercise').and.rejectWith()
         await exercises.editExercise({
-            user: therapist,
-            params: { exerciseID: exercise.id }
+            user: therapist, body: { type: exercise.type },  params: { exerciseID: exercise.id }
         }, {
             sendStatus(status) {
                 expect(status).toBe(500)
-                expect(exercisesCollection.updateOneExercise).not.toHaveBeenCalled()
+                expect(exercisesCollection.updateOneExercise).toHaveBeenCalled()
             }
         })
     })

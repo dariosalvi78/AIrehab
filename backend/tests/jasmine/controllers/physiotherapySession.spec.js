@@ -126,6 +126,25 @@ describe('addNewSession access:', function () {
             }
         })
     })
+    it('physiotherapist must consent before creating session', async function () {
+        let patient = this.patient
+        spyOn(sessions, 'createSession')
+        spyOn(physiotherapistCollection, 'getOnePatientByEmail').and.returnValue(undefined)
+        await physiotherapySession.addNewSession({ 
+            user: {...this.physiotherapist, activated: false},
+            query: { patientID: patient.id }
+        }, {
+            status(status) {
+                expect(status).toBe(403)
+                return this
+            },
+            send (data) {
+                expect(data.activated).toBeDefined()
+                expect(physiotherapistCollection.getOnePatientByEmail).not.toHaveBeenCalled()
+                expect(sessions.createSession).not.toHaveBeenCalled()
+            }
+        })
+    })
     it('physiotherapist cant create session for non assigned patient', async function () {
         let patient = this.patient
         spyOn(sessions, 'createSession')
@@ -189,12 +208,8 @@ describe('deleteSession access:', function () {
             user: therapist,
             params: { sessionID }
         }, {
-            status(status) {
+            sendStatus(status) {
                 expect(status).toBe(409)
-                return this
-            },
-            send(data) {
-                expect(data).toBeDefined()
                 expect(exercisesCollection.getExercisesInSessionByEmail).toHaveBeenCalledWith(sessionID, therapist.email)
             }
         })
