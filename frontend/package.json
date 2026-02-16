@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.17.0",
-    "axios": "^1.12.2",
+    "axios": "^1.13.5",
     "dayjs": "^1.11.19",
     "qrcode.vue": "^3.6.0",
     "quasar": "^2.18.2",
