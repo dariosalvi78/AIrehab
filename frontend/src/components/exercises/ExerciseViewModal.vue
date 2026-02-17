@@ -17,7 +17,7 @@
           <q-card-section v-if="showUploadPrompt" class="column items-center q-pa-sm">
             <div v-show="!uploadedFile" class="text-body2 text-center q-my-md">{{ $t('exercises.record.upload_desc') }}</div>
             <q-file class="full-width" filled ref="uploader" type="file" name="uploaded_file" accept="video/*" color="secondary" :label="$t('exercises.record.upload')" 
-              v-model="uploadedFile" @change.capture="uploadedRecordedVideo" @rejected="rejectedUpload" :readonly="!!uploadedFile"
+              v-model="uploadedFile" @change.capture="(e) => setVideoOutput(e.target.files[0])" @rejected="rejectedUpload" :readonly="!!uploadedFile"
             >
               <template v-slot:prepend>
                 <q-icon name="attach_file" />
@@ -51,38 +51,12 @@
             <q-btn v-show="uploadedFile" class="q-mt-sm q-mb-lg q-pa-md full-width" push :label="$t('exercises.record.begin')" color="secondary" no-caps icon-right="cloud_upload" @click="saveVideo" />
           </q-card-section>
         </q-card>
-        <q-dialog id="recordModal" ref="qRecordDialog" v-model="openRecordModal" maximized class="q-pa-none">
-          <q-card class="full-width q-my-none q-py-none">
-            <q-card-section class="q-pb-none flex justify-between">
-              <q-btn class="q-pa-none q-pb-sm" icon="close" :label="$t('common.close')" flat no-caps v-close-popup  @click="stopRecording" />
-              <div class="text-body1">{{ $t('exercises.record.dialog.title') }}</div>
-            </q-card-section>
-            <q-separator />
-            <q-card-section class="flex flex-center column q-pa-sm">
-              <div class="video-container col text-center flex flex-center">
-                <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline :controls="false" disable-picture-in-picture controlsList="nodownload">
-                  <source src="" type="video/mp4">
-                    Your browser does not support HTML5 video.
-                </video>
-                <div v-show="!mediaRecorder?.error" class="recording-actions flex flex">
-                  <div v-show="isRecording" class="text-subtitle2 text-center text-white">{{ displayTimer }}</div>
-                  <div class="col flex flex-center">
-                    <q-btn padding="md" round color="white" size="xl" class="shadow-8" push
-                      @click="!isRecording ? startRecording() : stopRecording()" 
-                    >
-                      <q-icon size="xl" :name="!isRecording ? 'photo_camera' : 'stop'" color="negative"/>
-                    </q-btn>
-                  </div>
-                  <div class="text-subtitle2 text-center text-white">{{!isRecording ? $t('exercises.record.dialog.start'): $t('exercises.record.dialog.stop')}}</div>
-                </div>
-                <div v-if="mediaRecorder?.loading" class="q-mt-md flex flex-center">
-                  <q-spinner-dots color="primary" size="3em" />
-                </div>
-                <div v-show="mediaRecorder.error" class="text-subtitle2" v-html="mediaRecorder.error"></div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-dialog>
+        <recording-modal
+          :exerciseID="exerciseID"
+          :toggle="toggleRecordDialog"
+          @set:uploaded-file="(file) => setVideoOutput(file)"
+        >
+        </recording-modal>
       </div>
       <div v-else>
         <q-card v-if="!poeResultsToFormat" flat class="q-pa-lg flex flex-center column">
@@ -103,8 +77,8 @@
         <transition v-else appear enter-active-class="animated fadeIn">
           <q-card flat class="q-ma-lg evaluation-card">
             <q-card-section>
-              <div class="text-h6">{{ $t('exercises.results.title') }}</div>
-              <div class="text-body1">{{ $t('exercises.results.description') }}</div>
+              <div class="text-h4 text-weight-light">{{ $t('exercises.results.title') }}</div>
+              <div class="text-subtitle1 q-mt-sm">{{ $t('exercises.results.description') }}</div>
               <q-btn :label="$t('exercises.results.review_video')" @click="openExerciseVideoDialog" icon-right="open_in_new" no-caps :ripple="false" flat class="q-pl-none q-mt-sm"/>
             </q-card-section>
             <q-separator />
@@ -136,9 +110,10 @@ import nicers from '../../utils/nicers'
 import exerciseTypes from '../../utils/types/exerciseTypesEnum'
 import ExerciseInstructions from './ExerciseInstructions.vue'
 import PoeViewModal from './PoeViewModal.vue'
+import RecordingModal from './RecordingModal.vue'
 
 export default {
-  components: { ExerciseInstructions, PoeViewModal },
+  components: { ExerciseInstructions, PoeViewModal, RecordingModal },
   name: 'ExerciseViewModal',
   i18n: await mergeLocaleMessages(['exercises']),
   props: {
@@ -147,32 +122,14 @@ export default {
   },
   data () {
     return {
-      mediaRecorder: undefined,
-      videoChunks: [],
       hasVideoDevice: false,
-      isRecording: false,
       uploadedFile: undefined,
       videoFile: undefined,
       poeResultsToFormat: undefined,
       isGettingPOEStatus: true,
       showPreview: false,
-      openRecordModal: false,
-      saveVideoToDevice: false,
-      openExerciseVideo: false,
-      timer: { elapsed: 0, interval: null },
-      /** @type {MediaStreamConstraints} */
-      constraints: {
-        video: {
-          facingMode: 'environment',
-          aspectRatio: 16/9,
-          width: { min: 1024, ideal: 1280, max: 1920 },
-          height: { min: 400, ideal: 720, max: 1080 },
-          frameRate: { min: 25, ideal: 30, max: 60 },
-          bits: 2500000
-        },
-        audio: false,
-        codecs: ['video/mp4; codecs="vp9"', 'video/mp4;']
-      },
+      toggleRecordDialog: false,
+      openExerciseVideo: false
     }
   },
   async beforeMount () {
@@ -203,96 +160,12 @@ export default {
           icon: 'report_problem'
         })
       }
-
     },
-    async videoCapture () {
-      const MEDIA_CONSTRAINTS = this.constraints
-      let supported_codec = undefined
-      this.showPreview = false
-      this.videoChunks = []
-
-      navigator.mediaDevices.getUserMedia(MEDIA_CONSTRAINTS)
-        .then((stream) => {
-          for (const codec of this.constraints.codecs) if (MediaRecorder.isTypeSupported(codec)) { supported_codec = codec; break }
-          if (!supported_codec) throw new Error(this.$t('exercises.notification.web_recording_not_supported'))
-          this.$refs.videoOutput.srcObject = stream
-          const mediaRecorder = new MediaRecorder(stream, { mimeType: supported_codec, videoBitsPerSecond: this.constraints.bits  })
-          this.mediaRecorder = mediaRecorder
-
-          this.mediaRecorder.ondataavailable = (e) => {
-            this.videoChunks.push(e.data)
-          }
-          this.mediaRecorder.onerror = (err) => {
-            console.error(err)
-            this.$q.notify({
-              color: 'negative',
-              position: 'bottom',
-              message: this.$t('exercises.notification.recording_error', { error: err }),
-              icon: 'report_problem'
-            })
-          }
-          this.mediaRecorder.onstop = (e) => this.stopVideoCapture()
-        })
-        .catch((err) => {
-          this.isRecording = false
-          this.mediaRecorder = { ...this.mediaRecorder, error: `${err}<br><br>${this.$q.platform.userAgent}` }
-          return this.$q.notify({
-            color: 'negative',
-            position: 'bottom',
-            message: this.$t('exercises.notification.camera_not_available', { error: err }),
-            icon: 'report_problem'
-          })
-        })
-    },
-    async stopVideoCapture () {
-      this.$q.loading.show()
-      await nicers.delay(200)
-
-      const filename = 'exercise_' + this.exerciseID + '.mp4'
-      let blob = new Blob(this.videoChunks, { type: this.mediaRecorder.mimeType })
-      let mediaBlobUrl = URL.createObjectURL(blob)
-
-      let file = new File([blob], filename, { type: this.mediaRecorder.mimeType })
-      const output = this.$refs.uploadedVideoPreview
-
+    async setVideoOutput (file) {
+      this.showPreview = true
       this.uploadedFile = file
-      output.style.display = 'block'
-      output.src = URL.createObjectURL(file)
-
-      // saves video directly on device
-      if (this.saveVideoToDevice) {
-        let a = document.createElement('a')
-        a.style = 'display: none'
-        a.href = mediaBlobUrl
-        a.download = filename
-        a.click()
-      }
-      URL.revokeObjectURL(file)
-      this.$refs.qRecordDialog.hide()
-      this.$q.loading.hide()
-    },
-    async stopRecording () {
-      this.isRecording = false
-      if (this.mediaRecorder?.stream) {
-        this.mediaRecorder.stream.getTracks().forEach( track => track.stop() )
-        this.mediaRecorder.stop()
-        this.showPreview = true
-      }
-      if (this.timer?.interval) clearInterval(this.timer.interval)
-      this.timer.elapsed = 0
-    },
-    async startRecording () {
-      this.isRecording = true
-      this.$refs.videoOutput.classList.toggle('recording')
-      this.mediaRecorder.start(1000)
-      this.timer.interval = setInterval(() => {
-        this.timer.elapsed++
-      }, 1000)
-    },
-    uploadedRecordedVideo(e) {
+      await nicers.delay(100)
       const output = this.$refs.uploadedVideoPreview
-      const file = e.target.files[0]
-      this.uploadedFile = file
       output.style.display = 'block'
       output.src = URL.createObjectURL(file)
     },
@@ -406,14 +279,8 @@ export default {
       this.$refs.uploader.removeFile(this.uploadedFile)
     },
     async openRecordingModal () {
-      this.mediaRecorder = { loading: true }
-      this.openRecordModal = !this.openRecordModal
-      await nicers.delay(500)
-      if (this.$refs.videoOutput) {
-        await this.videoCapture()
-        this.mediaRecorder.loading = false
-        document.querySelector('.recording-actions').classList.add('visible')
-      }
+      this.showPreview = false
+      this.toggleRecordDialog = !this.toggleRecordDialog
     },
     async openExerciseVideoDialog () {
       this.uploadedFile = true
@@ -437,8 +304,7 @@ export default {
       let formatFileSize = this.uploadedFile.size
       return (formatFileSize / Math.pow(1024, 2)).toFixed(1) + ' MB'
     },
-    showUploadPrompt () { return process.env.DEV || (this.showPreview) },
-    displayTimer() { if (this.timer?.interval) return nicers.formattedTimer(this.timer.elapsed) }
+    showUploadPrompt () { return process.env.DEV || (this.showPreview) }
   },
   unmounted () {
     this.isGettingPOEStatus = false
@@ -447,7 +313,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .exercise-card {
   max-width: 350px;
 }
@@ -474,30 +340,6 @@ export default {
   width: 300px;
   max-width: 100%;
 }
-
-#recordModal .video-container > #videoPreview {
-  max-height: 100%;
-  height: 100%;
-  margin: 0 auto;
-  transition: 0.5s ease-in-out;
-}
-
-.recording {
-  outline: 2px solid var(--q-negative);
-  box-shadow: 0px 0px 5px 1px var(--q-negative)
-}
-
-.recording-actions {
-  position: absolute;
-  flex-direction: column;
-  bottom: 8vh;
-  gap: 8px;
-  opacity: 0;
-  transition: 0.5s ease-in-out;
-}
-
-.visible { opacity: 1; }
-
 @media only screen and (max-width: 550px) {
   .video-container {
     width: 100%;
