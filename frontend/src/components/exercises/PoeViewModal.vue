@@ -10,11 +10,11 @@
       <q-tab name="results" :label="$t('poe.evaluation')" icon="accessibility" no-caps />
       <q-tab name="stats" :label="$t('poe.see_results')" icon="more_horiz" no-caps />
     </q-tabs>
-    <q-tab-panels v-model="panel" animated ref="panelForm">
+    <q-tab-panels v-model="panel" animated ref="panelForm" swipeable>
       <q-tab-panel name="results" class="">
-        <div class="text-h6 q-mt-md">{{ $t('poe.results.title') }}</div>
-        <div class="text-body2 q-mb-xl">{{ $t('poe.results.description') }}</div>
-        <div class="poe-score full-width">
+        <div class="text-h6 q-mt-md text-weight-regular">{{ $t('poe.results.title') }}</div>
+        <div class="text-subtitle1 q-mt-sm">{{ $t('poe.results.description') }}</div>
+        <div class="poe-score full-width q-mt-xl">
           <q-item v-if="poe && poe.bracket" class="q-pa-none">
             <q-item-section avatar class="row" >
               <q-icon class="q-mb-md material-symbols-outlined" :color="poe.bracket.theme" size="52px" :name="getProgressIcon" />

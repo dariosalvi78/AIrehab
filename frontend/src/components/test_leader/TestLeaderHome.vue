@@ -46,14 +46,6 @@
             gutter="sm"
           />
         </q-tab-panel>
-        <q-tab-panel name="view" class="q-pa-none" v-show="users.length >= 1 && pagination.maxPageNo >= 1">
-          <patient-view-modal 
-            :selectedPatient="selectedPatient" 
-            @openView="openPatientView"
-            @panelFormGoBack="openHomePage"
-            @update:tabs="updateTabs"
-          />
-        </q-tab-panel>
         <q-tab-panel name="sessions" class="q-px-none">
           <div class="text-h4 q-mx-md q-mb-md text-weight-light">{{ $t('common.tabs.sessions') }}</div>
           <q-separator />
@@ -65,6 +57,16 @@
           :incomingSurvey="this.incomingSurvey"
           @panelFormGoBack="openHomePage"
         />
+      </div>
+      <div v-else-if="panel == 'view'">
+        <transition appear enter-active-class="animated fadeIn">
+          <patient-view-modal 
+            :selectedPatient="selectedPatient" 
+            @openView="openPatientView"
+            @panelFormGoBack="openHomePage"
+            @update:tabs="updateTabs"
+          />
+        </transition>
       </div>
     </q-page-container>
   </q-layout>
@@ -113,8 +115,8 @@ export default {
     let qPatientID = new URLSearchParams(window.location.search).get('p')
     await this.isNewSurveyAvailable()
     if (this.panel == 'patients') {
+      if (qPatientID) return this.openPatientView({ patientID: qPatientID })
       await this.getPatients()
-      if (qPatientID) this.openPatientView({ patientID: qPatientID })
     }
   },
   watch: {
@@ -207,7 +209,7 @@ export default {
     async openPatientView (selectedUser) {
       let resp = await API.getPatient(selectedUser.patientID)
       this.selectedPatient = resp
-      this.$refs.panelForm.goTo('view')
+      this.panel = 'view'
       this.$router.push({ path: this.$route.path, query: { p: selectedUser.patientID } })
     },
     async openHomePage () {
@@ -239,7 +241,7 @@ export default {
     handleSwipe (e) { return this.$emit('handle:swipe', e) },
     updateTabs(name, newCount) { return this.$emit('update:tabs', name, newCount) }
   },
-  computed: { showNewUserPrompt () { return this.panel !== 'consent' && this.panel !== 'survey' } }
+  computed: { showNewUserPrompt () { return this.panel !== 'consent' && this.panel !== 'survey' && this.panel !== 'view' } }
 }
 </script>
 

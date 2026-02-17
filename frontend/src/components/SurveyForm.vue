@@ -1,5 +1,5 @@
 <template>
-  <q-page-container class="bg-white">
+  <q-page class="bg-white" style="padding-bottom: 32px;">
     <q-btn v-if="incomingSurvey.userType == 'patient'" class="q-mb-md" round dense color="primary" size="lg" icon="chevron_left" @click="this.$emit('panelFormGoBack')" />
     <div class="text-h5 q-mb-md">{{ $t('survey.title', { surveyName: this.incomingSurvey.currentSurveyID }) }}</div>
     <div class="text-body2">{{ $t('survey.description', { numOfQuestions: questions.length }) }}</div>
@@ -40,13 +40,13 @@
         />
       </div>
       <q-separator class="q-my-lg" />
-      <div class="q-mb-md">{{ $t('survey.complete_form_description') }} </div>
-      <q-btn class="q-my-md full-width" icon="send" type="submit"
+      <div class="text-body2 q-mb-md">{{ $t('survey.complete_form_description') }} </div>
+      <q-btn class="q-mb-lg full-width" icon="send" type="submit"
         padding="md" size="16px" color="secondary" no-caps @click="submitForm"
         :label="$t('survey.send_survey')" 
       />
     </q-form>
-  </q-page-container>
+  </q-page>
 </template>
 
 <script>

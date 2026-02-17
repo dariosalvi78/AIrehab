@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <q-page-container style="padding-top: 16px;">
     <q-btn v-if="this.user && !this.user.newSurveyAvailable" class="q-ml-md" round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.push('/home')" />
     <terms-modal v-model="openConsentModal" :isPatient="false"></terms-modal>
     <q-card flat class="q-ma-sm">
@@ -36,7 +36,7 @@
         :label="this.user && this.user.newSurveyAvailable ? $t('common.consent.continue_to_survey') : $t('common.confirm')" 
       />
     </q-card>
-  </div>
+  </q-page-container>
 </template>
 
 <script>
