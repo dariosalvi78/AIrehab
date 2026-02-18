@@ -21,7 +21,7 @@ const signResetPwdToken = async (email) => {
 }
 
 const signPatientAccessToken = async (patient) => {
-    return jwt.sign({ patient }, config.JWT.SECRET_KEY, { expiresIn: '30 days' })
+    return jwt.sign({ patient }, config.JWT.SECRET_KEY, { expiresIn: '7 days' })
 }
 
 const signInvitationToken = async (email) => {

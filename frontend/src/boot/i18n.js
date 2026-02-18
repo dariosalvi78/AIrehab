@@ -26,9 +26,9 @@ export async function mergeLocaleMessages(resources) {
 }
 
 export async function updateI18nLocale(newLocale) {
-  const old = i18n.global.locale
+  const [old, _] = i18n.global.locale.split('-')
   const resourcesToLoad = Object.keys(i18n.global.messages[old])
-  
+
   i18n.global.locale = newLocale
   await mergeLocaleMessages(resourcesToLoad)
 }
