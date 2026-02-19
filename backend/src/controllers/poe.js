@@ -75,8 +75,8 @@ export default {
         let exercise, exerciseID = req.params.exerciseID, email = req.user.email
         try {
             exercise = await exercises.getExerciseByID(exerciseID)
-            if (!exercise) return res.status(404).send('Exercise does not exist')
-            if (!exercise.videoFile) return res.status(400).send('Video does not exist')
+            if (!exercise) return res.status(404).send({ exercise: exercise })
+            if (!exercise.videoFile) return res.status(404).send({ videoFile: exercise.videoFile })
             let response = await poeMA.uploadVideo(exercise.id, exercise.physiotherapySessionId, exercise.videoFile, exercise.type)
             if (response) {
                 const META_INFO = req.body.metaInfo

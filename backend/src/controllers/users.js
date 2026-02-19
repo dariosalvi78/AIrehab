@@ -296,6 +296,12 @@ export default {
 
             const updatedStatus = await users.updateOneUserParticipation(newStatus, user.id)
 
+            // generate new token with updated consent status
+            if (req.user.activated !== updatedStatus.activated) {
+                const token = await signAccessToken({ ...req.user, activated: updatedStatus.activated })
+                res.cookie(session_cookie.name, token, session_cookie.options)
+            }
+
             return res.json({
                 updatedStatus,
                 role: user.role

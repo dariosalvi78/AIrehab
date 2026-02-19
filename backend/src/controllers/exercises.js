@@ -35,9 +35,12 @@ export default {
             } else return res.send({ exercises: [] })
             if (!isAssignedTo) return res.sendStatus(403)
 
-            let exercise = await exercises.getExercisesBySession(sessionID, req.query.pagination)
-            if (exercise[0] && req.patient) {
-                let exercises_in_session = exercise[0]
+            let exercise = await exercises.getExercisesBySession(sessionID, req.query.pagination),
+                maxPageNo = exercise[exercise.length - 1][0].maxPage,
+                numOfExercises = exercise[exercise.length - 1][0].numOfExercises,
+                exercises_in_session = numOfExercises ? exercise[0] : []
+
+            if (numOfExercises && req.patient) {
                 for (const e in exercises_in_session) {
                     let _exercise = exercises_in_session[e]
                     delete _exercise.videoFile
@@ -49,9 +52,9 @@ export default {
             }
 
             results = {
-                exercises: exercise[0],
-                maxPageNo: exercise[exercise.length - 1][0].maxPage,
-                numOfExercises: exercise[exercise.length - 1][0].numOfExercises
+                exercises: exercises_in_session,
+                maxPageNo: maxPageNo,
+                numOfExercises: numOfExercises
             }
             return res.send(results)
         } catch (err) {
@@ -76,7 +79,7 @@ export default {
                 results = await exercises.getExerciseByID(exerciseID)
             } else if (req.user.role == 'physiotherapist') {
                 results = await exercises.getOneExerciseByEmail(exerciseID, req.user.email)
-                if (!results) return res.status(404).send('Exercise does not exist')
+                if (!results) return res.sendStatus(404)
                 delete results.physiotherapistEmail
             }
             return res.send(results)

@@ -118,6 +118,7 @@ export default {
 
         try {
             if (req.user.role == 'physiotherapist') {
+                if (!req.user?.activated) return res.status(403).send({ activated: req.user.activated })
                 results = await physiotherapist.getOneTherapistByEmail(req.user.email)
             } else if (req.user.role == 'admin' && req.query.physiotherapistEmail) {
                 results = await physiotherapist.getOneTherapistByEmail(req.query.physiotherapistEmail)
