@@ -1,6 +1,5 @@
 <template>
-  <q-page-container style="padding-top: 16px;">
-    <q-btn v-if="this.user && !this.user.newSurveyAvailable" class="q-ml-md" round dense color="primary" size="lg" icon="chevron_left" @click="this.$router.push('/home')" />
+  <q-page-container style="padding-top: 0px;">
     <terms-modal v-model="openConsentModal" :isPatient="false"></terms-modal>
     <q-card flat class="q-ma-sm">
       <q-card-section>
@@ -65,7 +64,9 @@ export default {
         icon: 'report_problem'
       })
     }
-
+  },
+  created () {
+    if (!this.user?.newSurveyAvailable) this.$route.meta = '/home'
   },
   methods: {
     async updateParticipationStatus () {

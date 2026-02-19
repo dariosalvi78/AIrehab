@@ -56,6 +56,13 @@
         <q-space />
         <q-btn flat dense icon="logout" :label="!onInvitationPage ? $t('common.logout') : $t('common.go_back')" no-caps @click="logout()" />
       </q-toolbar>
+      <q-separator />
+      <q-toolbar v-show="showSecondaryMenu" class="justify-between">
+        <back-button @back:action="$router.push(this.$route.meta)" />
+        <q-chip dense size="18px" class="layout-theme text-weight-light q-mx-none q-px-none">
+          {{ $route.name }}
+        </q-chip>
+      </q-toolbar>
     </q-header>
     <router-view v-slot="{ Component }" :user="this.user" :currentTab="tab" @handle:swipe="setTabFromDirection" @update:tabs="setTabs">
       <transition appear enter-active-class="animated fadeIn">
@@ -77,6 +84,7 @@
 </template>
 
 <script>
+import BackButton from 'src/components/reusables/BackButton.vue';
 import API from '../API'
 import nicers from '../utils/nicers';
 import store from '../utils/storage.js';
@@ -84,6 +92,7 @@ import { updateI18nLocale } from 'src/boot/i18n.js';
 
 export default {
   name: 'MainLayout',
+  components: { BackButton },
   data () {
     return {
       appVersion: JSON.parse(process.env.APP_VERSION),
@@ -92,7 +101,8 @@ export default {
       tabs: {
         patients: { name: 'patients', count: 0 },
         sessions: { name: 'sessions', count: 0 }
-      }
+      },
+      showSecondaryMenu: false
     }
   },
   async beforeMount () {
@@ -104,6 +114,9 @@ export default {
       for (const d of Object.keys(data)) this.tabs[d].count = this.user.count[d]
       this.tab = this.updateTabs()
     }
+  },
+  async updated () {
+    this.showSecondaryMenu = this.hasRouteMeta()
   },
   methods: {
     async logout () {
@@ -158,6 +171,9 @@ export default {
       newCount == 'add'
         ? this.tabs[name].count++
         : this.tabs[name].count = newCount
+    },
+    hasRouteMeta () {
+      return this.$route?.name && typeof this.$route.meta !== 'object'
     }
   },
   computed: { 
@@ -177,7 +193,10 @@ export default {
     tab (up) {
       if (up && !this.$route.query?.redirect) this.$router.push({ path: '/home', query: { view: up } })
     },
-    $route (up) { this.tab = this.updateTabs() }
+    async $route (up) {
+      this.tab = this.updateTabs()
+      this.showSecondaryMenu = this.hasRouteMeta()
+    },
   }
 }
 </script>

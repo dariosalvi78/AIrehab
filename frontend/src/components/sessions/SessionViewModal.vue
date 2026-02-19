@@ -1,8 +1,7 @@
 <template>
-  <q-page-container class="q-pb-md" style="padding-top: 16px;">
+  <q-page-container class="q-pb-md" style="padding-top: 0px;">
     <q-page v-if="session">
-      <q-btn round dense class="q-ml-md" color="primary" size="lg" icon="chevron_left" @click="this.$router.push('/home?view=sessions')" />        
-       <q-card flat class="q-pb-lg q-mt-sm">
+      <q-card flat class="q-pb-lg q-mt-sm">
         <q-card-section>
           <div class="text-h6 text-weight-regular">
             {{ $t('exercises.sessions.title', { name: session.patientName }) }}
@@ -36,8 +35,8 @@
       <q-spinner-dots color="primary" size="3em" />
     </div>
     <div v-else class="q-pa-lg flex flex-center column">
-      <div class="q-py-md text-h6">{{ $t('exercises.sessions.does_not_exist') }}</div>
-      <q-btn color="secondary" size="md" label="Go back" icon="chevron_left" @click="this.$router.go(-1)" />
+      <div class="q-py-md text-h6 text-weight-light text-center">{{ $t('exercises.sessions.does_not_exist') }}</div>
+      <q-btn class="full-width" color="secondary" size="md" no-caps :label="$t('common.go_back')" icon="chevron_left" @click="this.$router.go(-1)" />
     </div>
   </q-page-container>
 </template>
@@ -66,6 +65,7 @@ export default {
     }
   },
   async created () {
+    this.$route.meta = '/home?view=sessions'
     this.resetForm()
     await this.getSessionData()
   },

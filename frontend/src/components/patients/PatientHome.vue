@@ -6,8 +6,15 @@
           <img src="/icons/favicon-maskable.ico">
         </q-avatar>
         <q-toolbar-title>{{ $t('patient.participant') }}</q-toolbar-title>
-        <q-chip v-show="authenticated" outline square size="md" class="q-mx-md text-white">
+        <q-chip v-show="authenticated" outline square size="md" class="q-mx-md">
           {{patient.names}}
+        </q-chip>
+      </q-toolbar>
+      <q-separator />
+      <q-toolbar v-show="panel == 'survey'" class="justify-between">
+        <back-button @back:action="openPatientHome" />
+        <q-chip dense size="18px" class="layout-theme text-weight-light q-mx-none q-px-none">
+          {{ $route.name }}
         </q-chip>
       </q-toolbar>
     </q-header>
@@ -87,7 +94,7 @@
                     <div style="margin-left:-2px;" class="text-capitalize">
                       <q-icon style="bottom:2px;" size="sm" name="schedule" />
                       {{ exercise.startTimestamp }}
-                      - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : 'Ongoing exercise' }}
+                      - {{ exercise.endTimestamp ? '' + exercise.endTimestamp : $t('exercises.ongoing') }}
                     </div>
                   </div>
                   <poe-view-modal 
@@ -117,7 +124,7 @@
             <q-card-section>
               <div class="text-h6">{{ $t('patient.home.survey.title') }}</div>
             </q-card-section>
-            <q-card-section class="q-pt-none flex flex-center">
+            <q-card-section class="q-pt-none flex flex-center column">
               <div class="text-body2" v-html="$t('patient.home.survey.description')"></div>
               <q-spinner-dots v-if="!incomingSurvey" color="primary" size="3em" />
               <q-btn 
@@ -129,7 +136,7 @@
             </q-card-section>
           </q-card>
         </q-tab-panel>
-        <q-tab-panel name="survey" class="q-py-none">
+        <q-tab-panel name="survey" class="q-mx-md q-py-none">
           <survey-form
             :incomingSurvey="this.incomingSurvey"
             @panelFormGoBack="openPatientHome"
@@ -178,12 +185,13 @@ import TermsModal from '../UserTermsModal.vue'
 import PoeViewModal from '../exercises/PoeViewModal.vue'
 import SurveyForm from '../SurveyForm.vue'
 import { mergeLocaleMessages } from 'src/boot/i18n'
+import BackButton from '../reusables/BackButton.vue'
 
 export default {
   name: 'PatientHome',
   i18n: await mergeLocaleMessages(['patient', 'exercises']),
   props: { patientID: String },
-  components: { TermsModal, PoeViewModal, SurveyForm },
+  components: { TermsModal, PoeViewModal, SurveyForm, BackButton },
   data () {
     return {
       patient: {},
@@ -211,8 +219,10 @@ export default {
 
     if (this.patientID && this.secret) await this.setPatientActivation()
     this.participationStatus = await this.getPatientInfo()
-    await this.getPatientExercises()
-    await this.setManifestFile()
+    if (this.authenticated) {
+      await this.getPatientExercises()
+      await this.setManifestFile()
+    }
   },
   methods: {
     async getPatientInfo() {
@@ -223,19 +233,16 @@ export default {
           if (response.token) return await this.getPatientInfo()
           this.patient = response.patient
           this.incomingSurvey = response.newSurveyAvailable || []
+          if (this.incomingSurvey) this.$route.name = this.$t('common.header.patient_survey')
           return response.patient.activated
         }
       } catch (err) {
         this.authenticated = false
         if (err.response.status == 403) {
           this.$q.dialog({
-            color: 'primary',
             title: this.$t('patient.authentication.error.title'),
             message: this.$t('patient.authentication.error.description', { supportEmail: err.response.data.support }),
-            ok: { color: 'primary' },
-            position: 'top',
-            cancel: true,
-            html: true
+            ok: false, cancel: false, position: 'top', html: true, persistent: true
           })
         } else {
           this.$q.notify({

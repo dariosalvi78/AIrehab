@@ -6,7 +6,7 @@
           <div class="text-h4 q-mx-md q-mb-md text-weight-light">{{ $t('common.tabs.patients') }}</div>
           <q-separator />
           <q-card-actions class="flex flex-center q-mt-md" v-if="showNewUserPrompt">      
-            <q-btn class="prompts" padding="sm" color="accent" no-caps @click="() => { this.newUserPrompt = !this.newUserPrompt }">
+            <q-btn class="prompts" padding="sm" color="accent" no-caps @click="newUserPrompt = !newUserPrompt">
               <q-icon left name="group_add"/>
               <div>{{ $t('patient.add') }}</div>
             </q-btn>
@@ -52,7 +52,7 @@
           <sessions-list @update:tabs="updateTabs" />
         </q-tab-panel>
       </q-tab-panels>
-      <div v-if="panel == 'survey'" id="survey" class="q-ma-md">
+      <div v-if="panel == 'survey'" id="survey" class="q-mx-md">
         <survey-form
           :incomingSurvey="this.incomingSurvey"
           @panelFormGoBack="openHomePage"
@@ -153,7 +153,8 @@ export default {
       } catch (e) {
         let errorMsg = 
           e.status === 400 ? this.$t('common.notification.error') :
-          e.status === 409 ? this.$t('patient.notification.patient_exist_error', { name: newUser.fullName }) : e
+          e.status === 409 ? this.$t('patient.notification.patient_exist_error', { name: newUser.fullName }) :
+          e.status === 403 && !e.response.data?.activated ? this.$t('exercises.notification.user_consent_missing') : e
         this.$q.notify({
           color: 'negative',
           position: 'top',
@@ -213,7 +214,6 @@ export default {
       this.$router.push({ path: this.$route.path, query: { p: selectedUser.patientID } })
     },
     async openHomePage () {
-      await this.getPatients()
       this.$refs.panelForm.goTo('patients')
       this.incomingSurvey = undefined
       this.$router.push(this.$route.path)

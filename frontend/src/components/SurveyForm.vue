@@ -1,6 +1,5 @@
 <template>
-  <q-page class="bg-white" style="padding-bottom: 32px;">
-    <q-btn v-if="incomingSurvey.userType == 'patient'" class="q-mb-md" round dense color="primary" size="lg" icon="chevron_left" @click="this.$emit('panelFormGoBack')" />
+  <q-page class="bg-white" style="padding-top: 16px; padding-bottom: 32px;">
     <div class="text-h5 q-mb-md">{{ $t('survey.title', { surveyName: this.incomingSurvey.currentSurveyID }) }}</div>
     <div class="text-body2">{{ $t('survey.description', { numOfQuestions: questions.length }) }}</div>
     <q-list class="q-py-sm">

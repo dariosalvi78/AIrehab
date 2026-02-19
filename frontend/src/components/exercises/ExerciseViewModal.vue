@@ -1,7 +1,6 @@
 <template>
   <q-page-container style="padding-top:16px;">
-    <q-btn class="q-ml-md" round dense color="primary" size="lg" icon="chevron_left" @click="goToSession" />
-    <q-page class="q-py-md">
+    <q-page class="q-pb-md q-pt-none">
       <div v-if="!videoFile">
         <exercise-instructions class="q-mb-md"/>
         <q-separator />
@@ -133,6 +132,7 @@ export default {
     }
   },
   async beforeMount () {
+    this.$route.meta = '/home/sessions/' + this.sessionID
     await this.checkForVideoSupport()
     await this.getVideoExercise()
     if (this.videoFile) {
@@ -290,9 +290,6 @@ export default {
     clearUpload () {
       this.uploadedFile = null
       this.showPreview = !this.showPreview
-    },
-    goToSession () {
-      return this.$router.push('/home/sessions/' + this.sessionID)
     }
   },
   computed: {

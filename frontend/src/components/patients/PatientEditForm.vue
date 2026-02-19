@@ -109,6 +109,7 @@
                             :rules="patterns.measurements('weight')"
                         />
                         <q-input
+                            ref="qNotes"
                             class="q-my-md"
                             filled
                             v-model="this.new.injuries"
@@ -193,8 +194,8 @@ export default {
                 name: [name => (!!name && name.length <= 25) || this.$t('patient.form.name_error')],
                 dob: [(date) => this.dateRestrictions(date) || this.$t('patient.form.date_error')],
                 measurements: (type) => [m => !m ? true : m <= 200 && m >= 0 || this.$t(`patient.form.${type}_error`)],
-                notes: [injuries => !injuries ? true : injuries.length <= 150 || this.$t('exercises.form.notes_error')],
-                exerciseType: [type => !!type  || this.$t('exercises.form.type_error')]
+                notes: [injuries => !injuries ? true : injuries.length <= 350 || this.$t('exercises.form.notes_error')],
+                exerciseType: [type => !!type || this.$t('exercises.form.type_error')]
             },
             new: {
                 fullName: undefined,
@@ -233,7 +234,6 @@ export default {
     methods: {
         formSubmit () {
             let refs = Object.keys(this.$refs), formError = false
-            refs.shift()
             for (const r of refs) {
                 let refInput = this.$refs[r]
                 if (refInput?.validate) refInput.validate()

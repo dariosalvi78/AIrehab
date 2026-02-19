@@ -1,3 +1,5 @@
+import { i18n } from 'src/boot/i18n'
+
 const routes = [
   {
     path: '/',
@@ -23,9 +25,9 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('components/test_leader/TestLeaderHome.vue') },
-      { path: 'sessions/:sessionID', component: () => import('components/sessions/SessionViewModal.vue'), props: true },
-      { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true },
-      { path: 'consent', component: () => import('components/test_leader/TestLeaderConsentPage.vue'), props: true },
+      { path: 'sessions/:sessionID', component: () => import('components/sessions/SessionViewModal.vue'), props: true, name: i18n.global.t('common.header.session') },
+      { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true, name: i18n.global.t('common.header.exercise') },
+      { path: 'consent', component: () => import('components/test_leader/TestLeaderConsentPage.vue'), props: true, name: i18n.global.t('common.header.consent')},
       { path: 'invitation', component: () => import('components/admin/NewUserForm.vue'), props: true },
     ]
   },

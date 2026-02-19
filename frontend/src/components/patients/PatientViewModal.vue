@@ -1,13 +1,13 @@
 <template>
   <div>
-    <q-btn class="q-ma-md" round dense color="primary" size="lg" icon="chevron_left" @click="$emit('panelFormGoBack')" />
     <div class="q-pa-md flex justify-between patient-view-width">
       <q-btn-group class="full-width" spread>
-        <q-btn icon-right="person" size="12px" :label="$t('patient.edit')" type="submit" color="primary" v-close-popup no-caps @click="openUserEditPrompt = !openUserEditPrompt"/>
+        <q-btn icon-right="person" size="md" :label="$t('patient.edit')" type="submit" color="primary" v-close-popup no-caps @click="openUserEditPrompt = !openUserEditPrompt"/>
         <q-btn v-if="!selectedPatient.sessionID" icon-right="start" size="12px" :label="$t('patient.start')" type="submit" color="secondary" v-close-popup no-caps @click="startNewSession(selectedPatient)"/>
         <q-btn v-else icon-right="open_in_new" size="12px" :label="$t('patient.ongoing')" type="submit" color="secondary" v-close-popup no-caps @click="navigateToSession(selectedPatient.sessionID)"/>
       </q-btn-group>
     </div>
+    <q-separator inset />
     <q-card flat class="patient-view-width">
       <q-card-section>
         <div class="text-h6 row">
@@ -106,6 +106,7 @@
 <script>
 import API from '../../API.js'
 import nicers from '../../utils/nicers'
+import BackButton from '../reusables/BackButton.vue';
 import PatientEditForm from './PatientEditForm.vue'
 import { QrcodeSvg } from 'qrcode.vue'
 
@@ -113,7 +114,7 @@ export default {
   name: 'PatientViewModal',
   props: { selectedPatient: Object },
   emits: ['openView', 'panelFormGoBack', 'update:tabs'],
-  components: { PatientEditForm, QrcodeSvg },
+  components: { PatientEditForm, BackButton, QrcodeSvg },
   data () {
     return {
       openUserEditPrompt: false,
@@ -123,6 +124,13 @@ export default {
         size: 300,
         lvl: 'L'
       }
+    }
+  },
+  beforeUpdate () {
+    const { name, meta } = this.$route
+    if (!name || !meta) {
+      this.$route.meta = '/home?view=patients'
+      this.$route.name = this.$t('common.header.patient')
     }
   },
   mounted () {
@@ -172,7 +180,7 @@ export default {
         this.$q.notify({
           color: 'secondary',
           position: 'top',
-          message: this.$t('patient.notification.patient.edit_patient', { name: fullName }),
+          message: this.$t('patient.notification.edit_patient', { name: fullName }),
           icon: 'info'
         })
         this.$emit('openView', { patientID: this.selectedPatient.id })
@@ -182,7 +190,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: this.$t('patient.notification.patient.edit_patient_error', { error: errMsg }),
+          message: this.$t('patient.notification.edit_patient_error', { error: errMsg }),
           icon: 'report_problem'
         })
       }
