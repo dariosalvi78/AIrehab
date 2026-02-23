@@ -29,7 +29,8 @@ export default {
             title: 'Spela in träningsvideo',
             start: 'Börja inspelning',
             stop: 'Stoppa inspelning',
-            save: '(Valfri) Spara inspelning till enhet'
+            save: '(Valfri) Spara inspelning till enhet',
+            auto_stop: '(Valfri) Avsluta inspelningen automatiskt efter {elapsed} sekunder'
         },
         upload: 'Ladda upp träningsvideo',
         upload_desc: 'Ladda upp video som du har filmat sen tidigare',
@@ -54,7 +55,7 @@ export default {
         no_exercises_in_session: 'Inga övningar i denna session',
         no_end_date: 'Inget slutdatum',
         not_found: 'Inga sessioner hittades',
-        does_not_exist: 'Sessionen finns inte'
+        does_not_exist: 'Sessionen finns inte, prova att uppdatera dina pågående sessioner'
     },
     instructions: {
         title: 'Övningsinstruktioner',
@@ -77,6 +78,7 @@ export default {
         get_exercises_error: 'Kan inte hämta övningar: {error}',
         add_exercise: 'Skapade ny övning för nuvarande session',
         add_exercise_error: 'Kunde inte skapa ny övning: {error}',
+        exercise_not_found: 'Kan inte hitta övning',
         delete_exercise: 'Övning har tagits bort',
         delete_exercise_error: 'Kunde inte ta bort övning från session: {error}',
         update_exercise: 'Uppdaterade övning för session',
@@ -99,7 +101,6 @@ export default {
         uploading_video_error: 'Inspelning kan inte sparas: {error}',
         video_upload_success: '<b>Inspelning är redo</b><br>Påbörjar videoanalys inom kort<br>Vänligen vänta...',
         processing_started: 'Videon har skickats för analysering',
-        get_video_exercise: 'Kan inte hitta övning: {error}',
         upload_rejected: 'Filen har inte ett giltigt format: {file}',
         web_recording_not_supported: 'Webbläsaren har inte stöd för .mp4 inspelning, prova en annan webbläsare.'
     }

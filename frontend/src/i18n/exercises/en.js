@@ -29,7 +29,8 @@ export default {
             title: 'Record exercise video',
             start: 'Start recording',
             stop: 'Stop recording',
-            save: '(Optional) Save video to device'
+            save: '(Optional) Save video to device',
+            auto_stop: '(Optional) Automatically stop recording after {elapsed} seconds'
         },
         upload: 'Upload exercise video',
         upload_desc: 'Upload video that you have already recorded',
@@ -54,7 +55,7 @@ export default {
         no_exercises_in_session: 'No exercises in session',
         no_end_date: 'No end date',
         not_found: 'No sessions found',
-        does_not_exist: 'Session does not exist'
+        does_not_exist: 'Session does not exist, try to update your ongoing sessions'
     },
     instructions: {
         title: 'Exercise instructions',
@@ -77,6 +78,7 @@ export default {
         get_exercises_error: 'Could not retrieve exercises: {error}',
         add_exercise: 'Created new exercise for current session',
         add_exercise_error: 'Creating new exercise failed: {error}',
+        exercise_not_found: 'Exercise not found',
         delete_exercise: 'Exercise has been deleted',
         delete_exercise_error: 'Cannot delete exercise from session: {error}',
         update_exercise: 'Updated exercise for current session',
@@ -99,7 +101,6 @@ export default {
         uploading_video_error: 'Video cannot be saved: {error}',
         video_upload_success: '<b>Video uploaded</b><br>Processing will start in a moment<br>Please wait...',
         processing_started: 'Video has been sent for processing',
-        get_video_exercise: 'Cannot get exercise: {error}',
         upload_rejected: 'File is not in a valid format: {file}',
         web_recording_not_supported: 'Browser does not support .mp4 web recording, use a different web browser.'
     }

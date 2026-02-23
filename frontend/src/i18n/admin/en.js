@@ -98,5 +98,17 @@ export default {
     },
     video: {
         uploaded: 'No recording | Recording exists',
+    },
+    notification:{
+        sending_invitation: 'Sending invitation, please wait',
+        invitation_sent: 'Invitation sent to {email}',
+        invitation_sent_error: 'Could not send invitation: {error}',
+        get_users_error: 'Could not get users: {error}',
+        no_data_available: 'No data is available for download',
+        email_sent: 'Email has been sent to {email}',
+        email_sent_error: 'Cannot send email: {error}',
+        delete_user: 'Deleted {username}',
+        delete_user_error: 'Could not delete {username}: {error}',
+        user_not_found: '{username} does not exist'
     }
 }

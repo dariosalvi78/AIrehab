@@ -89,5 +89,17 @@ export default {
     },
     video: {
         uploaded: 'Ingen inspelning finns | Inspelning finns',
+    },
+    notification:{
+        sending_invitation: 'Skickar inbjudan, vänligen vänta',
+        invitation_sent: 'Inbjudan skickad till {email}',
+        invitation_sent_error: 'Kunde inte skicka inbjudan: {error}',
+        get_users_error: 'Kunde inte hämta användare: {error}',
+        no_data_available: 'Det finns ingen undersökningsdata att hämta',
+        email_sent: 'E-post skickat till {email}',
+        email_sent_error: 'Kunde inte skicka e-post: {error}',
+        delete_user: 'Raderade {username}',
+        delete_user_error: 'Kunde inte radera {username}: {error}',
+        user_not_found: '{username} finns inte'
     }
 }

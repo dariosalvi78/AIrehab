@@ -17,7 +17,11 @@ export default {
     header: {
         language: 'Language',
         about: 'About',
-        consent: 'Change consent'
+        consent: 'Change consent',
+        exercise: 'Exercise screen',
+        session: 'Ongoing session',
+        patient: 'Patient profile',
+        patient_survey: 'Survey',
     },
     tabs: {
         patients: 'Your patients',

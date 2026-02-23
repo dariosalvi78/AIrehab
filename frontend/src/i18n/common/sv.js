@@ -17,7 +17,11 @@ export default {
     header: {
         language: 'Språk',
         about: 'Mer info',
-        consent: 'Ändra samtycke'
+        consent: 'Ändra samtycke',
+        exercise: 'Övningsskärm',
+        session: 'Pågående session',
+        patient: 'Patientprofil',
+        patient_survey: 'Frågeformulär',
     },
     tabs: {
         patients: 'Dina patienter',
