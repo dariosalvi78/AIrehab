@@ -26,11 +26,10 @@
               <div class="poe-indicator row justify-between">
                 <div class="score" :key="score" v-for="score in getPOEScores">
                   <q-chip
-                    outline
-                    :clickable="false" 
-                    :ripple="false" 
-                    size="md"
-                    :class="`q-mb-md ${poe.bracket.theme == score.theme ? 'text-bold' : ''}`"
+                    :color="score.theme"
+                    text-color="white" :clickable="false" 
+                    :ripple="false" size="md"
+                    :class="`glossy q-mb-md ${poe.bracket.theme == score.theme ? 'text-bold' : ''}`"
                     :text-color="score.theme">
                     {{ $t(`poe.scores.${score.text}`) }}
                   </q-chip>
@@ -38,7 +37,7 @@
               </div>
             </q-item-section>
           </q-item>
-          <q-card flat class="q-my-md full-height q-mb-xl">
+          <q-card flat class="q-mt-md full-height">
             <q-card-section class="q-pa-none">
               <div class="poe-figure">
                 <q-avatar square class="full-width full-height">
@@ -155,11 +154,13 @@ export default {
           }
           poe["highestPredictedConfidence"] = poe['confidences'][poe.score].score
         }
+
+        const calculateSumOfScores = ((sumOfScores / 10) * 100)
         const poe = {
           results: results,
-          sumOfScores: ((sumOfScores / 10) * 100),
+          sumOfScores: calculateSumOfScores,
           maxScore: ((poeTypesEnum.scores.POOR.point * results.length) * 10),
-          bracket: poeTypesEnum.getPOEScoreBracket(sumOfScores)
+          bracket: poeTypesEnum.getPOEScoreBracket(calculateSumOfScores)
         }
         this.$emit('getPOEBracket', poe.bracket)
         return poe
@@ -195,7 +196,7 @@ export default {
 
 <style scoped>
   .poe-figure {
-    max-width: 300px;
+    width: 300px;
     margin: 0 auto;
   }
   .poe-item-info {

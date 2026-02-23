@@ -7,15 +7,17 @@
         />
         <div class="text-body1">{{ $t('exercises.record.dialog.title') }}</div>
       </q-card-section>
+      <q-checkbox class="q-mx-md q-mb-md text-weight-light" dense v-model="autoplay.active" :label="$t('exercises.record.dialog.auto_stop', { elapsed: autoplay.limit })" />
       <q-separator />
       <q-card-section class="flex flex-center column q-pa-sm">
         <div class="video-container col text-center flex flex-center">
+          <div v-show="countdown.visible" class="countdown flex flex-center"><div class="text-h2 text-center text-white">{{ countdown.timer }}</div></div>
           <video ref="videoOutput" id="videoPreview" autoplay playsinline webkit-playsinline :controls="false"
             disable-picture-in-picture controlsList="nodownload">
             <source src="" type="video/mp4">
             Your browser does not support HTML5 video.
           </video>
-          <div v-show="!mediaRecorder?.error" class="recording-actions flex flex">
+          <div v-show="!mediaRecorder?.error && !countdown.visible" class="recording-actions flex flex">
             <div v-show="isRecording" class="text-subtitle2 text-center text-white">{{ displayTimer }}</div>
             <div class="col flex flex-center">
               <q-btn padding="md" round color="white" size="xl" class="shadow-8" push
@@ -52,7 +54,8 @@ export default {
       videoChunks: [],
       isRecording: false,
       videoFile: undefined,
-      saveVideoToDevice: false,
+      autoplay: undefined,
+      countdown: undefined,
       openExerciseVideo: false,
       timer: { elapsed: 0, interval: null },
       /** @type {MediaStreamConstraints} */
@@ -74,16 +77,18 @@ export default {
     async toggle() {
       this.$refs.qRecordDialog.show()
       this.mediaRecorder = { loading: true }
+      this.autoplay = { active: false, limit: 15 }
+      this.countdown = { visible: false, timer: 3 }
       await nicers.delay(500)
       if (this.$refs.videoOutput) {
-        await this.videoCapture()
+        await this.initMediaRecorder()
         this.mediaRecorder.loading = false
         document.querySelector('.recording-actions').classList.add('visible')
       }
     }
   },
   methods: {
-    async videoCapture() {
+    async initMediaRecorder () {
       const MEDIA_CONSTRAINTS = this.constraints
       let supported_codec = undefined
       this.videoChunks = []
@@ -153,10 +158,25 @@ export default {
       this.timer.elapsed = 0
     },
     async startRecording() {
+      this.countdown.visible = true
+      await new Promise(res => {
+        const interval = setInterval(() => {
+          --this.countdown.timer
+          if (this.countdown.timer == 0) {
+            this.countdown = { visible: false, timer: 3 }
+            res(clearInterval(interval))
+          }
+        }, 1000)
+      })
+
       this.isRecording = true
       this.$refs.videoOutput.classList.toggle('recording')
       this.mediaRecorder.start(1000)
-      this.timer.interval = setInterval(() => {
+      this.timer.interval = setInterval(async () => {
+        if (this.autoplay.active && (this.timer.elapsed >= this.autoplay.limit)) {
+          await this.stopRecording()
+          await this.stopVideoCapture()
+        }
         this.timer.elapsed++
       }, 1000)
     },
@@ -189,4 +209,13 @@ export default {
 .visible {
   opacity: 1;
 }
+
+.countdown {
+  border-radius: 100%;
+  width: 100px;
+  height: 100px;
+  background-color: rgba(128, 128, 128, 0.5);
+  position: absolute;
+}
+
 </style>
