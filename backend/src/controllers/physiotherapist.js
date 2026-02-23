@@ -114,7 +114,7 @@ export default {
         const checkIfPatient = await physiotherapist.getOnePatientByName(patient.fullName)
         if (checkIfPatient) return res.sendStatus(409)
 
-        if (req.user.role == 'admin' && !req.query.physiotherapistEmail) return res.status(400)
+        if (req.user.role == 'admin' && !req.query?.physiotherapistEmail) return res.sendStatus(400)
 
         try {
             if (req.user.role == 'physiotherapist') {
@@ -122,7 +122,7 @@ export default {
                 results = await physiotherapist.getOneTherapistByEmail(req.user.email)
             } else if (req.user.role == 'admin' && req.query.physiotherapistEmail) {
                 results = await physiotherapist.getOneTherapistByEmail(req.query.physiotherapistEmail)
-                if (!results) return res.status(404).send('No physiotherapist with given email')
+                if (!results) return res.sendStatus(404)
             }
 
             if (patient.isTestPatient && results) patient.fullName = `${config.test.prefix}${results.id}`

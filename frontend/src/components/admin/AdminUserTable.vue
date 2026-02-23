@@ -255,7 +255,7 @@ export default {
         this.$q.notify({
           color: 'info',
           position: 'top',
-          message: `Deleted ${this.selectedUser.email}`,
+          message: this.$t('admin.notification.delete_user', { username: this.selectedUser.email }),
           icon: 'info'
         })
         this.$emit('getUsers')
@@ -265,7 +265,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Cannot delete ${this.selectedUser.email}: ${errMsg}`,
+          message: this.$t('admin.notification.delete_user_error', { username: this.selectedUser.email, error: errMsg }),
           icon: 'warning'
         })
         return
@@ -278,7 +278,7 @@ export default {
         this.$q.notify({
           color: 'secondary',
           position: 'top',
-          message: 'Updated ' + this.selectedUser.email,
+          message: this.$t('patient.notification.edit_patient', { name: this.selectedUser.email }),
           icon: 'info'
         })
         this.resetForm()
@@ -290,7 +290,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Patient update failed: ' + errMsg,
+          message: this.$t('patient.notification.edit_patient_error', { error: errMsg }),
           icon: 'report_problem'
         })
       }
@@ -303,7 +303,7 @@ export default {
           return this.$q.notify({
               color: 'negative',
               position: 'top',
-              message: 'Please review fields and try again',
+              message: this.$t('common.notification.error'),
               icon: 'report_problem'
           })
         }
@@ -313,18 +313,18 @@ export default {
           this.$q.notify({
             color: 'secondary',
             position: 'top',
-            message: 'Email has been sent to ' + this.selectedUser.email,
+            message: this.$t('admin.notification.email_sent', { email: this.selectedUser.email }),
             icon: 'info'
           })
           this.openUserMailPrompt = !this.openUserMailPrompt
-          this.email.subject = 'POE App'
+          this.email.subject = 'Admin • POE Assessment'
           this.email.content = undefined
         }
       } catch (err) {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Cannot send email: ' + err,
+          message: this.$t('admin.notification.email_sent_error', { error: err }),
           icon: 'report_problem'
         })
       }

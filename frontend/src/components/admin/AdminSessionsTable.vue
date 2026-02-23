@@ -133,12 +133,12 @@ export default {
     async deleteSession () {
       let deletedSession = this.selectedSession
       try {
-        if (deletedSession.numOfExercises >= 1) throw new Error('Session has ongoing exercises')
+        if (deletedSession.numOfExercises >= 1) throw new Error(this.$t('exercises.notification.session_ongoing'))
         await API.deleteSession(deletedSession.sessionID)
         this.$q.notify({
           color: 'info',
           position: 'top',
-          message: 'Deleted selected session',
+          message: this.$t('exercises.notification.session_deleted'),
           icon: 'info'
         })
         this.$emit('getSessions')
@@ -148,7 +148,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Cannot delete session: ${errMsg}`,
+          message: this.$t('exercises.notification.session_deleted_error', { error: errMsg }),
           icon: 'warning'
         })
         return

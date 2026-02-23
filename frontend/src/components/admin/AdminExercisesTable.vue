@@ -174,7 +174,7 @@ export default {
         this.$q.notify({
           color: 'info',
           position: 'top',
-          message: 'Deleted selected exercise',
+          message: this.$t('exercises.notification.delete_exercise'),
           icon: 'info'
         })
         this.$emit('getExercises')
@@ -182,7 +182,7 @@ export default {
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Cannot delete selected exercise: ${err}`,
+          message: this.$t('exercises.notification.delete_exercise_error', { error: err }),
           icon: 'warning'
         })
         return

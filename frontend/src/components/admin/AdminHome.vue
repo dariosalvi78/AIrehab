@@ -65,7 +65,7 @@ export default {
         group: false,
         color: 'secondary',
         position: 'top',
-        message: 'Sending email, please wait',
+        message: this.$t('admin.notification.sending_invitation'),
         spinner: true
       })
       try {
@@ -74,7 +74,7 @@ export default {
           createdNotify({
             type: 'positive',
             color: 'positive',
-            message: 'Invitation sent to: ' + response.data.email,
+            message: this.$t('admin.notification.invitation_sent', { email: response.data.email }),
             spinner: false
           })
         }
@@ -83,7 +83,7 @@ export default {
         return createdNotify({
           color: 'negative',
           position: 'top',
-          message: 'Could not send invitation: ' + errorMsg,
+          message: this.$t('admin.notification.invitation_sent_error', { error: errorMsg }),
           icon: 'report_problem',
           spinner: false
         })
@@ -98,16 +98,18 @@ export default {
           this.$q.notify({
             type: 'positive',
             position: 'top',
-            message: 'Patient created for ' + physiotherapistEmail,
+            message: this.$t('patient.notification.add_patient'),
           })
         }
       } catch (e) {
-        let errorMsg = e
-        if (e.status === 404 || e.status === 400) errorMsg = e.response.data
+        let errorMsg = 
+          e.status === 404 ? this.$t('admin.notification.user_not_found', { username: newPatient.physiotherapistEmail }) :
+          e.status === 409 ? this.$t('patient.notification.patient_exist_error', { name: newPatient.fullName }) :
+          e.status === 400 ? this.$t('common.notification.error') : e
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: 'Patient registration failed: ' + errorMsg,
+          message: this.$t('patient.notification.add_patient_error', { error: errorMsg }),
           icon: 'report_problem'
         })
       }
@@ -122,7 +124,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Error retrieving users table: ${err}`,
+          message: this.$t('admin.notification.get_users_error', { error: err }),
           icon: 'warning'
         })
       }
@@ -135,7 +137,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Error retrieving sessions table: ${err}`,
+          message: this.$t('exercises.notification.get_sessions_error', { error: err }),
           icon: 'warning'
         })
       }
@@ -148,7 +150,7 @@ export default {
         return this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `Error retrieving exercises table: ${err}`,
+          message: this.$t('exercises.notification.get_exercises_error', { error: err }),
           icon: 'warning'
         })
       }
@@ -170,11 +172,11 @@ export default {
           URL.revokeObjectURL(url)
         }
       } catch (err) {
-        let errMsg = err.response && err.response.status === 404 ? 'No survey data available' : err.message
+        let errMsg = err.response && err.response.status === 404 ? this.$t('admin.notification.no_data_available') : err.message
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message: `${errMsg}`,
+          message: this.$t('common.notification.error_generic', { error: errMsg }),
           icon: 'warning'
         })
       }
