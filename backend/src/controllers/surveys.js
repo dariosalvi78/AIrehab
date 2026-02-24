@@ -37,7 +37,7 @@ export default {
 
         try {
             let surveyData = req.body.newSurveyData, physioID = undefined, patientID = null
-            if (!surveyData) return res.sendStatus(400)
+            if (!surveyData?.surveyName || !Object.keys(JSON.parse(surveyData.results)).length) return res.sendStatus(400)
             
             if (req.user) {
                 let user = await users.getUserByEmail(req.user.email)
