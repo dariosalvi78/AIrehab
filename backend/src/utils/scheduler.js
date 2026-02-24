@@ -5,55 +5,10 @@ import poeMA from './poeMotionAnalysis.js'
 import mailer from './mailer/mailer.js'
 import exercisesCollection from '../DOM/exercisesCollection.js'
 import surveysCollection from '../DOM/surveysCollection.js'
-import physiotherapistCollection from '../DOM/physiotherapistCollection.js'
 import usersCollection from '../DOM/usersCollection.js'
 
 const config = {
-    survey_prefix: 'T',
-    isReminderTimestamp: (latestSurveyTimestamp, surveysCompleted, today = new Date()) => {
-        if (surveysCompleted < 1 || !latestSurveyTimestamp) return false
-        const start = new Date(latestSurveyTimestamp),
-            numOfRemindersToSend = 2,
-            daysApart = 3
-
-        for (let i = 1; i <= numOfRemindersToSend; i++) {
-            const targetDate = new Date(start)
-            targetDate.setDate(start.getDate() + i * daysApart)
-            if (today.toDateString() === targetDate.toDateString()) return true
-        }
-    },
-    rules: {
-        test_leader: [
-            (latestSurveyTimestamp) => {
-                // 14 days from first survey
-                let timestamp = 14 * 24 * 60 * 60 * 1000
-                const dateUntilSecondSurvey = (latestSurveyTimestamp <= Date.now() - timestamp)
-                return { isAvailable: dateUntilSecondSurvey, becameAvailableOn: new Date(latestSurveyTimestamp + timestamp)}
-            },
-            (latestSurveyTimestamp) => { 
-                // 60 days from second survey
-                let timestamp = 60 * 24 * 60 * 60 * 1000
-                const dateUntilThirdSurvey = (latestSurveyTimestamp <= Date.now() - timestamp)
-                return { isAvailable: dateUntilThirdSurvey, becameAvailableOn: new Date(latestSurveyTimestamp + timestamp) }
-            }
-        ],
-        patient: [
-            (numOfExercises, latestSurveyTimestamp) => {
-                return {
-                    isAvailable: numOfExercises >= 3,
-                    becameAvailableOn: new Date(latestSurveyTimestamp)
-                }
-            },
-            (numOfExercises, latestSurveyTimestamp) => {
-                const sixWeeksInMs = 6 * 7 * 24 * 60 * 60 * 1000;
-                const dateIsSixWeeksApart = (latestSurveyTimestamp <= Date.now() - sixWeeksInMs)
-                return {
-                    isAvailable: (dateIsSixWeeksApart && numOfExercises >= 5),
-                    becameAvailableOn: new Date(latestSurveyTimestamp + sixWeeksInMs)
-                }
-            }
-        ]
-    }
+    survey_prefix: 'T'
 }
 
 cron.schedule('0 9 * * *', async (ctx) => {
@@ -63,7 +18,10 @@ cron.schedule('0 9 * * *', async (ctx) => {
         for (const u in users) {
             if (users[u] && !users[u].activated) continue
             let isNewSurvey = await isSurveyAvailable(users[u].id, users[u].role)
-            if (isNewSurvey && config.isReminderTimestamp(isNewSurvey.surveyDate, isNewSurvey.completed)) {
+            if (!isNewSurvey) continue
+
+            let isReminder = await surveysCollection.isReminderTimestamp(users[u].id, isNewSurvey.surveyDate)
+            if (isReminder.sendReminder && isNewSurvey) {
                 await mailer.sendPhysiotherapistSurveyAvailable(users[u].email)
                 reminderCount++
             }
@@ -85,46 +43,21 @@ cron.schedule('0 9 * * *', async (ctx) => {
 const isSurveyAvailable = async (userID, role) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let surveys = [], available = undefined, userType = role, surveyIsAvailable = false, latestSurveyTimestamp = undefined
-            if (userType == 'physiotherapist') {
-                surveys = await surveysCollection.getSurveysByPhysioID(userID)
-                userType = 'test_leader'
-                if (surveys && surveys.length) {
-                    latestSurveyTimestamp = new Date(surveys[0].createdTimestamp).getTime()
-                    const rules = config.rules.test_leader
-                    for (let i = 0; i < rules.length; i++) {
-                        let sRules = rules[i](latestSurveyTimestamp)
-                        if ((surveys.length - 1) === i && sRules.isAvailable) {
-                            surveyIsAvailable = sRules.isAvailable
-                            latestSurveyTimestamp = sRules.becameAvailableOn
-                        }
-                    }
-                }
-            } else if (userType == 'patient') {
-                surveys = await surveysCollection.getSurveysByPatientID(userID)
-                const patient = await physiotherapistCollection.getOnePatientByID(userID)
-                if (!patient.sessionID) return resolve()
-                let exercises = await exercisesCollection.getExercisesInSessionByEmail(patient.sessionID, patient.physiotherapistEmail)
-                const numOfExercises = exercises.length
-                if (surveys && surveys.length) {
-                    latestSurveyTimestamp = new Date(surveys[0].createdTimestamp).getTime()
-                    const rules = config.rules.patient
-                    for (let i = 0; i < rules.length; i++) {
-                        let sRules = rules[i](numOfExercises, latestSurveyTimestamp)
-                        if ((surveys.length - 1) === i && sRules.isAvailable) {
-                            surveyIsAvailable = sRules.isAvailable
-                            latestSurveyTimestamp = sRules.becameAvailableOn
-                        }
-                    }
-                }
-            }
+            let survey = undefined, 
+                available = undefined, 
+                userType = role
 
-            if (surveyIsAvailable || (surveys && !surveys.length)) {
-                const sCount = surveys.length + 1
+            if (userType == 'physiotherapist') {
+                survey = await surveysCollection.isPhysioSurveyAvailable(userID)
+                userType = 'test_leader'
+            } else if (userType == 'patient') survey = await surveysCollection.isPatientSurveyAvailable(userID)
+
+            if (survey.isAvailable) {
+                const sCount = survey.completed + 1
                 available = {
-                    surveyDate: latestSurveyTimestamp,
+                    surveyDate: survey.availableOnTimestamp,
                     currentSurveyID: (config.survey_prefix + sCount),
-                    completed: surveys.length,
+                    completed: survey.completed,
                     userType: userType
                 }
             }
@@ -138,8 +71,8 @@ const isSurveyAvailable = async (userID, role) => {
 
 export default {
     /**
-     * Check POE status for a given exercise.
-     * When POE results are ready, send email reminder to user
+     * Create a new task that will check POE status for a given exercise in intervals.
+     * - When POE results are ready, send email reminder to user.
      * @param {Types.User['email']} userEmail
      * @param {Object} meta additional data sent to email 
      * @param {Types.Exercise['id']} exerciseID 
