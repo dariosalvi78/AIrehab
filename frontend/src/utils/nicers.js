@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import calendar from 'dayjs/plugin/calendar'
 import 'dayjs/locale/sv.js'
 import 'dayjs/locale/en.js'
 import { i18n } from 'src/boot/i18n'
@@ -11,6 +12,7 @@ import { i18n } from 'src/boot/i18n'
 dayjs.extend(utc)
 dayjs.extend(localizedFormat)
 dayjs.extend(relativeTime)
+dayjs.extend(calendar)
 const dateFormatter = dayjs
 
 export default {
@@ -43,8 +45,12 @@ export default {
      * @returns Localized date from now
     */
     formattedDateFromNow (date) {
-        if (!date) return
-        return dateFormatter.utc(date).fromNow()
+        let now = new Date()
+        if (!date) return this.formattedDate(now)
+        const dateFromNow = dateFormatter.utc(date).isSame(now, 'day') 
+            ? dateFormatter.utc(date).calendar(null, { sameDay: `[${i18n.global.t('common.today')}]` }) 
+            : dateFormatter.utc(date).fromNow()
+        return dateFromNow
     },
 
     /** 
