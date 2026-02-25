@@ -44,10 +44,9 @@ export default {
         let response = await db.query(`
             SELECT s.id, s.createdTimestamp,
                 CASE
-                    WHEN COALESCE(count(s.id), 0) >= 1
-                        AND DATEDIFF(day, '${new Date(availableOnTimestamp).toISOString()}', CURRENT_TIMESTAMP) IN (3, 6)
-                    THEN CAST(1 AS BIT)
-                    ELSE CAST(0 AS BIT)
+                    WHEN DATEDIFF(day, '${new Date(availableOnTimestamp).toISOString()}', CURRENT_TIMESTAMP) IN (3, 6)
+                        THEN CAST(1 AS BIT)
+                        ELSE CAST(0 AS BIT)
                 END AS sendReminder
             FROM survey_answer s
                 WHERE s.physiotherapistId = '${physiotherapistId}' AND s.patientId IS NULL

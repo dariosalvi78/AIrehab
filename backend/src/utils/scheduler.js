@@ -21,7 +21,7 @@ cron.schedule('0 9 * * *', async (ctx) => {
             if (!isNewSurvey) continue
 
             let isReminder = await surveysCollection.isReminderTimestamp(users[u].id, isNewSurvey.surveyDate)
-            if (isReminder.sendReminder && isNewSurvey) {
+            if (isReminder?.sendReminder && isNewSurvey) {
                 await mailer.sendPhysiotherapistSurveyAvailable(users[u].email)
                 reminderCount++
             }
