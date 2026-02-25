@@ -136,7 +136,7 @@
             </q-card-section>
           </q-card>
         </q-tab-panel>
-        <q-tab-panel name="survey" class="q-mx-md q-py-none">
+        <q-tab-panel name="survey" class="q-mx-none q-py-none">
           <survey-form
             :incomingSurvey="this.incomingSurvey"
             @panelFormGoBack="openPatientHome"

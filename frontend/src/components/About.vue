@@ -1,6 +1,6 @@
 <template>
   <div class="m-width q-py-sm">
-    <q-btn round dense class="q-ml-md q-my-sm" color="primary" size="lg" icon="chevron_left" @click="this.$router.go(-1)" />        
+    <back-button @back:action="$router.go(-1)" ></back-button>
     <q-card flat class="q-py-none">
       <q-card-section>
         <div class="text-body1 text-weight-light q-py-sm">
@@ -56,8 +56,11 @@
 </template>
 
 <script>
+import BackButton from './reusables/BackButton.vue';
+
 export default {
   name: 'About',
+  components: { BackButton }
 }
 </script>
 

@@ -9,7 +9,8 @@
               <q-avatar size="250px" square style="height:150px;" class="q-mb-xl">
                 <q-img src="logos/POE_logo_noframe.png"/>
               </q-avatar>
-              <div class="text-h5 text-left">{{ $t('common.signin') }}</div>
+              <div class="text-h4 text-left text-weight-light">{{ $t('common.signin.header') }}</div>
+              <div class="text-body2 q-mt-sm text-left text-grey-8">{{ $t('common.signin.subtitle') }}</div>
             </q-card-section>
             <q-card-section class="q-px-sm">
               <form autocomplete="on">
@@ -45,12 +46,12 @@
                 </template>
               </q-input>
               <div class="flex row justify-end">
-                <q-btn class="q-pr-none" flat size="md" :label="$t('common.forgot_password')" @click="resetPassword()" no-caps />
+                <div class="text-subtitle2 q-pr-none cursor-pointer" @click="resetPassword()">{{ $t('common.forgot_password') }}</div>
               </div>
               </form>
             </q-card-section>
-            <q-card-actions class="flex flex-center q-py-none">
-              <q-btn class="full-width" size="md" :label="$t('common.login')" color="primary" @click="login()" no-caps />
+            <q-card-actions class="flex flex-center q-py-none q-mt-lg">
+              <q-btn class="full-width" rounded size="16px" :label="$t('common.login')" color="primary" @click="login()" no-caps />
             </q-card-actions>
           </q-card>
         </q-form>

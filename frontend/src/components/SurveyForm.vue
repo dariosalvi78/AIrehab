@@ -39,8 +39,8 @@
         />
       </div>
       <q-separator class="q-my-lg" />
-      <div class="text-body2 q-mb-md">{{ $t('survey.complete_form_description') }} </div>
-      <q-btn class="q-mb-lg full-width" icon="send" type="submit"
+      <div class="text-body2">{{ $t('survey.complete_form_description') }} </div>
+      <q-btn class="q-mt-lg full-width" icon="send" type="submit"
         padding="md" size="16px" color="secondary" no-caps @click="submitForm"
         :label="$t('survey.send_survey')" 
       />

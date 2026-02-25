@@ -52,12 +52,11 @@
           <sessions-list @update:tabs="updateTabs" />
         </q-tab-panel>
       </q-tab-panels>
-      <div v-if="panel == 'survey'" id="survey" class="q-mx-md">
-        <survey-form
-          :incomingSurvey="this.incomingSurvey"
-          @panelFormGoBack="openHomePage"
-        />
-      </div>
+      <survey-form
+        v-if="panel == 'survey'" id="survey" class="q-mx-md"
+        :incomingSurvey="this.incomingSurvey"
+        @panelFormGoBack="openHomePage"
+      />
       <div v-else-if="panel == 'view'">
         <transition appear enter-active-class="animated fadeIn">
           <patient-view-modal 
@@ -197,7 +196,7 @@ export default {
         this.$q.dialog({
           color: 'primary', 
           title: this.$t('common.new_survey.header'),
-          message: this.$t('common.new_survey.description', { date: this.incomingSurvey?.surveyDate ? h.formattedDateFromNow(this.incomingSurvey.surveyDate) : h.formattedDate(new Date()) }),
+          message: this.$t('common.new_survey.description', { date: h.formattedDateFromNow(this.incomingSurvey?.surveyDate) }),
           ok: { color: 'primary', label:this.$t('common.new_survey.action'), noCaps: true, push: true, size: 'lg', style: 'width: 100%;' },
           persistent: true,
           html: true,

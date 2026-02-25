@@ -69,7 +69,7 @@
         <component :is="Component"></component>
       </transition>
     </router-view>
-    <q-footer v-if="isLoggedIn && isTestleader" bordered class="layout-theme m-width">
+    <q-footer v-if="isLoggedIn && isTestleader && !$route.query?.redirect" bordered class="layout-theme m-width">
       <q-tabs v-model="tab" dense align="justify">
         <q-tab 
           v-for="tab in tabs" :key="tab" no-caps :name="tab.name" :label="`${this.$t(`common.tabs.${tab.name}`)} · ${tab.count}`" 
