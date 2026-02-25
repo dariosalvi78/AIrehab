@@ -8,12 +8,13 @@ export default {
     send: 'Send',
     continue: 'Continue',
     delete: 'Delete',
-    signin: 'Sign-in',
+    signin: { header: 'Sign-in', subtitle: 'Assessment of movement quality using AI' },
     email: 'Email',
     password: 'Password',
-    forgot_password: 'Forgot password',
+    forgot_password: 'Forgot password?',
     home: 'Home',
     go_back: 'Go back',
+    today: 'today',
     header: {
         language: 'Language',
         about: 'About',
@@ -59,7 +60,7 @@ export default {
     },
     new_survey: {
         header: 'A new survey is available',
-        description: 'As part of this study, you will be asked to complete a few surveys. A new survey has been made available on {date}.<br><br>After you have submitted your answers, you can continue to use the POE app.',
+        description: 'As part of this study, you will be asked to complete a few surveys. A new survey has been made available {date}.<br><br>After you have submitted your answers, you can continue to use the POE app.',
         action: 'Go to latest survey'
     },
     new_user: {

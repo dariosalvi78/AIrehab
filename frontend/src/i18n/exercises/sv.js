@@ -40,7 +40,7 @@ export default {
     },
     results: {
         processing: 'Förbereder video',
-        processing_info: 'Inspelning är inskickad för analysering, observera att detta kan ta en stund.<br><br>När ditt resultat är redo så skickas ett mejl till dig.',
+        processing_info: 'Inspelning är inskickad för analysering, observera att detta kan ta en stund. AI-modellen är under utveckling och kommer att förbättras under studiens gång.<br><br>När ditt resultat är redo så skickas ett mejl till dig.',
         retrieving: 'Hämtar resultat från analyserad video',
         title: 'Utvärdering av övning',
         description: 'Resultat från inspelad träningsvideo',
