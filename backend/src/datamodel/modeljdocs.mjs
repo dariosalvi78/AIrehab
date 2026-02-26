@@ -23,8 +23,7 @@
  * @property {number} height - height in cm
  * @property {number} weight - weight in KGs
  * @property {?string} injuries - general description of injuries
- * @property {?string} injuredSide - side of the body that is injured, 'left', 'right' or 'both'
- * @property {?string} injuredBodyPart - body part that is injured. 'foot', 'knee', 'hip', 'back'
+ * @property {?string} injuredBodyParts - body part that is injured. 'foot', 'knee', 'hip', 'back'. Can specify multiple body parts by side.
  * @property {!boolean} activated - if patient has given consent and agreed to the research study
  * @property {?string} email - email address of the patient, to send out personal access link and reminders
  */
