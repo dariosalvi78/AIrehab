@@ -7,7 +7,7 @@
 import nodemailer from 'nodemailer'
 import config from '../config.js'
 import logger from '../logger.js'
-import { renderFile } from 'ejs'
+import ejs from 'ejs'
 
 let transport_config = undefined
 let domain = undefined
@@ -54,7 +54,7 @@ export default {
    * @param {String} invitationToken 
    */
   sendPhysiotherapistInvitation: async (recipient, invitationToken) => {
-    const template = await renderFile(import.meta.dirname + '/views/welcome.ejs', { recipient, domain, invitationToken })
+    const template = await ejs.renderFile(import.meta.dirname + '/views/welcome.ejs', { recipient, domain, invitationToken })
     const options = {
       from: config.mailer.from_address,
       to: recipient,
@@ -65,7 +65,7 @@ export default {
     await sendEmail(options)
   },
   sendPhysiotherapistPasswordReset: async (recipient, resetToken) => {
-    const template = await renderFile(import.meta.dirname + '/views/passwordReset.ejs', { domain, resetToken, recipient })
+    const template = await ejs.renderFile(import.meta.dirname + '/views/passwordReset.ejs', { domain, resetToken, recipient })
     const options = {
       from: config.mailer.from_address,
       to: recipient,
@@ -76,7 +76,7 @@ export default {
     await sendEmail(options)
   },
   sendPatientAccessLink: async (recipient, patientID, accessToken) => {
-    const template = await renderFile(import.meta.dirname + '/views/patientAccess.ejs', { domain, patientID, accessToken })
+    const template = await ejs.renderFile(import.meta.dirname + '/views/patientAccess.ejs', { domain, patientID, accessToken })
     const options = {
       from: config.mailer.from_address,
       to: recipient,
@@ -87,7 +87,7 @@ export default {
     await sendEmail(options)
   },
   sendPhysiotherapistPOEResults: async (recipient, meta, sessionID, exerciseID) => {
-    const template = await renderFile(import.meta.dirname + '/views/poeAvailable.ejs', { domain, exerciseType: meta.typeAsc, sessionID, exerciseID })
+    const template = await ejs.renderFile(import.meta.dirname + '/views/poeAvailable.ejs', { domain, exerciseType: meta.typeAsc, sessionID, exerciseID })
     const options = {
       from: config.mailer.from_address,
       to: recipient,
@@ -98,7 +98,7 @@ export default {
     await sendEmail(options)
   },
   sendPhysiotherapistSurveyAvailable: async (recipient) => {
-    const template = await renderFile(import.meta.dirname + '/views/newSurvey.ejs', { domain })
+    const template = await ejs.renderFile(import.meta.dirname + '/views/newSurvey.ejs', { domain })
     const options = {
       from: config.mailer.from_address,
       to: recipient,
