@@ -49,8 +49,8 @@ export default {
         height_not_specified: 'Kroppslängd inte specificerat',
         weight_not_specified: 'Vikt inte specificerat',
         part_not_specified: 'Kroppsdel inte specificerat',
-        side_not_specified: 'Skadad sida inte specificerat',
-        part_of_body: 'Kroppsdel'
+        side_not_specified: 'Inga skador specificerade',
+        part_of_body: '{side} sida av kroppen'
     },
     form: {
         type: 'Patienttyp',
@@ -79,8 +79,8 @@ export default {
         injuries: 'Patient har skador',
         no_injuries: 'Patient har inga skador',
         injured_side: 'Sidan av kroppen som är skadad',
-        injured_part: 'Skadad kroppsdel',
-        injured_part_hint: 'Den skadade kroppsdelen',
+        injured_part: '{side} sida av kroppen | De skadade kroppsdelarna',
+        injured_part_hint: 'Valfri. De skadade kroppsdelarna',
         admin: {
             assigned_to: "Tilldelad: {email}",
             created: "Skapad: {created}",
@@ -92,12 +92,10 @@ export default {
         left: 'Vänster',
         right: 'Höger',
         both: 'Båda',
-        foot: 'Fot',
-        knee: 'Knä',
+        foot: 'Fot | Foten',
+        knee: 'Knä | Knät',
         hip: 'Bäcken',
-        back: 'Rygg',
-        side: 'sida skadad',
-        sides: 'sidorna skadade'
+        back: 'Rygg | Ryggen'
     },
     not_found: 'Inga patienter hittades',
     consent: 'Patient har gett samtycke',

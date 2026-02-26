@@ -49,8 +49,8 @@ export default {
         height_not_specified: 'Height not specified',
         weight_not_specified: 'Weight not specified',
         part_not_specified: 'Body part not specified',
-        side_not_specified: 'Injured Side not specified',
-        part_of_body: 'Part of the body'
+        side_not_specified: 'No injuries specified',
+        part_of_body: '{side} side of the body'
     },
     form: {
         type: 'Type of patient',
@@ -79,8 +79,8 @@ export default {
         injuries: 'Patient has injuries',
         no_injuries: 'Patient has no injuries',
         injured_side: 'Side of the body that is injured',
-        injured_part: 'Injured body part',
-        injured_part_hint: 'Part of the body that is injured',
+        injured_part: '{side} side of the body | The injured body parts',
+        injured_part_hint: 'Optional. Part of the body that is injured',
         admin: {
             assigned_to: "Assigned to: {email}",
             created: "Created: {created}",
@@ -95,9 +95,7 @@ export default {
         foot: 'Foot',
         knee: 'Knee',
         hip: 'Pelvis',
-        back: 'Back', 
-        side: 'side injured',
-        sides: 'sides injured'
+        back: 'Back'
     },
     not_found: 'No patients found',
     consent: 'Patient has given consent',
