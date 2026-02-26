@@ -53,11 +53,16 @@
           <q-icon class="q-mr-sm" size="sm" name="accessibility"/>
           {{ $t('patient.profile.injuries') }}
         </div>
-        <div class="text-body2">
-          {{ selectedPatient.injuredBodyPart ? getInjuredBodyPart : $t('patient.profile.part_not_specified') }}
-        </div>
-        <div class="text-body2">
-          {{ selectedPatient.injuredSide ? getInjuredSide : $t('patient.profile.side_not_specified') }}
+        <q-list v-if="getInjuredBodyParts.length" class="text-body2 q-mt-md" v-for="p in getInjuredBodyParts" :key="p">
+          <q-item class="q-pa-none">
+            <q-item-section class="col">
+              <q-item-label overline>{{ p.side }}</q-item-label>
+              <q-item-label class="row q-gutter-sm"><q-chip  :ripple="false" v-for="b in p.parts" :key="b" :label="b"/></q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+        <div v-else class="text-body2">
+          {{ $t('patient.profile.side_not_specified') }}
         </div>
       </q-card-section>
       <q-separator />
@@ -175,8 +180,8 @@ export default {
     },
     async editPatient (edited) {
       try {
-        const { fullName, dateOfBirth, height, weight, injuries, injuredSide, injuredBodyPart } = edited
-        await API.editPatient(fullName, dateOfBirth, height, weight, { description: injuries, side: injuredSide, bodyPart: injuredBodyPart }, this.selectedPatient.id)
+        const { fullName, dateOfBirth, height, weight, injuries, injuredBodyParts } = edited
+        await API.editPatient(fullName, dateOfBirth, height, weight, { description: injuries, bodyParts: injuredBodyParts }, this.selectedPatient.id)
         this.$q.notify({
           color: 'secondary',
           position: 'top',
@@ -261,13 +266,16 @@ export default {
     }
   },
   computed: {
-    getInjuredBodyPart () {
-      return `${this.$i18n.t('patient.profile.part_of_body')}: ` + this.$i18n.t(`patient.injuries.${this.selectedPatient.injuredBodyPart}`)
-    },
-    getInjuredSide () {
-      let side = this.selectedPatient.injuredSide
-      side = this.$i18n.t(`patient.injuries.${side}`)
-      return this.selectedPatient.injuredSide !== 'both' ? (side + ` ${this.$i18n.t('patient.injuries.side')}`) : side + ` ${this.$i18n.t('patient.injuries.sides')}`
+    getInjuredBodyParts () {
+      let parts = this.selectedPatient.injuredBodyParts ? JSON.parse(this.selectedPatient.injuredBodyParts) : [], selected = []
+      if (!parts) return this.$i18n.$t('patient.profile.part_not_specified')
+
+      for (const i in Object.keys(parts)) {
+        let side = Object.keys(parts)[i], partsInSide = parts[Object.keys(parts)[i]]
+        selected.push({ side: this.$i18n.t('patient.profile.part_of_body', { side: this.$i18n.t(`patient.injuries.${side}`) }), parts: [] })
+        for (const part of partsInSide) selected[i].parts.push(this.$i18n.t(`patient.injuries.${part}`, { count: 0 }))
+      }
+      return selected
     },
     getPatientStatus() {
       let status = {

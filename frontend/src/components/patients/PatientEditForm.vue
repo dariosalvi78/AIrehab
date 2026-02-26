@@ -72,11 +72,10 @@
                             <q-icon name="event" style="cursor:pointer;">
                             <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
                                 <q-date 
-                                mask="YYYY-MM-DD"
-                                v-model="this.new.dateOfBirth" 
-                                @update:model="() => qDateProxy.hide()" 
-                                today-btn
-                                :options="dateRestrictions"
+                                    mask="YYYY-MM-DD"
+                                    v-model="this.new.dateOfBirth" 
+                                    @update:model="() => qDateProxy.hide()" 
+                                    today-btn :options="dateRestrictions"
                                 >
                                 <template v-slot>
                                     <div class="row items-center justify-end q-gutter-sm">
@@ -121,19 +120,21 @@
                         <q-toggle class="text-body2" v-model="hasInjury" :label="!hasInjury ? $t('patient.form.no_injuries') : $t('patient.form.injuries') " />
                         <div class="q-my-md q-gutter-sm" v-if="hasInjury">
                             <div class="q-px-sm text-body2">{{ $t('patient.form.injured_side') }}</div>
-                            <q-radio v-for="side in this.sides" :key="side" v-model="this.new.injuredSide" :val="side" :label="$t(`patient.injuries.${side}`)" />
+                            <q-radio 
+                                v-for="side in this.sides" :key="side" 
+                                :model-value="this.new.injuredSide" @update:model-value="changeSide" 
+                                :val="side" :label="$t(`patient.injuries.${side}`)" 
+                            />
                         </div>
                         <q-select
+                            v-for="(side, i) in this.new.injuredSide !== 'both'
+                                ? [this.new.injuredSide] : [this.sides[0], this.sides[1]]" :key="i"
                             v-if="hasInjury"
-                            class="q-my-md"
-                            filled
-                            clearable
-                            behavior="menu"
-                            emit-value
-                            map-options
-                            v-model="this.new.injuredBodyPart"
+                            class="q-my-md" filled behavior="menu" emit-value
+                            map-options multiple use-chips
+                            v-model="this.new.injuredBodyParts[side]"
                             :options="this.bodyParts"
-                            :label="$t('patient.form.injured_part')"
+                            :label="$t('patient.form.injured_part', { side: $t(`patient.injuries.${side}`), count: this.new.injuredSide == 'both' ? 1 : 0 })"
                             :hint="$t('patient.form.injured_part_hint')"
                         />
                     </q-tab-panel>
@@ -197,15 +198,7 @@ export default {
                 notes: [injuries => !injuries ? true : injuries.length <= 350 || this.$t('exercises.form.notes_error')],
                 exerciseType: [type => !!type || this.$t('exercises.form.type_error')]
             },
-            new: {
-                fullName: undefined,
-                dateOfBirth: undefined,
-                height: undefined,
-                weight: undefined,
-                injuries: undefined,
-                injuredSide: undefined,
-                injuredBodyPart: undefined,
-            },
+            new: {},
             physiotherapistEmail: undefined,
             mode: 'new',
             hasInjury: false,
@@ -218,7 +211,10 @@ export default {
     async mounted () {
         this.resetForm()
         patientEnums.types.patient.map((type, i) => this.bodyParts[i] = { value: type, label: this.$i18n.t(`patient.injuries.${type}`) })
-        patientEnums.types.sides.map((type, i) => this.sides[i] = type)
+        patientEnums.types.sides.map((type, i) => {
+            this.sides[i] = type    
+            if (type !== 'both') this.new.injuredBodyParts[type] = []
+        })
         if (this.formMode == 'edit' ) await this.populateEdit()
     },
     watch: {
@@ -253,13 +249,17 @@ export default {
                 height: this.new.height ? +this.new.height : null,
                 weight: this.new.weight ? +this.new.weight : null,
                 injuries: this.new.injuries ? this.new.injuries : '',
-                injuredSide: '',
-                injuredBodyPart: '',
+                injuredBodyParts: '',
             }
             if (this.hasInjury) {
-                userSubmitted.injuredSide = this.new.injuredSide ? this.new.injuredSide : '',
-                userSubmitted.injuredBodyPart = this.new.injuredBodyPart ? this.new.injuredBodyPart : ''
+                let selectedBodyParts = {}
+                for (const part of Object.keys(this.new.injuredBodyParts)) {
+                    console.log(part, this.new.injuredBodyParts[part])
+                    if (this.new.injuredBodyParts[part].length) selectedBodyParts[part] = this.new.injuredBodyParts[part]
+                }
+                userSubmitted.injuredBodyParts = Object.keys(selectedBodyParts).length ? JSON.stringify(selectedBodyParts) : ""
             }
+
             if (this.mode == 'adminNew') userSubmitted.physiotherapistEmail = this.physiotherapistEmail
             if (this.mode === 'new' || this.mode == 'adminNew') this.$emit('addNewPatient', userSubmitted)
             else if (this.mode === 'edit' || this.mode === 'adminEdit') this.$emit('editPatient', userSubmitted)
@@ -284,7 +284,7 @@ export default {
                 weight: null,
                 injuries: '',
                 injuredSide: '',
-                injuredBodyPart: this.testExercise.selected,
+                injuredBodyParts: this.testExercise.selected,
                 isTestPatient: this.testPatient
             }
             this.$emit('addNewPatient', userSubmitted)
@@ -301,10 +301,14 @@ export default {
                 this.new.weight = +this.user.weight
                 this.new.injuries = this.user.injuries
                 this.testPatient = false
-                if (this.user.injuredBodyPart || this.user.injuredSide) {
+
+                let injuredBodyParts = this.user.injuredBodyParts ? JSON.parse(this.user.injuredBodyParts) : {}
+                if (Object.keys(injuredBodyParts).length) {
                     this.hasInjury = true
-                    this.new.injuredBodyPart = this.user.injuredBodyPart
-                    this.new.injuredSide = this.user.injuredSide
+                    for (const p of Object.keys(injuredBodyParts)) {
+                        this.new.injuredBodyParts = injuredBodyParts
+                        this.new.injuredSide = Object.keys(injuredBodyParts).length == 2 ? patientEnums.types.sides[2] : p
+                    }
                 }
             }
             else if (this.mode == 'adminNew' && this.user) {
@@ -318,11 +322,23 @@ export default {
         resetForm () {
             this.mode = 'new'
             this.physiotherapistEmail = undefined
-            this.new = {}
+            this.new = {
+                fullName: undefined,
+                dateOfBirth: undefined,
+                height: undefined,
+                weight: undefined,
+                injuries: undefined,
+                injuredSide: undefined,
+                injuredBodyParts: {}
+            }
             this.testPatient = false
         },
         dateRestrictions (qDate) {
             return nicers.formDatetimeValidation(qDate, 'patient')
+        },
+        changeSide(up) {
+            this.new.injuredSide = up
+            this.new.injuredBodyParts = {}
         }
     }
 }

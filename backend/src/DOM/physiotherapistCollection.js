@@ -143,7 +143,7 @@ export default {
     createPatient: async function (patient, therapistId) {
         const response = await db.query(`
             INSERT INTO [patient] 
-            (id, names, dateofbirth, physiotherapistId, height, weight, injuries, injuredSide, injuredBodyPart, createdTimestamp)
+            (id, names, dateofbirth, physiotherapistId, height, weight, injuries, injuredBodyParts, createdTimestamp)
             OUTPUT Inserted.id, Inserted.physiotherapistId, Inserted.createdTimestamp
             VALUES(
                 NEWID(),
@@ -153,8 +153,7 @@ export default {
                 ${patient.height}, 
                 ${patient.weight}, 
                 '${patient.injuries.description}',
-                '${patient.injuries.injuredSide}',
-                '${patient.injuries.injuredBodyPart}',
+                '${patient.injuries.injuredBodyParts}',
                 CURRENT_TIMESTAMP
                 );
         `)
@@ -189,8 +188,7 @@ export default {
             height = ${patient.height},
             weight = ${patient.weight},
             injuries = '${patient.injuries.description}',
-            injuredSide = '${patient.injuries.injuredSide}',
-            injuredBodyPart = '${patient.injuries.injuredBodyPart}'
+            injuredBodyParts = '${patient.injuries.injuredBodyParts}'
             FROM [patient] p
             WHERE p.id = '${patientID}';
         `)

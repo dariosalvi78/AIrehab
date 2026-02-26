@@ -132,8 +132,8 @@ export default {
   methods: {
      async addNewUser (newUser) {
       try {
-        const { fullName, dateOfBirth, height, weight, injuries, injuredSide, injuredBodyPart, isTestPatient } = newUser
-        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, { description: injuries, side: injuredSide, bodyPart: injuredBodyPart }, null, isTestPatient)
+        const { fullName, dateOfBirth, height, weight, injuries, injuredBodyParts, isTestPatient } = newUser
+        let resp = await API.addPatient(fullName, dateOfBirth, height, weight, { description: injuries, bodyParts: injuredBodyParts }, null, isTestPatient)
         if (resp.data) {
           if (resp.data.testSession) {
             this.$q.notify({

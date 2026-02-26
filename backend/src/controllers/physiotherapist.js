@@ -132,7 +132,7 @@ export default {
             if (patient.isTestPatient && addedPatient) {
                 // Create temporary test suite
                 const session = await sessions.createSession(addedPatient.id)
-                const exercise = await exercises.createExercise(session.id, { type: patient.injuries.injuredBodyPart, notes: '' })
+                const exercise = await exercises.createExercise(session.id, { type: patient.injuries.injuredBodyParts, notes: '' })
                 logger.info({ patientID: addedPatient }, 'temporary test setup created: ')
                 patientData = { patient: addedPatient, sessionID: session.id, exerciseID: exercise.id, testSession: patient.isTestPatient }
             }
