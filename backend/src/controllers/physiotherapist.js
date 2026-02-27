@@ -78,9 +78,8 @@ export default {
             let patient, patientID = req.params.patientID
             if (req.user.role == 'physiotherapist') {
                 const isAssignedTo = await physiotherapist.getOnePatientByID(patientID)
-                if (isAssignedTo.physiotherapistEmail !== req.user.email) {
-                    return res.sendStatus(403)
-                }
+                if (!isAssignedTo) return res.sendStatus(404)
+                else if (isAssignedTo.physiotherapistEmail !== req.user.email) return res.sendStatus(403)
                 patient = await physiotherapist.getOnePatientByEmail(req.user.email, patientID)
 
             } else if (req.user.role == 'admin') {
@@ -244,7 +243,7 @@ export default {
             const { id, names, physiotherapistId, createdTimestamp } = patient
             const token = await signPatientAccessToken({ id, names, physiotherapistId, createdTimestamp, secret })
             res.cookie(patient_cookie.name, token, patient_cookie.options)
-            logger.info({ patientID, assignedTo: physiotherapistId }, 'patient has authenticated to physiotherapist')
+            logger.info({ patientID, assignedToID: physiotherapistId, created_at: new Date().toISOString() }, 'new patient session authenticated')
             return res.send({ token: token }).status(200)
         }
         catch (err) {

@@ -15,7 +15,7 @@ export default {
         let archive = undefined
         return new Promise(async (resolve, reject) => {
             try {
-                const [currentDate, time] = new Date().toLocaleString().split(' ')
+                const [currentDate, time] = new Date().toISOString().split('T')
                 const outputFilename = currentDate + '_enkäter.zip'
 
                 res.setHeaders(new Headers({
