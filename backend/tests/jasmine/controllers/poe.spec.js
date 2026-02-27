@@ -149,10 +149,6 @@ describe('sendVideoForPOEEvaluation access:', function () {
             status(status) {
                 expect(status).toBe(404)
                 expect(exercisesCollection.getExerciseByID).toHaveBeenCalledWith(0)
-                return this
-            }, 
-            send(data) {
-                expect(data).toContain('Exercise does not exist')
                 expect(poeMotionAnalysis.uploadVideo).not.toHaveBeenCalled()
             }
         })

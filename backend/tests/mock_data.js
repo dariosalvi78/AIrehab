@@ -4,7 +4,8 @@ const mock = {
         email: "email@test.com",
         hashedPassword: "password",
         role: "physiotherapist",
-        createdTimestamp: "177718530000"
+        createdTimestamp: "177718530000",
+        activated: true
     },
     patient: {
         id: 2,
@@ -14,8 +15,7 @@ const mock = {
         weight: 75,
         injuries: {
             description: "description of injuries...",
-            injuredSide: 'L',
-            injuredBodyPart: 'foot'
+            injuredBodyParts: { left: ['foot', 'knee'], right: ['hip'] }
         }
     },
     sessions: [
