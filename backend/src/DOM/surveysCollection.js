@@ -91,6 +91,7 @@ export default {
     /**
      * Check if a new survey is available for patient
      * - Conditions: 1st survey: now, 2nd survey: completed at least 3 exercises, 3rd: 6 weeks (42 days) and 5 exercises
+     * - If 2nd survey is not completed and 3rd survey conditions are met, skip 2nd and continue with 3rd survey
      * @param {Types.Patient["id"]} patientID
      * @returns {Promise<Types.SurveyAnswer>} survey reminder to send
      */
@@ -104,28 +105,29 @@ export default {
                 WHERE session.patientId = '${patientID}'
             ),
             latest_survey AS (
-                SELECT s.latestDate, s.completed, s.exerciseTotal,
-                    CASE
-                        WHEN s.completed <= 0 THEN CURRENT_TIMESTAMP
-                        WHEN s.completed = 1 AND s.exerciseTotal >= 3 THEN CURRENT_TIMESTAMP
-                        WHEN s.completed = 2 AND s.exerciseTotal >= 5 THEN DATEADD(day, 42, s.latestDate)
-                        ELSE NULL
-                    END AS availableOnTimestamp
-                FROM (
-                    SELECT MAX(s.createdTimestamp) AS latestDate, count(*) AS completed, e.exerciseTotal
-                    FROM survey_answer s
-                    CROSS JOIN s_exercises e
-                    WHERE s.patientId = '${patientID}' AND s.patientId IS NOT NULL AND s.physiotherapistId IS NOT NULL
-                    GROUP BY e.exerciseTotal
-                ) s
+                SELECT TOP 1 s.createdTimestamp AS latestDate, 
+                    COUNT(s.id) AS completed, 
+                    e.exerciseTotal, 
+                    DATEDIFF(day, s.createdTimestamp, CURRENT_TIMESTAMP) AS daysSinceLastSurvey,
+                    s.surveyName as latestSurveyName
+                    FROM s_exercises e
+                LEFT JOIN survey_answer s ON s.patientId = '${patientID}' AND s.physiotherapistId IS NOT NULL
+                GROUP BY s.surveyName, e.exerciseTotal, s.createdTimestamp
+                ORDER BY s.createdTimestamp DESC
             )
-            SELECT l.completed, l.availableOnTimestamp, l.exerciseTotal,
-                CASE 
-                    WHEN l.availableOnTimestamp IS NULL THEN CAST(0 AS BIT)
-                    WHEN CURRENT_TIMESTAMP >= l.availableOnTimestamp THEN CAST(1 AS BIT)
-                    ELSE CAST(0 AS BIT)
-                END AS isAvailable
-            FROM latest_survey l;
+            SELECT *,
+                CAST(CASE WHEN currentSurveyIndex IS NULL THEN 0 ELSE 1 END AS BIT) AS isAvailable
+            FROM (
+                SELECT l.completed, l.exerciseTotal, l.latestDate, l.latestSurveyName,
+                CASE
+                    WHEN l.latestSurveyName = 'T3' THEN NULL
+                    WHEN l.completed <= 0 THEN '1'
+                    WHEN l.exerciseTotal >= 5 AND l.daysSinceLastSurvey >= 42 THEN '3'
+                    WHEN l.latestSurveyName = 'T1' AND l.exerciseTotal >= 3 AND l.daysSinceLastSurvey >= 0 THEN '2'
+                ELSE NULL
+            END AS currentSurveyIndex
+                FROM latest_survey l
+            ) t;
         `)
         return response.recordset[0]
     }

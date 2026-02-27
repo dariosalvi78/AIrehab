@@ -45,18 +45,23 @@ const isSurveyAvailable = async (userID, role) => {
         try {
             let survey = undefined, 
                 available = undefined, 
-                userType = role
+                userType = role,
+                surveyIndex = undefined
 
             if (userType == 'physiotherapist') {
                 survey = await surveysCollection.isPhysioSurveyAvailable(userID)
                 userType = 'test_leader'
-            } else if (userType == 'patient') survey = await surveysCollection.isPatientSurveyAvailable(userID)
+                surveyIndex = survey.completed + 1
+
+            } else if (userType == 'patient') {
+                survey = await surveysCollection.isPatientSurveyAvailable(userID)
+                surveyIndex = survey.currentSurveyIndex   
+            }
 
             if (survey.isAvailable) {
-                const sCount = survey.completed + 1
                 available = {
                     surveyDate: survey.availableOnTimestamp,
-                    currentSurveyID: (config.survey_prefix + sCount),
+                    currentSurveyID: (config.survey_prefix + surveyIndex),
                     completed: survey.completed,
                     userType: userType
                 }
