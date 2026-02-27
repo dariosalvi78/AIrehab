@@ -30,7 +30,7 @@ export default {
             start: 'Börja inspelning',
             stop: 'Stoppa inspelning',
             save: '(Valfri) Spara inspelning till enhet',
-            auto_stop: '(Valfri) Avsluta inspelningen automatiskt efter {elapsed} sekunder'
+            auto_stop: '(Valfri) Avsluta inspelningen efter {elapsed} sekunder'
         },
         upload: 'Ladda upp träningsvideo',
         upload_desc: 'Ladda upp video som du har filmat sen tidigare',
@@ -54,8 +54,7 @@ export default {
         no_exercises: 'Inga övningar',
         no_exercises_in_session: 'Inga övningar i denna session',
         no_end_date: 'Inget slutdatum',
-        not_found: 'Inga sessioner hittades',
-        does_not_exist: 'Sessionen finns inte, prova att uppdatera dina pågående sessioner'
+        not_found: 'Inga sessioner hittades'
     },
     instructions: {
         title: 'Övningsinstruktioner',

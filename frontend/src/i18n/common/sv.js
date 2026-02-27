@@ -97,6 +97,10 @@ export default {
         create: 'Skapa konto',
         suggestion: 'Lägg till ett eller två ord till. Ovanliga ord är bättre.'
     },
+    not_found: {
+        header: "Vi beklagar",
+        description: "Det verkar som att sidan du letar efter inte längre finns eller har flyttats.<br><br>Vänligen kontrollera URL:en eller gå tillbaka till startsidan.",
+    },
     notification: {
         error: 'Vänligen kontrollera fälten och försök igen',
         error_generic: 'Felmeddelande: {error}',

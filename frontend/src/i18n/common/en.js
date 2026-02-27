@@ -94,6 +94,10 @@ export default {
         create: 'Create account',
         suggestion: 'Add another word or two. Uncommon words are better.'
     },
+    not_found: {
+        header: "We apologize",
+        description: "It seems the page you are looking for no longer exists or has been moved.<br><br>Please check the URL or return to the homepage.",
+    },
     notification: {
         error: 'Please review fields and try again',
         error_generic: 'Error message: {error}',

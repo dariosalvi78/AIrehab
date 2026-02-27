@@ -30,7 +30,7 @@ export default {
             start: 'Start recording',
             stop: 'Stop recording',
             save: '(Optional) Save video to device',
-            auto_stop: '(Optional) Automatically stop recording after {elapsed} seconds'
+            auto_stop: '(Optional) Stop recording after {elapsed} seconds'
         },
         upload: 'Upload exercise video',
         upload_desc: 'Upload video that you have already recorded',
@@ -54,8 +54,7 @@ export default {
         no_exercises: 'No exercises',
         no_exercises_in_session: 'No exercises in session',
         no_end_date: 'No end date',
-        not_found: 'No sessions found',
-        does_not_exist: 'Session does not exist, try to update your ongoing sessions'
+        not_found: 'No sessions found'
     },
     instructions: {
         title: 'Exercise instructions',
