@@ -207,10 +207,12 @@ export default {
       } catch (err) { return }
     },
     async openPatientView (selectedUser) {
-      let resp = await API.getPatient(selectedUser.patientID)
-      this.selectedPatient = resp
-      this.panel = 'view'
-      this.$router.push({ path: this.$route.path, query: { p: selectedUser.patientID } })
+      try {
+        let resp = await API.getPatient(selectedUser.patientID)
+        this.selectedPatient = resp
+        this.panel = 'view'
+        this.$router.push({ path: this.$route.path, query: { p: selectedUser.patientID } })
+      } catch (err) { return this.$router.push('not-found') }
     },
     async openHomePage () {
       this.$refs.panelForm.goTo('patients')

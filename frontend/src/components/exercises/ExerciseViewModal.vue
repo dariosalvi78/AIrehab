@@ -191,9 +191,8 @@ export default {
               message: this.$t('exercises.notification.video_upload_success'),
               html: true
             })
-            let formattedType = exerciseTypes.typeToAsc(results.type), exerciseDate = nicers.formattedDayOfMonth(results.date)
+            let formattedType = this.$t(`exercises.form.types.${results.type}`), exerciseDate = nicers.formattedDayOfMonth(results.date)
             const meta_info = { typeAsc: formattedType, date: exerciseDate }
-            console.log(meta_info)
             let poe_evaluation = await API.sendPOE(meta_info, this.exerciseID)
             if (poe_evaluation) {
               loading.hide()
@@ -232,12 +231,12 @@ export default {
         let errMsg = err
         if (err.response.status == 404) {
           errMsg = err.response.data
-          this.$router.push('/home')
+          this.$router.push(`/home/sessions/${this.sessionID}`)
         }
         return this.$q.notify({
           type: 'negative',
           position: 'top',
-          message: this.$t('exercises.notification.get_video_exercise', { error: errMsg }),
+          message: this.$t('common.notification.error_generic', { error: this.$t('exercises.notification.exercise_not_found', { error: errMsg }) }),
           icon: 'warning'
         })
       }

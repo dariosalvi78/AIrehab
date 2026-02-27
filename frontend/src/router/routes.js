@@ -24,6 +24,7 @@ const routes = [
     path: '/home',
     component: () => import('layouts/MainLayout.vue'),
     children: [
+      { path: '/:catchAll(.*)*', component: () => import('components/ErrorNotFound.vue') },
       { path: '', component: () => import('components/test_leader/TestLeaderHome.vue') },
       { path: 'sessions/:sessionID', component: () => import('components/sessions/SessionViewModal.vue'), props: true, name: i18n.global.t('common.header.session') },
       { path: 'sessions/:sessionID/exercise/:exerciseID', component: () => import('components/exercises/ExerciseViewModal.vue'), props: true, name: i18n.global.t('common.header.exercise') },
@@ -42,12 +43,6 @@ const routes = [
     children: [
       { path: '', component: () => import('components/About.vue') }
     ]
-  },
-  // Always leave this as last one,
-  // but you can also remove it
-  {
-    path: '/:catchAll(.*)*',
-    component: () => import('src/components/ErrorNotFound.vue')
   }
 ]
 

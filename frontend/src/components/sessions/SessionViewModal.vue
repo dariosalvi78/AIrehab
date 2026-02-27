@@ -34,10 +34,6 @@
     <div v-else-if="isloadingSession" class="q-ma-md flex flex-center">
       <q-spinner-dots color="primary" size="3em" />
     </div>
-    <div v-else class="q-pa-lg flex flex-center column">
-      <div class="q-py-md text-h6 text-weight-light text-center">{{ $t('exercises.sessions.does_not_exist') }}</div>
-      <q-btn class="full-width" color="secondary" size="md" no-caps :label="$t('common.go_back')" icon="chevron_left" @click="this.$router.go(-1)" />
-    </div>
   </q-page-container>
 </template>
 
@@ -78,6 +74,7 @@ export default {
         this.endDate = this.formatDate(response.endTimestamp)
       } catch (err) {
         this.session = undefined  
+        this.isloadingSession = false
         this.$q.notify({
           color: 'negative',
           position: 'top',
@@ -86,8 +83,7 @@ export default {
             : this.$t('exercises.notification.get_session_error', { error: err }),
           icon: 'warning'
         })
-        this.isloadingSession = false
-        return
+        return this.$router.push('/not-found')
       }
     },
     async submitNewEndDate () {

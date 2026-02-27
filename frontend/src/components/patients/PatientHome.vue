@@ -102,7 +102,7 @@
                     :assessmentResults="exercise.poe" 
                     @getPOEBracket="(bracket) => exercise.bracket = bracket"
                   />
-                  <div v-else class="q-ma-md text-body2 text-italic">{{ $t('poe.no_results') }}</div>
+                  <div v-else class="q-ma-md text-body2 text-italic" style="opacity: .6;">{{ $t('poe.no_results') }}</div>
                 </q-expansion-item>
               </q-list>
               <div v-else class="text-body2 text-center q-pa-md">{{ $t('patient.home.exercise_no_results') }}</div>

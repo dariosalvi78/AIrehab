@@ -254,7 +254,6 @@ export default {
             if (this.hasInjury) {
                 let selectedBodyParts = {}
                 for (const part of Object.keys(this.new.injuredBodyParts)) {
-                    console.log(part, this.new.injuredBodyParts[part])
                     if (this.new.injuredBodyParts[part].length) selectedBodyParts[part] = this.new.injuredBodyParts[part]
                 }
                 userSubmitted.injuredBodyParts = Object.keys(selectedBodyParts).length ? JSON.stringify(selectedBodyParts) : ""
