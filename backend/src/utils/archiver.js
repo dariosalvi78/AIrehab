@@ -68,6 +68,9 @@ export default {
                     const userType = !survey.patientId ? 'användare' : 'patient'
                     surveysFormatted[userType].push({
                         ID: 'Enkät_' + (i + 1),
+                        PAT_ID: survey.patientId,
+                        PHY_ID: survey.physiotherapistId,
+                        TIME: survey.createdTimestamp,
                         surveyName: survey.surveyName,
                         ...JSON.parse(survey.content)
                     })
