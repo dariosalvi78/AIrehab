@@ -1,7 +1,6 @@
 import archiver from 'archiver'
 import logger from './logger.js'
 import surveysCollection from '../DOM/surveysCollection.js'
-import usersCollection from '../DOM/usersCollection.js';
 import { json2csv as csv } from 'json-2-csv';
 
 export default {
@@ -22,15 +21,16 @@ export default {
                     'Content-Type': 'application/zip',
                     'Content-Disposition': `attachment; filename=${outputFilename}`
                 })).status(201)
-        
+
                 res.on('finish', () => {
                     if (archive.destroyed && archive.pointer() <= 0) return resolve()
                     let kb = (archive.pointer() / Math.pow(1024, 1)).toFixed(2)
-                    logger.info({ 
-                        file: outputFilename, 
-                        size: `${kb} kB`, 
-                        download_at: `${currentDate} ${time}`},
-                    'downloaded surveys:')
+                    logger.info({
+                        file: outputFilename,
+                        size: `${kb} kB`,
+                        download_at: `${currentDate} ${time}`
+                    },
+                        'downloaded surveys:')
                     return resolve(res)
                 }).on('error', (err) => {
                     return reject(new Error('response stream error: ' + err.message))
@@ -55,9 +55,11 @@ export default {
 
                 const surveys = await surveysCollection.getSurveys()
                 if (surveys && !surveys.length) {
-                    reject({ error: { 
-                        message: 'no surveys available for download', 
-                        timestamp: new Date().toISOString() }, statusCode: 404 
+                    reject({
+                        error: {
+                            message: 'no surveys available for download',
+                            timestamp: new Date().toISOString()
+                        }, statusCode: 404
                     })
                     archive.destroy()
                     return
@@ -70,16 +72,14 @@ export default {
                         ID: 'Enkät_' + (i + 1),
                         PAT_ID: survey.patientId,
                         PHY_ID: survey.physiotherapistId,
+                        PHY_EMAIL: survey.physiotherapistEmail,
                         TIME: survey.createdTimestamp,
                         surveyName: survey.surveyName,
                         ...JSON.parse(survey.content)
                     })
                     let userInterview = JSON.parse(survey.content)['13_interview'] ?? false
                     if (userType == 'användare' && userInterview) {
-                        try {
-                            let user = await usersCollection.getOneUser(survey.physiotherapistId)
-                            interviews.push(user.email)
-                        } catch (err) { return reject(err) }
+                        interviews.push(survey.physiotherapistEmail)
                     }
                 }
 

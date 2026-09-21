@@ -8,13 +8,15 @@ export default {
      */
     getSurveys: async function () {
         let response = await db.query(`
-            SELECT s.* FROM survey_answer s
+            SELECT s.*, u.email AS physiotherapistEmail
+            FROM survey_answer s
+            JOIN [user] u ON u.id = s.physiotherapistId
             ORDER BY s.createdTimestamp DESC;
         `)
         return response.recordset
     },
 
-    /**
+    /**colum
      * Creates one survey using survey data
      * @param {Types.SurveyAnswer["physiotherapistId"]} physiotherapistId
      * @param {Types.SurveyAnswer["patientId"]} patientId
